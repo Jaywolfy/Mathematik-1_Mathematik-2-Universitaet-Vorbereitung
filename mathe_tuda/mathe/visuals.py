@@ -447,30 +447,521 @@ def logik_variablen(a):
     return set().union(*[logik_variablen(k) for k in a[1:] if isinstance(k, tuple)]) if len(a) > 1 else set()
 
 
+# ── Diskrete Visuals (Frontend: vis_diskret.js) ──────────────────────────
+
+def _ganz(v, feld, von=None, bis=None):
+    """JSON-Wert -> int mit Bereichsprüfung (verständliche Fehlermeldung)."""
+    try:
+        z = zahl(v)
+    except (pruefer.TermFehler, ArithmeticError, ValueError):
+        raise ValueError(f"'{feld}' muss eine ganze Zahl sein, nicht {v!r}")
+    if isinstance(z, float) or z.denominator != 1:
+        raise ValueError(f"'{feld}' muss eine ganze Zahl sein, nicht {v!r}")
+    z = int(z)
+    if (von is not None and z < von) or (bis is not None and z > bis):
+        grenzen = f"mindestens {von}" if bis is None else (f"höchstens {bis}" if von is None else f"zwischen {von} und {bis}")
+        raise ValueError(f"'{feld}' muss {grenzen} sein, nicht {z}")
+    return z
+
+
+_ZAHL_EL = re.compile(r"-?\d+(?:[.,]\d+)?$")
+
+
+def _el_text(e):
+    """Element einer Menge/Relation -> Anzeigetext (Vergleich über diesen Text)."""
+    if isinstance(e, bool) or isinstance(e, (list, dict)) or e is None:
+        raise ValueError(f"Element {e!r}: erlaubt sind Zahlen und kurze Texte")
+    if isinstance(e, int):
+        return str(e)
+    if isinstance(e, float):
+        return repr(e).replace(".", ",")
+    s = str(e).strip()
+    if not s:
+        raise ValueError("leeres Element")
+    return s
+
+
+def _el_tex(s):
+    if _ZAHL_EL.match(s):
+        return s.replace(".", ",").replace(",", "{,}")
+    if "\\" in s or re.fullmatch(r"[A-Za-z](?:_\{?\w+\}?)?(?:\^\{?\w+\}?)?", s):
+        return s
+    return "\\text{" + s.replace("{", "").replace("}", "") + "}"
+
+
+def _menge_tex(elemente):
+    return "\\{" + ", ".join(_el_tex(e) for e in elemente) + "\\}" if elemente else "\\emptyset"
+
+
+def _aufzaehlen(teile):
+    teile = list(teile)
+    return teile[0] if len(teile) == 1 else ", ".join(teile[:-1]) + " und " + teile[-1]
+
+
+# ---- Venn-Diagramm
+
+def _mengen_ausdruck(text, namen):
+    """Mengenausdruck wie 'A ∩ B', 'A \\ B', 'Komplement A', '(A ∪ B) ∩ C' -> AST."""
+    s = str(text)
+    s = re.sub(r"\\overline\{([^{}]*)\}", r"~(\1)", s)
+    for alt, neu in (("\\cap", "∩"), ("\\cup", "∪"), ("\\setminus", "∖"), ("\\complement", "~"), ("\\", "∖"),
+                     ("&", "∩"), ("|", "∪"), ("-", "∖"), ("¬", "~"), ("{", "("), ("}", ")")):
+        s = s.replace(alt, neu)
+    s = re.sub(r"(?i)\bkomplement(\s+von)?\b", "~", s)
+    s = re.sub(r"(?i)\bohne\b", "∖", s)
+    s = re.sub(r"\^\(?c\)?", "'", s)
+    toks = re.findall(r"[^\W\d]\w*|[~∩∪∖()']|\S", s)
+    pos = [0]
+
+    def peek():
+        return toks[pos[0]] if pos[0] < len(toks) else None
+
+    def nimm():
+        pos[0] += 1
+        return toks[pos[0] - 1]
+
+    def vereinigung():
+        a = schnitt()
+        while peek() in ("∪", "∖"):
+            a = (nimm(), a, schnitt())
+        return a
+
+    def schnitt():
+        a = einzel()
+        while peek() == "∩":
+            nimm()
+            a = ("∩", a, einzel())
+        return a
+
+    def einzel():
+        t = nimm()
+        if t == "~":
+            a = ("~", einzel())
+        elif t == "(":
+            a = vereinigung()
+            if nimm() != ")":
+                raise ValueError(f"markiert: Klammer fehlt in {text!r}")
+        elif t in namen:
+            a = ("menge", namen.index(t))
+        else:
+            raise ValueError(f"markiert: {t!r} ist keine der Mengen {namen} (in {text!r})")
+        while peek() == "'":
+            nimm()
+            a = ("~", a)
+        return a
+
+    a = vereinigung()
+    if pos[0] != len(toks):
+        raise ValueError(f"markiert: unerwartet {toks[pos[0]]!r} in {text!r}")
+    return a
+
+
+def _mengen_wert(a, maske):
+    if a[0] == "menge":
+        return bool(maske >> a[1] & 1)
+    if a[0] == "~":
+        return not _mengen_wert(a[1], maske)
+    x, y = _mengen_wert(a[1], maske), _mengen_wert(a[2], maske)
+    return {"∩": x and y, "∪": x or y, "∖": x and not y}[a[0]]
+
+
+def _mengen_tex(a, namen, aussen=True):
+    if a[0] == "menge":
+        return namen[a[1]]
+    if a[0] == "~":
+        return "\\overline{" + _mengen_tex(a[1], namen) + "}"
+    op = {"∩": "\\cap", "∪": "\\cup", "∖": "\\setminus"}[a[0]]
+    s = _mengen_tex(a[1], namen, False) + f" {op} " + _mengen_tex(a[2], namen, False)
+    return s if aussen else f"({s})"
+
+
+def _region_tex(maske, namen):
+    innen = [namen[i] for i in range(len(namen)) if maske >> i & 1]
+    aussen = [namen[i] for i in range(len(namen)) if not maske >> i & 1]
+    if not innen:
+        return "\\overline{" + " \\cup ".join(namen) + "}"
+    links = " \\cap ".join(innen)
+    if not aussen:
+        return links
+    if len(innen) > 1:
+        links = f"({links})"
+    rechts = aussen[0] if len(aussen) == 1 else "(" + " \\cup ".join(aussen) + ")"
+    return f"{links} \\setminus {rechts}"
+
+
+def _venn(d):
+    mengen = d["mengen"]
+    if not 2 <= len(mengen) <= 3:
+        raise ValueError("venn: 2 oder 3 Mengen angeben")
+    namen, inhalte = [], []
+    for m in mengen:
+        if not isinstance(m, dict) or "name" not in m:
+            raise ValueError('Jede Menge als {"name": "A", "elemente": [...]}')
+        fremd = set(m) - {"name", "elemente"}
+        if fremd:
+            raise ValueError(f"Menge {m.get('name')!r}: unbekannte Felder {sorted(fremd)}")
+        name = str(m["name"]).strip()
+        if not name or name in namen:
+            raise ValueError(f"Mengenname {name!r} leer oder doppelt")
+        if not isinstance(m.get("elemente", []), list):
+            raise ValueError(f"Menge {name}: 'elemente' muss eine Liste sein")
+        namen.append(name)
+        inhalte.append([_el_text(e) for e in m.get("elemente", [])])
+    alle = []
+    if "universum" in d:
+        alle = [_el_text(e) for e in d["universum"]]
+        for name, els in zip(namen, inhalte):
+            fehlt = [e for e in els if e not in alle]
+            if fehlt:
+                raise ValueError(f"Menge {name}: {fehlt} fehlen im universum")
+    for els in inhalte:
+        alle += [e for e in els if e not in alle]
+    if len(alle) != len(set(alle)):
+        raise ValueError("universum enthält ein Element doppelt")
+    if len(alle) > 30:
+        raise ValueError("venn: höchstens 30 Elemente")
+
+    def maske_von(e):
+        return sum(1 << i for i, els in enumerate(inhalte) if e in els)
+
+    n = len(namen)
+    d["_n"], d["_namen"] = n, namen
+    d["_regionen"] = []
+    for m in list(range(1, 2 ** n)) + [0]:
+        els = [e for e in alle if maske_von(e) == m]
+        d["_regionen"].append({"maske": m, "elemente": els, "tex": _region_tex(m, namen),
+                               "elemente_tex": _menge_tex(els)})
+    if "markiert" in d:
+        a = _mengen_ausdruck(d["markiert"], namen)
+        masken = [m for m in range(2 ** n) if _mengen_wert(a, m)]
+        d["_markiert"] = masken
+        d["_markiert_tex"] = _mengen_tex(a, namen)
+        els = [e for e in alle if maske_von(e) in masken]
+        d["_markiert_elemente"] = _menge_tex(els)
+        d["_markiert_unvollstaendig"] = 0 in masken and "universum" not in d
+
+
+# ---- Wahrheitstabelle
+
 def _wahrheitstabelle(d):
     variablen = [str(v) for v in d["variablen"]]
+    if not 1 <= len(variablen) <= 4:
+        raise ValueError("wahrheitstabelle: 1 bis 4 Variablen")
     asts = [logik_parse(a) for a in d["ausdruecke"]]
     for a, text in zip(asts, d["ausdruecke"]):
         fremd = logik_variablen(a) - set(variablen)
         if fremd:
             raise ValueError(f"{text!r} benutzt unbekannte Variable(n) {sorted(fremd)}")
+    if d.get("darstellung", "wf") not in ("wf", "01"):
+        raise ValueError("darstellung: 'wf' (w/f, Standard) oder '01'")
     d["_kopf"] = [logik_tex(a) for a in asts]
     d["_zeilen"] = [{"werte": list(w), "ergebnisse": [logik_wert(a, dict(zip(variablen, w))) for a in asts]}
                     for w in itertools.product([True, False], repeat=len(variablen))]
+    markiert = []
+    for m in d.get("markiert", []):
+        if isinstance(m, int) and not isinstance(m, bool) and 0 <= m < len(asts):
+            markiert.append(m)
+        elif isinstance(m, str) and m in d["ausdruecke"]:
+            markiert.append(d["ausdruecke"].index(m))
+        else:
+            raise ValueError(f"markiert: {m!r} ist kein Eintrag aus 'ausdruecke' (Text oder Index ab 0)")
+    d["_markiert"] = markiert
+    spalten = [[z["ergebnisse"][j] for z in d["_zeilen"]] for j in range(len(asts))]
+    d["_art"] = ["tautologie" if all(s) else "kontradiktion" if not any(s) else "erfuellbar" for s in spalten]
+    d["_gleich"] = [[i, j] for i in range(len(spalten)) for j in range(i + 1, len(spalten)) if spalten[i] == spalten[j]]
 
 
-def _euklid(d):
-    a, b = int(zahl(d["a"])), int(zahl(d["b"]))
-    d["_schritte"] = [list(s) for s in mathlib.euklid_schritte(a, b)]
-    d["_ggt"] = math.gcd(a, b)
-    if d.get("erweitert"):
-        g, s, t, _ = mathlib.erweiterter_euklid(a, b)
-        d["_bezout"] = {"s": s, "t": t, "tex": f"{g} = {s} \\cdot {a} {'+' if t >= 0 else '-'} {abs(t)} \\cdot {b}"}
+# ---- Relationen / Abbildungen
+
+_EIGENSCHAFTEN = ("abbildung", "injektiv", "surjektiv", "bijektiv")
+
+
+def _relation_graph(d):
+    seiten = {}
+    for seite in ("links", "rechts"):
+        liste = [_el_text(e) for e in d[seite]]
+        if not 1 <= len(liste) <= 10:
+            raise ValueError(f"'{seite}': 1 bis 10 Elemente")
+        if len(set(liste)) != len(liste):
+            raise ValueError(f"'{seite}' enthält ein Element doppelt")
+        seiten[seite] = liste
+    links, rechts = seiten["links"], seiten["rechts"]
+    pfeile = []
+    for p in d["pfeile"]:
+        if not (isinstance(p, list) and len(p) == 2):
+            raise ValueError(f"Pfeil {p!r}: als [links, rechts] angeben")
+        l, r = _el_text(p[0]), _el_text(p[1])
+        if l not in links:
+            raise ValueError(f"Pfeil {p!r}: {l!r} steht nicht in 'links'")
+        if r not in rechts:
+            raise ValueError(f"Pfeil {p!r}: {r!r} steht nicht in 'rechts'")
+        if (l, r) in pfeile:
+            raise ValueError(f"Pfeil {p!r} doppelt")
+        pfeile.append((l, r))
+    namen = d.get("namen", ["A", "B"])
+    if len(namen) != 2 or not all(isinstance(x, str) for x in namen):
+        raise ValueError('namen: zwei Texte, z. B. ["A", "B"]')
+    zeige = d.get("zeige", list(_EIGENSCHAFTEN))
+    if not zeige or any(z not in _EIGENSCHAFTEN for z in zeige):
+        raise ValueError(f"zeige: Auswahl aus {list(_EIGENSCHAFTEN)}")
+    t = {e: "$" + _el_tex(e) + "$" for e in links + rechts}
+    aus = {l: [i for i, (a, _) in enumerate(pfeile) if a == l] for l in links}
+    ein = {r: [i for i, (_, b) in enumerate(pfeile) if b == r] for r in rechts}
+    verst = []
+    for l in links:
+        if not aus[l]:
+            verst.append({"eigenschaft": "abbildung", "seite": "links", "element": links.index(l), "pfeile": [],
+                          "text": f"{t[l]} hat keinen Pfeil."})
+        elif len(aus[l]) > 1:
+            ziele = _aufzaehlen(t[pfeile[i][1]] for i in aus[l])
+            verst.append({"eigenschaft": "abbildung", "seite": "links", "element": links.index(l), "pfeile": aus[l],
+                          "text": f"{t[l]} hat {len(aus[l])} Pfeile (zu {ziele})."})
+    abb = not verst
+    inj = sur = bij = None
+    if abb:
+        for r in rechts:
+            if len(ein[r]) > 1:
+                quellen = _aufzaehlen(t[pfeile[i][0]] for i in ein[r])
+                verst.append({"eigenschaft": "injektiv", "seite": "rechts", "element": rechts.index(r),
+                              "pfeile": ein[r], "text": f"{t[r]} wird mehrfach getroffen (von {quellen})."})
+        for r in rechts:
+            if not ein[r]:
+                verst.append({"eigenschaft": "surjektiv", "seite": "rechts", "element": rechts.index(r),
+                              "pfeile": [], "text": f"{t[r]} wird von keinem Pfeil getroffen."})
+        inj = not any(v["eigenschaft"] == "injektiv" for v in verst)
+        sur = not any(v["eigenschaft"] == "surjektiv" for v in verst)
+        bij = inj and sur
+    d["_links"] = [{"text": e, "tex": _el_tex(e)} for e in links]
+    d["_rechts"] = [{"text": e, "tex": _el_tex(e)} for e in rechts]
+    d["_pfeile"] = [[links.index(l), rechts.index(r)] for l, r in pfeile]
+    d["_namen"] = namen
+    d["_zeige"] = zeige
+    d["_abbildung"], d["_injektiv"], d["_surjektiv"], d["_bijektiv"] = abb, inj, sur, bij
+    d["_verstoesse"] = verst
+
+
+# ---- Pascalsches Dreieck
+
+def _pascal_tex(i, k):
+    if 0 < k < i:
+        a, b = math.comb(i - 1, k - 1), math.comb(i - 1, k)
+        return (f"\\binom{{{i}}}{{{k}}} = \\binom{{{i - 1}}}{{{k - 1}}} + \\binom{{{i - 1}}}{{{k}}}"
+                f" = {a} + {b} = {a + b}")
+    return f"\\binom{{{i}}}{{{k}}} = 1"
 
 
 def _pascal(d):
-    n = int(zahl(d.get("zeilen", 7)))
+    n = _ganz(d.get("zeilen", 7), "zeilen", 1, 16)
     d["_zeilen"] = [[math.comb(i, k) for k in range(i + 1)] for i in range(n)]
+    mark = []
+    for m in d.get("markiert", []):
+        if not (isinstance(m, list) and len(m) == 2):
+            raise ValueError("markiert: Zellen als [n, k] (Zeile n und Stelle k, beide ab 0)")
+        i, k = _ganz(m[0], "markiert n"), _ganz(m[1], "markiert k")
+        if not 0 <= k <= i < n:
+            raise ValueError(f"markiert: Zelle [{i}, {k}] liegt nicht im Dreieck (0 <= k <= n < {n})")
+        mark.append({"n": i, "k": k, "wert": math.comb(i, k), "tex": _pascal_tex(i, k)})
+    d["_markiert"] = mark
+
+
+# ---- Euklidischer Algorithmus
+
+def _lin_tex(s, x, t, y):
+    return f"{s} \\cdot {x} {'+' if t >= 0 else '-'} {abs(t)} \\cdot {y}"
+
+
+def _rueckwaerts(a, b, schritte):
+    """Rückwärtseinsetzen: Zeilen {tex, text}; liefert (zeilen, s, t) mit ggT = s·a + t·b."""
+    R = [a, b] + [s[3] for s in schritte]      # R[i] = q_i · R[i+1] + R[i+2]
+    q = [s[2] for s in schritte]
+    m = len(R) - 2                              # R[m] = ggT
+    g = R[m]
+    if m == 1:
+        return [{"tex": f"{g} = 0 \\cdot {a} + 1 \\cdot {b}",
+                 "text": f"${b}$ teilt ${a}$. Der ggT ist ${b}$ selbst."}], 0, 1
+    zeilen = [{"tex": f"{g} = {R[m - 2]} - {q[m - 2]} \\cdot {R[m - 1]}",
+               "text": f"Zeile {m - 1} nach dem ggT ${g}$ umstellen."}]
+    s, t, j = 1, -q[m - 2], m - 2
+    while j > 0:
+        ein = f"\\hl{{({R[j - 1]} - {q[j - 1]} \\cdot {R[j]})}}"
+        zeilen.append({"tex": f"{g} = {s} \\cdot {R[j]} {'+' if t >= 0 else '-'} {abs(t)} \\cdot {ein}",
+                       "text": f"Zeile {j} umgestellt: ${R[j + 1]} = {R[j - 1]} - {q[j - 1]} \\cdot {R[j]}$. Einsetzen."})
+        s, t = t, s - t * q[j - 1]
+        zeilen.append({"tex": f"{g} = {_lin_tex(s, R[j - 1], t, R[j])}",
+                       "text": f"Ausmultiplizieren und nach ${R[j - 1]}$ und ${R[j]}$ sortieren."})
+        j -= 1
+    if s * a + t * b != g:
+        raise ValueError("Rückwärtseinsetzen ergibt keine Darstellung des ggT (interner Fehler)")
+    zeilen.append({"tex": f"{_lin_tex(s, a, t, b)} = {s * a} {'+' if t * b >= 0 else '-'} {abs(t * b)} = {g}",
+                   "text": "Probe: Es kommt wirklich der ggT heraus."})
+    return zeilen, s, t
+
+
+def _euklid(d):
+    a, b = _ganz(d["a"], "a", 1, 10 ** 12), _ganz(d["b"], "b", 1, 10 ** 12)
+    schritte = mathlib.euklid_schritte(a, b)
+    d["_schritte"] = [list(s) for s in schritte]
+    d["_ggt"] = math.gcd(a, b)
+    if d.get("erweitert"):
+        zeilen, s, t = _rueckwaerts(a, b, schritte)
+        d["_rueckwaerts"] = zeilen
+        d["_bezout"] = {"s": s, "t": t, "tex": f"{d['_ggt']} = {_lin_tex(s, a, t, b)}"}
+
+
+# ---- Modulo-Uhr
+
+def _modulo_uhr(d):
+    n = _ganz(d["n"], "n", 2, 36)
+    a = _ganz(d.get("start", 0), "start", -10 ** 6, 10 ** 6)
+    ops = [k for k in ("plus", "mal", "potenz") if k in d]
+    if len(ops) > 1:
+        raise ValueError("modulo_uhr: nur eins von 'plus', 'mal', 'potenz'")
+    art = ops[0] if ops else "rest"
+    mod = f"\\pmod{{{n}}}"
+    spruenge, potenzen = [], []
+    if art == "plus":
+        p = _ganz(d["plus"], "plus", -3 * n, 3 * n)
+        roh = a + p
+        spruenge = [[a % n, roh % n, p]]
+        tex = f"{a} {'+' if p >= 0 else '-'} {abs(p)} = {roh} \\equiv {roh % n} {mod}"
+    elif art == "mal":
+        k = _ganz(d["mal"], "mal", 0, 24)
+        if not 0 <= a < 10 ** 4:
+            raise ValueError("modulo_uhr mit 'mal': start zwischen 0 und 9999")
+        pos = 0
+        for _ in range(k):
+            spruenge.append([pos, (pos + a) % n, a])
+            pos = (pos + a) % n
+        roh = a * k
+        tex = f"{a} \\cdot {k} = {roh} \\equiv {roh % n} {mod}"
+    elif art == "potenz":
+        k = _ganz(d["potenz"], "potenz", 1, 24)
+        w = a % n
+        potenzen = [{"exp": 1, "wert": w, "tex": f"{a}^{{1}} \\equiv {w} {mod}"}]
+        for e in range(2, k + 1):
+            neu = w * a % n
+            spruenge.append([w, neu, e])
+            potenzen.append({"exp": e, "wert": neu,
+                             "tex": f"{a}^{{{e}}} \\equiv {w} \\cdot {a} = {w * a} \\equiv {neu} {mod}"})
+            w = neu
+        roh = None
+        tex = f"{a}^{{{k}}} \\equiv {pow(a, k, n)} {mod}"
+    else:
+        roh = a
+        tex = f"{a} \\equiv {a % n} {mod}"
+    erg = pow(a, int(d["potenz"]), n) if art == "potenz" else roh % n
+    d["_n"], d["_start"], d["_art"], d["_ergebnis"] = n, a, art, erg
+    d["_wert"] = _ganz(d[art], art) if art != "rest" else 0
+    d["_spruenge"], d["_potenzen"], d["_tex"] = spruenge, potenzen, tex
+    if roh is not None:
+        d["_rechnung"] = f"{roh} = {roh // n} \\cdot {n} + {roh % n}"
+
+
+# ---- Induktion als Dominokette
+
+def _induktion_domino(d):
+    d["_anzahl"] = _ganz(d.get("anzahl", 8), "anzahl", 3, 12)
+    d["_anfang"] = _ganz(d.get("anfang", 1), "anfang", -5, 100)
+
+
+# ---- Folgen mit Grenzwert und ε-Schlauch
+
+_FOLGE_NMAX = 10000
+
+
+def _folge(d):
+    hat_t, hat_r = "term" in d, "rekursion" in d
+    if hat_t == hat_r:
+        raise ValueError("folge: entweder 'term' (in n) oder 'start' + 'rekursion' (in a und n) angeben")
+    n_von = _ganz(d.get("n_von", 1), "n_von", 0, 1000)
+    n_bis = _ganz(d.get("n_bis", n_von + 19), "n_bis", n_von + 1, n_von + 200)
+    if hat_t:
+        t = pruefer.parse(str(d["term"]), ["n"])
+        if t.variablen - {"n"}:
+            raise ValueError(f"term: nur die Variable n erlaubt, nicht {sorted(t.variablen - {'n'})}")
+        d["_ast"] = pruefer.ast_json(t.ast)
+        d["_tex"] = "a_n = " + t.latex()
+
+        def glieder():
+            for n in range(n_von, _FOLGE_NMAX + 1):
+                yield n, pruefer.wert(t.ast, {"n": F(n)})
+    else:
+        if "start" not in d:
+            raise ValueError("folge mit 'rekursion' braucht 'start' (das ist a_{n_von})")
+        r = pruefer.parse(str(d["rekursion"]), ["a", "n"])
+        if r.variablen - {"a", "n"}:
+            raise ValueError(f"rekursion: nur a (Vorgänger) und n erlaubt, nicht {sorted(r.variablen - {'a', 'n'})}")
+        start = zahl(d["start"])
+        if isinstance(start, float) and not math.isfinite(start):
+            raise ValueError("start muss endlich sein")
+        d["_ast_rek"] = pruefer.ast_json(r.ast)
+        d["_start"] = float(start)
+        mit_an = _ersetzen_var(r.ast, "a", ("var", "a_n"))
+        d["_tex"] = f"a_{{{n_von}}} = {zahl_tex(d['start'])},\\quad a_{{n+1}} = " + pruefer.zu_latex(mit_an)
+
+        def glieder():
+            w = start
+            for n in range(n_von, _FOLGE_NMAX + 1):
+                yield n, w
+                if isinstance(w, F) and (w.numerator.bit_length() > 300 or w.denominator.bit_length() > 300):
+                    w = float(w)
+                w = pruefer.wert(r.ast, {"a": w, "n": F(n)})
+    g = eps = None
+    if "grenzwert" in d:
+        gt = pruefer.parse(str(d["grenzwert"]), [])
+        g = pruefer.wert(gt.ast)
+        d["_grenzwert"], d["_grenzwert_tex"] = float(g), gt.latex()
+    if "epsilon" in d:
+        if g is None:
+            raise ValueError("epsilon braucht einen grenzwert")
+        eps = zahl(d["epsilon"])
+        if not eps > 0:
+            raise ValueError("epsilon muss > 0 sein")
+        d["_epsilon"], d["_epsilon_tex"] = float(eps), zahl_tex(d["epsilon"])
+    werte, letzt_schlecht, bis = [], None, n_von - 1
+    try:
+        for n, w in glieder():
+            if n <= n_bis:
+                werte.append(w)
+            if eps is not None:
+                if isinstance(w, F) and isinstance(g, F) and isinstance(eps, F):
+                    schlecht = abs(w - g) >= eps
+                else:
+                    schlecht = not abs(float(w) - float(g)) < float(eps)
+                if schlecht:
+                    letzt_schlecht = n
+            elif n >= n_bis:
+                break
+            bis = n
+    except (pruefer.Undefiniert, OverflowError, ZeroDivisionError) as e:
+        if bis < n_bis:
+            raise ValueError(f"a_{bis + 1} ist nicht definiert ({e})")
+    d["_werte"] = [[n_von + i, float(w)] for i, w in enumerate(werte)]
+    if eps is not None:
+        d["_n0_bis"] = bis
+        d["_n0"] = None if letzt_schlecht == bis or bis < _FOLGE_NMAX else (
+            n_von if letzt_schlecht is None else letzt_schlecht + 1)
+    if d.get("monotonie"):
+        diffs = [werte[i + 1] - werte[i] for i in range(len(werte) - 1)]
+        if all(x > 0 for x in diffs):
+            d["_monotonie"] = "streng monoton steigend"
+        elif all(x >= 0 for x in diffs):
+            d["_monotonie"] = "monoton steigend"
+        elif all(x < 0 for x in diffs):
+            d["_monotonie"] = "streng monoton fallend"
+        elif all(x <= 0 for x in diffs):
+            d["_monotonie"] = "monoton fallend"
+        else:
+            d["_monotonie"] = "nicht monoton"
+    if d.get("schranken"):
+        lo, hi = min(werte), max(werte)
+        d["_schranken"] = {"min": float(lo), "max": float(hi), "min_tex": mathlib.tex(lo), "max_tex": mathlib.tex(hi)}
+
+
+def _ersetzen_var(ast, name, neu):
+    if ast[0] == "var" and ast[1] == name:
+        return neu
+    return tuple(_ersetzen_var(k, name, neu) if isinstance(k, tuple) else k for k in ast)
 
 
 def _matrix_mult(d):
@@ -510,6 +1001,8 @@ _ERGAENZER = {
     "zahlenstrahl": _zahlenstrahl, "bruch": _bruch, "rechnung": _rechnung, "funktionsgraph": _funktionsgraph,
     "parabel": _parabel, "wahrheitstabelle": _wahrheitstabelle, "euklid": _euklid, "pascal": _pascal,
     "matrix_mult": _matrix_mult, "gauss": _gauss,
+    "venn": _venn, "relation_graph": _relation_graph, "modulo_uhr": _modulo_uhr,
+    "induktion_domino": _induktion_domino, "folge": _folge,
 }
 
 

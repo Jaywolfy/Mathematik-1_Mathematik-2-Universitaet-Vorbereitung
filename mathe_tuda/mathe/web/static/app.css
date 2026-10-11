@@ -1433,3 +1433,83 @@ a.tab { text-decoration: none; }
 .wf-btn.falsch { border-color: #d97706; background: var(--warn-soft); box-shadow: 0 3px 0 #d97706; }
 .segment.falsch { background: #f0b45a; }
 .baustein.nok, .zuordnen-wahl.nok { border-color: #d97706; }
+
+/* ===== Visuals: Funktionen/Analysis (vis_funktionen.js) und Lineare Algebra (vis_linalg.js) ===== */
+figure.visual { margin-left: 0; margin-right: 0; }   /* Browser-Standard von <figure> (40 px) würde auf 390 px überlaufen */
+.vf-reihe { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: center; }
+.vf-buehne { min-width: 0; }
+.vf-quadrat { flex: 0 1 340px; }
+.vf-breit { flex: 1 1 380px; }
+.vf-reihe .plot-buehne { max-width: none; }
+.vf-werte { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; font-size: 15.5px; max-width: 100%; overflow-x: auto; }
+.vf-wert { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 2px 4px; }
+.vf-wert .katex-html, .mm-rechnung .katex-html { white-space: nowrap; }
+.vf-hinweis { font-size: 13.5px; color: var(--text-2); text-align: center; }
+.vf-segment .btn[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--on-primary, #fff); }
+.plot:focus-visible, .vl-griff:focus-visible, .mm-zelle:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.plot .hilfskreis, .plot .ek-kreis { fill: none; stroke: var(--text-2); stroke-width: 2; }
+.plot .ek-radius { stroke: var(--text); stroke-width: 2; }
+.plot .ek-cos { stroke: var(--plot-1); stroke-width: 5; stroke-linecap: round; }
+.plot .ek-sin { stroke: var(--plot-2); stroke-width: 5; stroke-linecap: round; }
+.plot .ek-tan { stroke: var(--plot-3); stroke-width: 4; stroke-linecap: round; }
+.plot .ek-tangentenlinie { stroke: var(--plot-3); stroke-width: 1.2; opacity: .5; }
+.plot .ek-p { fill: var(--text); cursor: grab; }
+.plot .ek-cos-p { fill: var(--plot-1); }
+.plot .ek-sin-p { fill: var(--plot-2); }
+.plot .winkelbogen { fill: none; stroke: var(--plot-4); stroke-width: 2.2; }
+.plot .winkelbogen.b1 { stroke: var(--plot-1); }
+.plot .winkelbogen.b2 { stroke: var(--plot-2); }
+.plot .winkelbogen.b3 { stroke: var(--plot-3); }
+.plot .gerade { stroke: var(--text-2); stroke-width: 2; }
+.plot .sekante { stroke: var(--plot-2); stroke-width: 2.4; }
+.plot .tangente { stroke: var(--plot-3); stroke-width: 2.4; stroke-dasharray: 8 5; }
+.plot .steigungsdreieck { stroke: var(--plot-2); stroke-width: 1.6; stroke-dasharray: 3 3; }
+.plot .rechteck { fill: color-mix(in srgb, var(--plot-3) 26%, transparent); stroke: var(--plot-3); stroke-width: 1.2; }
+.plot .rechteck.negativ { fill: color-mix(in srgb, var(--plot-2) 24%, transparent); stroke: var(--plot-2); }
+.plot .flaeche.zart { fill: color-mix(in srgb, var(--plot-1) 12%, transparent); }
+.plot .punkt.stuetz { fill: var(--plot-3); stroke-width: 1.5; }
+.plot .vl-pfeil line { stroke-width: 3; stroke-linecap: round; }
+.plot .vl-pfeil.breit line { stroke-width: 6; opacity: .55; }
+.plot .vl-pfeil.breit path { opacity: .7; }
+.plot .vl-pfeil.summe line { stroke-width: 3.5; }
+.plot .vl-pfeil.kette line { stroke-dasharray: 7 4; }
+.plot .vl-griff { fill: color-mix(in srgb, var(--primary) 18%, transparent); stroke: var(--primary); stroke-width: 2; cursor: grab; }
+.plot .vl-griff.zieht { cursor: grabbing; fill: color-mix(in srgb, var(--primary) 35%, transparent); }
+.plot-legende .leg i.gestrichelt { background: repeating-linear-gradient(90deg, var(--plot-3) 0 5px, transparent 5px 9px); }
+.plot-etikett.klein { font-size: 12.5px; }
+.plot-etikett.unten { transform: translate(-50%, 10px); }
+.plot-etikett.oben { transform: translate(-50%, calc(-100% - 8px)); }
+.plot-etikett.rechts { transform: translate(8px, -50%); }
+.plot-etikett.links { transform: translate(calc(-100% - 8px), -50%); }
+.plot-etikett.links-oben { transform: translate(calc(-100% - 8px), calc(-100% - 4px)); }
+.plot-etikett.ek-lbl, .plot-etikett.vl-label { font-weight: 600; }
+.plot-etikett.ek-alpha { background: transparent; }
+/* Matrixmultiplikation im Falk-Schema */
+.mm-falk { display: grid; grid-template-columns: auto auto; gap: 10px 14px; justify-content: center; align-items: end; width: max-content; margin: 0 auto; }
+.mm-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mm-name { font-size: 14px; color: var(--text-2); }
+.mm-matrix { display: grid; gap: 2px; padding: 4px 8px; border-left: 2px solid var(--text-2); border-right: 2px solid var(--text-2); border-radius: 8px; }
+.mm-zelle { min-width: 46px; min-height: 36px; display: flex; align-items: center; justify-content: center; padding: 3px 8px; border-radius: 8px; font-size: 16px; transition: background .2s; }
+.mm-zelle.hl-zeile { background: color-mix(in srgb, var(--plot-1) 20%, transparent); }
+.mm-zelle.hl-spalte { background: color-mix(in srgb, var(--plot-2) 20%, transparent); }
+.mm-zelle.hl-ziel { background: color-mix(in srgb, var(--plot-3) 28%, transparent); box-shadow: inset 0 0 0 2px var(--plot-3); }
+.mm-zelle.klickbar { cursor: pointer; }
+.mm-zelle.offen { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
+.mm-rechnung { margin-top: 12px; text-align: center; overflow-x: auto; overflow-y: hidden; }
+.mm-paar { padding: 0 2px; border-radius: 4px; }
+.mm-paar-0 { background: color-mix(in srgb, var(--plot-1) 16%, transparent); }
+.mm-paar-1 { background: color-mix(in srgb, var(--plot-2) 16%, transparent); }
+.mm-paar-2 { background: color-mix(in srgb, var(--plot-3) 16%, transparent); }
+.mm-paar-3 { background: color-mix(in srgb, var(--plot-4) 16%, transparent); }
+/* Gauß-Verfahren */
+.gs-op { text-align: center; min-height: 2em; margin-bottom: 8px; font-size: 16px; }
+.gs-matrix { border-collapse: separate; border-spacing: 2px; margin: 0 auto; font-size: 16px; }
+.gs-matrix th { font-weight: 500; color: var(--text-3); padding: 4px 10px 4px 0; font-size: 14px; }
+.gs-matrix td { min-width: 46px; height: 38px; text-align: center; padding: 3px 8px; border-radius: 8px; }
+.gs-matrix td.rechts { border-left: 2px solid var(--text-2); border-radius: 0 8px 8px 0; }
+.gs-matrix tr.geaendert td { background: color-mix(in srgb, var(--plot-2) 18%, transparent); }
+.gs-matrix td.pivot { box-shadow: inset 0 0 0 2.5px var(--plot-3); font-weight: 700; }
+@media (max-width: 520px) {
+  .mm-zelle, .gs-matrix td { min-width: 34px; padding: 2px 4px; font-size: 14.5px; }
+  .vf-werte { font-size: 14px; }
+}

@@ -496,6 +496,8 @@ def ausmultiplizieren_zusammenfassen(rng):
                f"Vorzeichenfehler beim zweiten Produkt: ${tex_kl(d)} \\cdot {tex_kl(f)} = {d * f}$."),
               (_ptext(_p(f"{a * b}x + {c} + {d * e}x + {f}")),
                "Du hast nur den ersten Summanden in den Klammern malgenommen. Jeder Summand bekommt den Faktor ab.")]
+    if d > 0 and f > 0:
+        fehler = fehler[1:]          # ohne Minus gibt es keinen Vorzeichenfehler
     return {
         "frage": f"Multipliziere aus und fasse zusammen: ${_tex(aufgabe)}$.",
         "loesung": _ptext(loes), "variablen": "x", "form": "ausmultipliziert",

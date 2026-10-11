@@ -99,7 +99,7 @@ export function rechnung(b, { alleZeigen = false } = {}) {
   const zeilen = schritte.map((s, i) => {
     const z = h("li", { class: "rechnung-zeile" + (s.falsch ? " falsch" : ""), hidden: !alleZeigen && i > 0 },
       h("div", { class: "rz-formel", html: texHtml("\\displaystyle " + s.tex, false) }),
-      h("div", { class: "rz-grund" }, s.falsch ? h("span", { class: "chip rot", text: "✗ So nicht!" }) : null, h("span", { html: inline(s.grund || "") })));
+      h("div", { class: "rz-grund" }, s.falsch ? h("span", { class: "chip rot", text: "✗ So nicht!" }) : null, s.widerspruch ? h("span", { class: "chip", text: "⚡ Widerspruch: keine Lösung" }) : null, h("span", { html: inline(s.grund || "") })));
     liste.append(z);
     return z;
   });

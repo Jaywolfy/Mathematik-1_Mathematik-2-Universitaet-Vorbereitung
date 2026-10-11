@@ -179,7 +179,7 @@ export function koordinaten(opts, malen) {
     for (let y = Math.ceil(ymin / sy) * sy; y <= ymax + 1e-9; y += sy) {
       gitter.append(svg("line", { class: Math.abs(y) < 1e-9 ? "achse" : "gitterlinie", x1: 0, y1: k.py(y), x2: W, y2: k.py(y) }));
     }
-    const y0 = Math.min(H - 4, Math.max(14, k.py(0))), x0 = Math.min(W - 6, Math.max(6, k.px(0)));
+    const y0 = Math.min(H - 20, Math.max(14, k.py(0))), x0 = Math.min(W - 6, Math.max(6, k.px(0)));
     for (const x of xWerte) {
       if (Math.abs(x) < 1e-9 || k.px(x) < 14 || k.px(x) > W - 14) continue;
       const text = xTicks ? (xTicks.find(t => t.x === x) || {}).text : zahlText(x);

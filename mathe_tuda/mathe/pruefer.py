@@ -715,12 +715,131 @@ def form_pruefen(term, form, referenz=None):
                     "z. B. 3(x + 2) oder (x - 1)(x + 1).")
         if f == "ohne_klammern" and term.klammern:
             return "Dein Term ist richtig, soll aber ohne Klammern geschrieben werden."
-        if f == "gekuerzt":
+        if f in ("gekuerzt", "vereinfacht"):
             meldung = _gekuerzt_meldung(term.ast)
+            if meldung:
+                return meldung
+        if f == "linearfaktoren":
+            meldung = _linearfaktoren_meldung(term.ast)
+            if meldung:
+                return meldung
+        if f in ("wurzel_vereinfacht", "vereinfacht"):
+            meldung = _wurzel_meldung(term.ast)
+            if meldung:
+                return meldung
+        if f in ("potenz", "vereinfacht"):
+            meldung = _potenz_meldung(term.ast)
+            if meldung:
+                return meldung
+        if f == "vereinfacht":
+            meldung = _zahlen_meldung(term.ast)
+            if not meldung and referenz is not None and _nur_zahlen(term.ast) and _einfache_zahl(referenz) \
+                    and not _einfache_zahl(term.ast):
+                meldung = "Richtig, aber rechne das noch zu einer Zahl aus."
             if meldung:
                 return meldung
         if f == "vereinfacht" and referenz is not None and knoten_zahl(term.ast) > knoten_zahl(referenz) + 2:
             return "Dein Term ist richtig, lässt sich aber noch weiter vereinfachen."
+    return None
+
+
+def _linearfaktoren_meldung(ast):
+    """Formcheck 'linearfaktoren': Produkt, dessen Faktoren über Q nicht weiter zerfallen."""
+    from . import mathlib
+    if not _faktorisiert(ast) and _ohne_neg(ast)[0] not in ("var",):
+        return ("Dein Term ist richtig, aber noch keine Produktform. Gesucht ist ein Produkt aus "
+                "Linearfaktoren wie (x - 1)(x + 2).")
+    for f, _ in _faktoren(_ohne_neg(ast)):
+        f = _ohne_neg(f)
+        if f[0] == "pow":
+            f = f[1]
+        try:
+            pol = mathlib.Polynom.aus_ast(f)
+        except ValueError:
+            continue
+        if pol is not None and pol.grad() >= 2 and pol.rationale_nullstellen():
+            return "Richtig, aber ein Faktor lässt sich noch weiter zerlegen. Suche seine Nullstellen."
+    return None
+
+
+def _knoten(ast):
+    yield ast
+    for k in ast[1:]:
+        if isinstance(k, tuple):
+            yield from _knoten(k)
+
+
+def _ist_wurzel(ast):
+    a = _ohne_neg(ast)
+    return (a[0] == "fun" and a[1] == "sqrt") or (
+        a[0] == "pow" and a[2][0] == "zahl" and a[2][1].denominator != 1)
+
+
+def _wurzel_meldung(ast):
+    """Formcheck 'wurzel_vereinfacht': kein Quadratfaktor > 1 unter einer Quadratwurzel, keine
+    ganz ausrechenbare Wurzel, keine Wurzel im Nenner."""
+    for k in _knoten(ast):
+        if k[0] == "fun" and k[1] == "sqrt" and k[2][0] == "zahl" and k[2][1].denominator == 1:
+            n = k[2][1].numerator
+            if n > 1:
+                r = math.isqrt(n)
+                if r * r == n:
+                    return f"Richtig, aber $\\sqrt{{{n}}} = {r}$ lässt sich ganz ausrechnen."
+                q = max(d for d in range(1, r + 1) if n % (d * d) == 0)
+                if q > 1:
+                    return (f"Richtig, aber unter der Wurzel steckt noch der Quadratfaktor ${q * q}$. "
+                            f"Ziehe ihn heraus: $\\sqrt{{{n}}} = {q}\\sqrt{{{n // (q * q)}}}$.")
+        if k[0] == "div" and any(_ist_wurzel(x) for x in _knoten(k[2])):
+            return "Richtig, aber im Nenner steht noch eine Wurzel. Mach den Nenner rational."
+    return None
+
+
+def _faktoren(ast, exp=1):
+    """Zerlegt Produkte und Quotienten in (faktor, +1|-1)."""
+    a = ast
+    if a[0] == "mul":
+        return _faktoren(a[1], exp) + _faktoren(a[2], exp)
+    if a[0] == "div":
+        return _faktoren(a[1], exp) + _faktoren(a[2], -exp)
+    return [(a, exp)]
+
+
+def _potenz_meldung(ast):
+    """Formcheck 'potenz': in jedem Produkt jede Basis höchstens einmal, keine Potenz einer Potenz."""
+    for k in _knoten(ast):
+        if k[0] == "pow" and _ohne_neg(k[1])[0] == "pow":
+            return "Richtig, aber da steht noch eine Potenz einer Potenz. Multipliziere die Exponenten."
+        if k[0] in ("mul", "div"):
+            basen = []
+            for f, _ in _faktoren(k):
+                f = _ohne_neg(f)
+                b = f[1] if f[0] == "pow" else f
+                if b[0] in ("var", "konst"):
+                    if b in basen:
+                        return ("Richtig, aber die Basis " + (b[1] if b[0] == "var" else "e")
+                                + " kommt noch mehrfach vor. Fasse die Potenzen zusammen.")
+                    basen.append(b)
+    return None
+
+
+def _nur_zahlen(ast):
+    return all(k[0] in ("zahl", "neg", "add", "sub", "mul", "div", "pow") for k in _knoten(ast))
+
+
+def _einfache_zahl(ast):
+    a = _ohne_neg(ast)
+    return a[0] == "zahl" or (a[0] == "div" and _ohne_neg(a[1])[0] == "zahl" and a[2][0] == "zahl")
+
+
+def _zahlen_meldung(ast):
+    """Teil von 'vereinfacht': mehrere reine Zahlfaktoren in einem Produkt zusammenrechnen."""
+    for k in _knoten(ast):
+        if k[0] == "mul":
+            zahlen = [f for f, e in _faktoren(k) if e == 1 and _ohne_neg(f)[0] == "zahl"]
+            if len(zahlen) > 1:
+                return "Richtig, aber die Zahlen im Produkt lassen sich noch zusammenrechnen."
+        if k[0] in ("add", "sub", "mul", "pow") and _nur_zahlen(k) and k is not ast:
+            return "Richtig, aber ein Teil besteht nur aus Zahlen. Rechne ihn aus."
     return None
 
 
@@ -739,7 +858,11 @@ def _gekuerzt_meldung(ast):
             pz, pn = mathlib.Polynom.aus_ast(a[1]), mathlib.Polynom.aus_ast(a[2])
         except ValueError:
             return None
-        if pz is None or pn is None or pn.grad() < 1:
+        if pz is None or pn is None:
+            return None
+        if pn.grad() < 1:
+            if pz.grad() >= 1 and pz.inhalt_ggt(pn) > 1:
+                return "Richtig gerechnet, aber Zähler und Nenner lassen sich noch durch dieselbe Zahl kürzen."
             return None
         g = mathlib.Polynom.ggt(pz, pn)
         if g.grad() >= 1:
@@ -1244,6 +1367,10 @@ def bereiche_gleich(a, b):
 
 
 def bereich_latex(ivs):
+    return re.sub(r"\\frac\{-(\w+)\}", r"-\\frac{\1}", _bereich_latex(ivs))
+
+
+def _bereich_latex(ivs):
     if not ivs:
         return "\\emptyset"
     if len(ivs) == 1 and math.isinf(ivs[0].lo.f()) and math.isinf(ivs[0].hi.f()):
@@ -1362,7 +1489,7 @@ color textcolor colorbox htmlClass hl luecke boxed cancel bcancel xcancel phanto
 underset overset stackrel substack prime ast star dagger aleph ell hbar Re Im mod bmod pmod
 equiv not uparrow downarrow updownarrow Uparrow Downarrow mathfrak checkmark square blacksquare Box
 tag notag nonumber limits nolimits
-""".split())
+ mathbin colon lg""".split())
 LATEX_UMGEBUNGEN = {"pmatrix", "bmatrix", "vmatrix", "matrix", "array", "cases", "aligned", "align*",
                     "gathered", "smallmatrix", "Bmatrix", "Vmatrix", "rcases", "split"}
 

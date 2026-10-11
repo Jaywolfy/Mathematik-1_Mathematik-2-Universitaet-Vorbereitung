@@ -346,12 +346,16 @@ def _direktive(kopf, inhalt, probleme):
             if not z.strip():
                 continue
             falsch = z.lstrip().startswith("!")
-            z = z.lstrip()[1:] if falsch else z
+            widerspruch = z.lstrip().startswith("#")
+            z = z.lstrip()[1:] if falsch or widerspruch else z
             tex, _, grund = z.partition("||")
             if not tex.strip():
                 probleme.append(f"':::rechnung': Zeile ohne Formel: {z!r}")
                 continue
-            schritte.append({"tex": tex.strip(), "grund": grund.strip(), "falsch": falsch})
+            schritt = {"tex": tex.strip(), "grund": grund.strip(), "falsch": falsch}
+            if widerspruch:
+                schritt["widerspruch"] = True
+            schritte.append(schritt)
         if not schritte:
             probleme.append("':::rechnung' enthält keine Schritte.")
         return {"typ": "rechnung", "titel": rest, "schritte": schritte}

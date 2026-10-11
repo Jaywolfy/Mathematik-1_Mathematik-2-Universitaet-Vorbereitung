@@ -521,8 +521,38 @@ def _ist_bruch_eingabe(text):
     return ganz(a) or (a[0] == "div" and ganz(a[1]) and ganz(a[2]))
 
 
+def _ist_zahl_text(x):
+    try:
+        pruefer.zahl_parsen(_als_text(x))
+        return True
+    except (pruefer.TermFehler, ArithmeticError, ValueError):
+        return False
+
+
+def _gleich_als_term(a, b):
+    try:
+        ta, tb = pruefer.parse(_als_text(a)), pruefer.parse(_als_text(b))
+        if not ta.variablen and not tb.variablen:
+            return pruefer.gleich(pruefer.wert(ta.ast), pruefer.wert(tb.ast))
+        return pruefer.aequivalent(ta.ast, tb.ast).ok
+    except (pruefer.TermFehler, pruefer.Undefiniert, ArithmeticError):
+        return _norm_text(_als_text(a)) == _norm_text(_als_text(b))
+
+
 def ohne_gleiche(loesung, fehler):
-    """Für Generatoren: entfernt Fehlwerte, die zufällig gleich der Lösung sind (oder doppelt)."""
+    """Für Generatoren: entfernt Fehlwerte, die zufällig gleich der Lösung sind (oder doppelt).
+    Funktioniert für Zahlen, Terme und für Lückentexte (Lösung und Fehlwerte als Listen je Lücke)."""
+    if isinstance(loesung, (list, tuple)) or not _ist_zahl_text(loesung):
+        def gleich(x, y):
+            if isinstance(x, (list, tuple)) and isinstance(y, (list, tuple)):
+                return len(x) == len(y) and all(_gleich_als_term(p, q) for p, q in zip(x, y))
+            return _gleich_als_term(x, y)
+        erg = []
+        for w, m in fehler:
+            if gleich(w, loesung) or any(gleich(w, g) for g, _ in erg):
+                continue
+            erg.append((w, m))
+        return erg
     soll = pruefer.zahl_parsen(_als_text(loesung))[1]
     erg, gesehen = [], []
     for w, m in fehler:
@@ -920,10 +950,12 @@ class Luecke(Frage):
     typ = "luecke"
     eingabe = "term"
 
-    def __init__(self, frage, formel, antworten, erklaerung="", **kw):
+    def __init__(self, frage, formel, antworten, erklaerung="", formen=None, **kw):
         super().__init__(frage, erklaerung, **kw)
         self.formel = formel
         self.antworten = [[_als_text(a) for a in (x if isinstance(x, (list, tuple)) else [x])] for x in antworten]
+        # formen: je Lücke None oder ein Formcheck wie bei Termfragen ("gekuerzt", "wurzel_vereinfacht", …)
+        self.formen = list(formen) if formen else [None] * len(self.antworten)
 
     def haupttext(self):
         return self.frage + "\n" + self.formel
@@ -968,6 +1000,17 @@ class Luecke(Frage):
         details = [{"name": f"Lücke {i + 1}", "ok": self._passt(e, a)} for i, (e, a) in enumerate(zip(eingaben, self.antworten))]
         richtig = sum(d["ok"] for d in details)
         if richtig == len(details):
+            for i, (e, form) in enumerate(zip(eingaben, self.formen)):
+                if not form:
+                    continue
+                try:
+                    t = pruefer.parse(e)
+                except pruefer.TermFehler:
+                    continue
+                m = (pruefer.bruch_gekuerzt(e) if form == "gekuerzt" and not t.variablen
+                     else pruefer.form_pruefen(t, form, pruefer.parse(self.antworten[i][0]).ast))
+                if m:
+                    return self._ergebnis(False, "Fast!", hinweis=f"Lücke {i + 1}: {m}", fast=True, details=details)
             return self._ergebnis(True, details=details)
 
         def vergleich(w):

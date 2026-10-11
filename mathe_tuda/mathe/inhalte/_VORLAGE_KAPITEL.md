@@ -17,6 +17,11 @@ neues Kapitel schreibst. Der Vertrag steht in `mathe/ARCHITEKTUR.md` (Abschnitte
 
 ## Regeln in Kürze
 
+- In `:::rechnung` keine Funktionsschreibweise `f(3) = …` (wird als f·3 gelesen): nackte Ausdrücke rechnen, `f(3)` in die Begründung schreiben.
+- Glossar: Begriffe und Synonyme werden ohne Groß/Klein verglichen; Synonyme nur, wenn sie eindeutig sind (nicht „Periode“, „Basis“, „Wurzel“).
+- Glossar-Verweis: `[[Begriff]]` oder `[[angezeigter Text|Begriff]]` (Anzeigetext **vorn**, Glossarbegriff hinten).
+- Vereinfachte Form verlangen: `form="vereinfacht"` bzw. `"wurzel_vereinfacht"`, `"potenz"`, `"gekuerzt"`; bei Lücken `formen=[None, "gekuerzt"]`.
+
 - **Alle Zahlen rechnet Python.** Lösungen mit `Fraction`/`mathlib` berechnen oder `k.berechne`,
   `k.vereinfache`, `k.gleichung`, `k.lgs` benutzen. Keine Ergebnisse von Hand eintippen, wo es anders geht.
 - Jeder Text mit LaTeX ist ein **Raw-String**: `r"…"`, `r"""…"""`. In normalen und f-Strings Backslash

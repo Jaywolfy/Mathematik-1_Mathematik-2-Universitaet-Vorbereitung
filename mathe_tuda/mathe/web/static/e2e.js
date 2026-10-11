@@ -299,6 +299,57 @@ async function training() {
   check("Diagnose: Auswertung mit Empfehlung", !!document.querySelector("#main .diag-liste") && /Empfehlung/.test(document.querySelector("#main").textContent), norm(document.querySelector("#main .unter")?.textContent));
 }
 
+/* ---------------- Visuals Funktionen/Lineare Algebra bedienen (Demo-Seite) ---------------- */
+async function visualsBedienen() {
+  await warten(() => !document.querySelector("#main .visual[data-laedt]"), 15000, "Visuals geladen");
+  const fehler = [...document.querySelectorAll("#main .vis-fehler")].map(e => norm(e.textContent).slice(0, 120));
+  check("Demo: keine Visual-Fehler", !fehler.length, fehler.join(" | "));
+  const vis = (art) => document.querySelector(`#main .vis-${art}`);
+  const text = (el) => norm([...el.querySelectorAll("annotation")].map(a => a.textContent).join(" ") + " " + el.textContent);
+  const ek = vis("einheitskreis");
+  if (ek) {
+    taste(ek.querySelector("svg.plot[tabindex]"), "PageUp"); await pause(50);   // 60° -> 75°
+    check("einheitskreis: Tastatur, exakter Wert bei 75°", /sqrt\{6\}\+\\sqrt\{2\}/.test(text(ek.querySelector(".vf-werte"))), text(ek.querySelector(".vf-werte")).slice(0, 200));
+    eingeben(ek.querySelector("input[type=range]"), "100"); await pause(50);
+    check("einheitskreis: Regler 100° -> Näherung", /approx/.test(text(ek.querySelector(".vf-werte"))));
+  }
+  const tg = vis("tangente");
+  if (tg) {
+    const [, rh] = tg.querySelectorAll("input[type=range]");
+    eingeben(rh, "0.5"); await pause(50);
+    check("tangente: h-Regler ändert Sekante", /m_\{\\text\{Sek\}\}.*approx 1,25|m_\{\\text\{Sek\}\}.*approx 1\{,\}25/.test(text(tg)), text(tg.querySelector(".vf-werte")).slice(0, 200));
+  }
+  const rm = vis("riemann");
+  if (rm) {
+    const vorher = rm.querySelectorAll("polygon.rechteck").length;
+    eingeben(rm.querySelector("input[type=range]"), "20"); await pause(50);
+    [...rm.querySelectorAll(".vf-segment .btn")].find(b => b.textContent === "Obersumme").click(); await pause(50);
+    check("riemann: n und Obersumme", vorher === 4 && rm.querySelectorAll("polygon.rechteck").length === 20 && /Obersumme/.test(rm.querySelector(".vf-werte").textContent), `${vorher} -> ${rm.querySelectorAll("polygon.rechteck").length}`);
+  }
+  const vk = vis("vektoren2d");
+  if (vk) {
+    taste(vk.querySelector(".vl-griff"), "ArrowUp"); await pause(50);
+    check("vektoren2d: Griff mit Pfeiltaste", /pmatrix\} 3 \\\\ \\frac\{3\}\{2\}/.test(text(vk.querySelector(".vf-werte"))), text(vk.querySelector(".vf-werte")).slice(0, 160));
+  }
+  const mm = vis("matrix_mult");
+  if (mm) {
+    [...mm.querySelectorAll(".vis-steuer .btn")].find(b => /Weiter/.test(b.textContent)).click(); await pause(50);
+    check("matrix_mult: Schritt 2 hebt Zeile 1 / Spalte 2 hervor", mm.querySelectorAll(".mm-matrix.b .hl-spalte").length === 3 && /c_\{12\}/.test(text(mm.querySelector(".mm-rechnung"))));
+  }
+  const gs = vis("gauss");
+  if (gs) {
+    const weiter = [...gs.querySelectorAll(".vis-steuer .btn")].find(b => /Weiter/.test(b.textContent));
+    for (let i = 0; i < 20 && !weiter.disabled; i++) { weiter.click(); await pause(10); }
+    check("gauss: bis zum Ende, Lösung angezeigt", /x_\{1\} = 1/.test(text(gs)) && gs.querySelector("td.pivot"), text(gs.querySelector(".vf-werte")).slice(0, 160));
+  }
+  const ke = vis("komplexe_ebene");
+  if (ke) {
+    check("komplexe_ebene: exakte Polarform", /e\^\{i\\frac\{5\\pi\}\{12\}\}/.test(text(ke)), text(ke.querySelector(".vf-werte")).slice(0, 200));
+    taste(ke.querySelector(".vl-griff"), "ArrowRight"); await pause(50);
+    check("komplexe_ebene: z verschiebbar", /z = \\frac\{3\}\{2\} \+ i/.test(text(ke)), text(ke.querySelector(".vf-werte")).slice(0, 160));
+  }
+}
+
 /* ---------------- Werkzeuge ---------------- */
 async function werkzeuge() {
   location.hash = "#/formelsammlung";
@@ -324,6 +375,7 @@ async function werkzeuge() {
   const probleme = layoutPruefen(document.querySelector("#main .container"), "Demo");
   check("Demo-Seite: alle Visuals ohne Fehler", !document.querySelector("#main .fehler-karte") && !probleme.length
         && document.querySelectorAll("#main .demo-teil").length >= 5, probleme.join("; ") || document.querySelector("#main .fehler-karte")?.textContent);
+  await visualsBedienen();
   location.hash = "#/spielwiese/plotter";
   await warten(() => document.querySelector("#main .plot path.kurve"), 15000, "Plotter-Kurve");
   check("Spielwiese: Plotter zeichnet", (document.querySelector("#main .plot path.kurve").getAttribute("d") || "").length > 100);

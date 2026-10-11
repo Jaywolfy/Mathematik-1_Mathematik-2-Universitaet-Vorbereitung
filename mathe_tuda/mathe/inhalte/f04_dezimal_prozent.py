@@ -14,11 +14,6 @@ def dz(x):
     return mathlib.dezimal(F(x), 8)
 
 
-def dz_text(x):
-    """Wie dz, aber für Fließtext außerhalb von Formeln nicht gedacht: nur in $…$ verwenden."""
-    return dz(x)
-
-
 k = neues_kapitel(
     slug="dezimal_prozent",
     titel="Dezimalzahlen und Prozent",
@@ -36,7 +31,7 @@ k.lernziele([
 ])
 
 k.warum(r"""
-Computer speichern Kommazahlen als [[Gleitkommazahl|Gleitkommazahlen]]. Dabei passieren
+Computer speichern Kommazahlen als [[Gleitkommazahlen|Gleitkommazahl]]. Dabei passieren
 Rundungsfehler: In Python ergibt `0.1 + 0.2` nicht genau `0.3`. Warum das so ist,
 verstehst du nach diesem Kapitel. Prozent brauchst du ständig: Ein Algorithmus ist
 $30\,\%$ schneller, eine Datei wird um $60\,\%$ kleiner, $5\,\%$ der Tests schlagen fehl.
@@ -142,7 +137,7 @@ k.erklaerung("Bruch und Dezimalzahl umwandeln", r"""
     ## Von der Dezimalzahl zum Bruch
 
     Die Anzahl der Nachkommastellen sagt dir den [[Nenner]]: eine Stelle Zehntel,
-    zwei Stellen Hundertstel, drei Stellen Tausendstel. Danach [[Kürzen|kürzt]] du.
+    zwei Stellen Hundertstel, drei Stellen Tausendstel. Danach [[kürzt|Kürzen]] du.
 
     :::rechnung Beispiel vorgerechnet
     0{,}75 = \frac{75}{100} || zwei Nachkommastellen: Hundertstel
@@ -160,7 +155,7 @@ k.erklaerung("Bruch und Dezimalzahl umwandeln", r"""
     ## Vom Bruch zur Dezimalzahl
 
     Ein Bruchstrich heißt „geteilt durch“. Oft geht es ohne schriftliches Teilen:
-    [[Erweitern|Erweitere]] so, dass unten $10$, $100$ oder $1000$ steht.
+    [[Erweitere|Erweitern]] so, dass unten $10$, $100$ oder $1000$ steht.
 
     :::rechnung Beispiel vorgerechnet
     \frac{3}{8} = \frac{3 \cdot 125}{8 \cdot 125} || $8 \cdot 125 = 1000$
@@ -549,6 +544,11 @@ def runden(rng):
                + ("Sie ist $5$ oder größer, also aufrunden." if entscheid >= 5 else "abrunden.")),
               (_runde(_runde(x, s + 1), s), f"Du hast in zwei Schritten gerundet. Nur die Ziffer direkt hinter der Rundungsstelle zählt: ${entscheid}$."),
               (_runde(x, s + 1), "Du hast eine Stelle zu genau gerundet.")]
+    if entscheid < 5:
+        fehler.append((F(math.floor(x * 10 ** s) + 1, 10 ** s),
+                       f"Du hast aufgerundet. Die Ziffer dahinter ist ${entscheid}$, also abrunden."))
+    if s > 0:
+        fehler.append((_runde(x, s - 1), "Du hast eine Stelle zu grob gerundet. Zähle die Nachkommastellen nach."))
     return {
         "frage": f"Runde ${dz(x)}$ {_STELLEN_TEXT[s]}.",
         "loesung": w, "form": "dezimal",

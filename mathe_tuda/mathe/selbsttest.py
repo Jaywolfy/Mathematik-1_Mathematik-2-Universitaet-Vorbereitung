@@ -142,12 +142,40 @@ def _ast_von(teil):
     return pruefer.parse(pruefer.latex_zu_term(teil)).ast
 
 
+def _rel_gilt(a, rel, b):
+    wa, wb = float(pruefer.wert(a)), float(pruefer.wert(b))
+    eps = 1e-9 * max(1, abs(wa), abs(wb))
+    return {"=": abs(wa - wb) <= eps, "≠": abs(wa - wb) > eps, "<": wa < wb - eps, ">": wa > wb + eps,
+            "≤": wa <= wb + eps, "≥": wa >= wb - eps}[rel]
+
+
+def _einsetzen(ast, name, wert):
+    if ast[0] == "var" and ast[1] == name:
+        return wert
+    return tuple(_einsetzen(k, name, wert) if isinstance(k, tuple) else k for k in ast)
+
+
 def rechnung_pruefen(schritte):
     """Rückgabe: (fehler: [str], ungeprueft: int, geprueft: int)."""
     fehler, ungeprueft, geprueft = [], 0, 0
     zeilen = []                       # (index, [asts], [rels]) oder None
     for i, s in enumerate(schritte):
         if s.get("falsch"):
+            zeilen.append(None)
+            continue
+        if s.get("widerspruch"):
+            # "#"-Zeile: eine falsche Aussage ohne Variable, aus der L = ∅ folgt
+            try:
+                teile, rels = pruefer.latex_relationen(_rechnung_zeile(s["tex"])[0])
+                asts = [_ast_von(p) for p in teile]
+                if any(a is None or pruefer.variablen_von(a) for a in asts):
+                    fehler.append(f"Schritt {i + 1}: Widerspruchszeile (#) muss eine Aussage ohne Variable sein")
+                elif all(_rel_gilt(a, r, b) for (a, b), r in zip(zip(asts, asts[1:]), rels)):
+                    fehler.append(f"Schritt {i + 1}: Widerspruchszeile (#) ist gar keine falsche Aussage")
+                else:
+                    geprueft += 1
+            except (pruefer.NichtPruefbar, pruefer.TermFehler):
+                ungeprueft += 1
             zeilen.append(None)
             continue
         tex, oder = _rechnung_zeile(s["tex"])
@@ -187,10 +215,10 @@ def rechnung_pruefen(schritte):
     # Lösungszeilen am Ende: var = Konstante (auch x_1 = …)
     loesungen, loesung_zeilen = {}, set()
     for z in reversed(zeilen):
-        if not z or z[0] != "normal" or z[2] != ["="] or None in z[1]:
+        if not z or z[0] != "normal" or set(z[2]) != {"="} or None in z[1]:
             break
-        a, b = z[1]
-        if a[0] == "var" and not pruefer.variablen_von(b):
+        a, b = z[1][0], z[1][-1]
+        if a[0] == "var" and not any(pruefer.variablen_von(t) for t in z[1][1:]):
             name = re.sub(r"_\w+$", "", a[1])
             try:
                 loesungen.setdefault(name, []).append(pruefer.wert(b))
@@ -199,6 +227,38 @@ def rechnung_pruefen(schritte):
                 break
         else:
             break
+
+    hat_widerspruch = any(x.get("widerspruch") for x in schritte)
+
+    # Wie oft kommt jede Variable in den Zeilen vor? (für Definitionszeilen wie "D = b^2 - 4ac")
+    vorkommen = {}
+    for z in zeilen:
+        if z and z[0] == "normal":
+            for t in z[1]:
+                if t is not None:
+                    for v in pruefer.variablen_von(t):
+                        vorkommen[v] = vorkommen.get(v, 0) + 1
+
+    def ohne_loesung(a, b):
+        """a = b hat keine Lösung, weil a - b konstant und ≠ 0 ist (an Stichproben geprüft)."""
+        vs = sorted(pruefer.variablen_von(a) | pruefer.variablen_von(b))
+        werte = []
+        for k in range(1, 8):
+            bel = {v: Fraction(k * (j + 2), 7) + Fraction(1, 13) for j, v in enumerate(vs)}
+            try:
+                werte.append(pruefer.wert(("sub", a, b), bel))
+            except pruefer.Undefiniert:
+                continue
+        return len(werte) >= 4 and all(pruefer.gleich(w, werte[0]) for w in werte) and not pruefer.gleich(werte[0], 0)
+
+    # Formel umgestellt: letzte Zeile "v = Term", Term ohne v, aber mit anderen Variablen
+    umgestellt = None
+    for z in reversed(zeilen):
+        if z and z[0] == "normal" and z[2] == ["="] and None not in z[1]:
+            a, b = z[1]
+            if a[0] == "var" and pruefer.variablen_von(b) and a[1] not in pruefer.variablen_von(b):
+                umgestellt = (a[1], b)
+        break
 
     ungleichung_ende = None
     for z in reversed(zeilen):
@@ -223,13 +283,23 @@ def rechnung_pruefen(schritte):
         if art == "oder" or idx in loesung_zeilen:
             if idx in loesung_zeilen:
                 geprueft += 1
+                for (a, b), rel in list(zip(zip(asts, asts[1:]), rels))[1:]:
+                    try:
+                        if not gilt(a, rel, b, {}):
+                            fehler.append(f"Schritt {idx + 1}: {pruefer.zu_text(a)} {rel} {pruefer.zu_text(b)} stimmt nicht")
+                    except pruefer.Undefiniert:
+                        fehler.append(f"Schritt {idx + 1}: Ausdruck ist nicht definiert")
             continue
         if None in asts:
             ungeprueft += 1
             continue
         vs = set().union(*[pruefer.variablen_von(a) for a in asts])
-        for (a, b), rel in zip(zip(asts, asts[1:]), rels):
+        for nr, ((a, b), rel) in enumerate(zip(zip(asts, asts[1:]), rels)):
             paar_vs = pruefer.variablen_von(a) | pruefer.variablen_von(b)
+            if nr == 0 and rel == "=" and a[0] == "var" and vorkommen.get(a[1], 0) == 1 \
+                    and a[1] not in pruefer.variablen_von(b) and (len(asts) > 2 or pruefer.variablen_von(b)):
+                ungeprueft += 1      # Definitionszeile: neuer Name für den Term rechts davon
+                continue
             try:
                 if not paar_vs:
                     if not gilt(a, rel, b, {}):
@@ -238,8 +308,18 @@ def rechnung_pruefen(schritte):
                 elif rel == "=" and loesungen and set(v for v in paar_vs) <= set(loesungen) and len(paar_vs) == 1:
                     v = next(iter(paar_vs))
                     werte = loesungen[v]
-                    erfuellt = [gilt(a, "=", b, {v: w}) if not isinstance(w, float) else gilt(a, "=", b, {v: w})
-                                for w in werte]
+                    erfuellt = []
+                    for w in werte:
+                        try:
+                            erfuellt.append(gilt(a, "=", b, {v: w}))
+                        except pruefer.Undefiniert:
+                            pass   # z. B. Division durch (x - 1) bei der Lösung x = 1: diese Lösung hier nicht prüfbar
+                    if not erfuellt:
+                        if pruefer.aequivalent(a, b).ok:
+                            geprueft += 1
+                        else:
+                            ungeprueft += 1
+                        continue
                     if not any(erfuellt):
                         if pruefer.aequivalent(a, b).ok:
                             geprueft += 1
@@ -250,7 +330,13 @@ def rechnung_pruefen(schritte):
                         ungeprueft += 1
                     else:
                         geprueft += 1
+                elif rel == "=" and hat_widerspruch and ohne_loesung(a, b):
+                    geprueft += 1
                 elif rel == "=":
+                    if not pruefer.aequivalent(a, b).ok and umgestellt and umgestellt[0] in paar_vs and \
+                            pruefer.aequivalent(_einsetzen(a, *umgestellt), _einsetzen(b, *umgestellt)).ok:
+                        geprueft += 1
+                        continue
                     if not pruefer.aequivalent(a, b).ok:
                         fehler.append(f"Schritt {idx + 1}: {pruefer.zu_text(a)} und {pruefer.zu_text(b)} "
                                       "sind nicht gleich (Umformung falsch?)")

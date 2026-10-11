@@ -1,0 +1,129 @@
+/* Diskrete Visuals (vis_diskret.js): Farben nur über die Theme-Variablen aus app.css. */
+
+/* ---------- Venn ---------- */
+.venn-buehne { max-width: 520px; margin: 0 auto; }
+.venn-svg { width: 100%; height: auto; display: block; user-select: none; touch-action: manipulation; border-radius: 10px; }
+.venn-svg:focus-visible, .pascal-svg:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.venn-flaeche { fill: transparent; }
+.venn-region.markiert .venn-flaeche { fill: color-mix(in srgb, var(--plot-1) 30%, transparent); }
+.venn-region.aktiv .venn-flaeche { fill: color-mix(in srgb, var(--plot-2) 38%, transparent); }
+.venn-rand { fill: none; stroke: var(--border-strong); stroke-width: 2; }
+.venn-kreis { fill: none; stroke-width: 2.5; }
+.venn-kreis.k1 { stroke: var(--plot-1); }
+.venn-kreis.k2 { stroke: var(--plot-3); }
+.venn-kreis.k3 { stroke: var(--plot-4); }
+.venn-name { font-family: "KaTeX_Math", serif; font-style: italic; font-size: 21px; fill: var(--text-2); }
+.venn-name.k1 { fill: var(--plot-1); }
+.venn-name.k2 { fill: var(--plot-3); }
+.venn-name.k3 { fill: var(--plot-4); }
+.venn-el { font-family: "KaTeX_Main", var(--font); font-size: 17px; fill: var(--text); pointer-events: none; }
+.venn-info { text-align: center; margin-top: 10px; min-height: 1.8em; font-size: 15.5px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+
+/* ---------- Wahrheitstabelle ---------- */
+.wt-rahmen > table { margin: 0 auto; }
+.wt-diskret { min-width: 0; }
+.wt-diskret th .katex { font-size: 1.05em; }
+.wt-diskret td.markiert, .wt-diskret th.ergebnis-spalte { background: var(--primary-soft); }
+.wt-diskret td.verdeckt .wb { visibility: hidden; }
+.wt-diskret td.verdeckt { background: repeating-linear-gradient(-45deg, var(--surface-2) 0 6px, var(--surface-3) 6px 12px); }
+.wt-diskret th.verdeckt-kopf { opacity: .55; }
+.wt-diskret th, .wt-diskret td { padding: 7px 12px; }
+.wt-hinweise p { margin-top: 8px; font-size: 14.5px; line-height: 1.9; }
+
+/* ---------- Relation ---------- */
+.rel-buehne { max-width: 420px; margin: 0 auto; }
+.rel-svg { width: 100%; height: auto; display: block; }
+.rel-menge { fill: var(--surface-2); stroke: var(--border-strong); stroke-width: 2; }
+.rel-name { font-family: "KaTeX_Math", serif; font-style: italic; font-size: 20px; fill: var(--text-2); }
+.rel-el { font-family: "KaTeX_Main", var(--font); font-size: 19px; fill: var(--text); }
+.rel-punkt { fill: var(--text-2); }
+.rel-ring { fill: none; stroke: transparent; stroke-width: 2.5; }
+.rel-ring.fehler { stroke: var(--danger-strong); fill: color-mix(in srgb, var(--danger-strong) 15%, transparent); }
+.rel-pfeil { stroke: var(--plot-1); stroke-width: 2.2; }
+.rel-pfeil.fehler { stroke: var(--danger-strong); stroke-width: 3; }
+.rel-svg .pfeilspitze { fill: var(--plot-1); }
+.rel-svg .rel-spitze-fehler { fill: var(--danger-strong); }
+.rel-eigenschaften { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+.rel-chip[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent); }
+.rel-chip.ja { color: var(--success); }
+.rel-chip.nein { color: var(--danger); }
+
+/* ---------- Pascal ---------- */
+.pascal-buehne { display: flex; justify-content: center; }
+.pascal-svg { width: 100%; height: auto; display: block; user-select: none; }
+.pascal-zelle rect { fill: var(--surface-2); stroke: var(--border-strong); stroke-width: 1.2; }
+.pascal-zelle text { font-family: "KaTeX_Main", var(--font); font-size: 15px; fill: var(--text); pointer-events: none; }
+.pascal-svg.klickbar .pascal-zelle { cursor: pointer; }
+.pascal-zelle.markiert rect { stroke: var(--plot-1); stroke-width: 2.2; }
+.pascal-zelle.eltern rect { fill: color-mix(in srgb, var(--plot-3) 30%, var(--surface)); stroke: var(--plot-3); }
+.pascal-zelle.aktiv rect { fill: color-mix(in srgb, var(--plot-2) 35%, var(--surface)); stroke: var(--plot-2); stroke-width: 2.5; }
+.pascal-linie { stroke: var(--plot-3); stroke-width: 2.5; stroke-dasharray: 4 3; }
+.pascal-zeile { font-family: var(--font); font-size: 11px; fill: var(--text-3); }
+.pascal-info { text-align: center; margin-top: 8px; min-height: 2.6em; font-size: 15px; color: var(--text-2); }
+.pascal-info p { margin-top: 4px; }
+
+/* ---------- Euklid ---------- */
+.eu-tabelle td, .eu-tabelle th { white-space: nowrap; }
+.eu-tabelle tr.neu td { animation: einblenden .35s; }
+.eu-nr { color: var(--text-3); font-variant-numeric: tabular-nums; }
+.eu-null { color: var(--success); font-weight: 700; }
+.katex .eu-b { color: var(--plot-1); }
+.katex .eu-r { color: var(--plot-2); font-weight: 700; }
+.eu-ggt { margin-top: 10px; }
+.eu-rueck { margin-top: 8px; padding: 8px 12px; border: 1px dashed var(--border-strong); border-radius: 10px; overflow-x: auto; }
+.eu-rueck-titel { font-size: 12.5px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; }
+.eu-rueck-zeile.neu { animation: einblenden .35s; }
+
+/* ---------- Modulo-Uhr ---------- */
+.mod-buehne { max-width: 340px; margin: 0 auto; }
+.mod-svg { width: 100%; height: auto; display: block; }
+.mod-kreis { fill: var(--surface-2); stroke: var(--border-strong); stroke-width: 2; }
+.mod-pos { fill: var(--text-3); }
+.mod-pos.start { fill: var(--plot-1); }
+.mod-pos.ergebnis { fill: var(--plot-3); stroke: var(--surface); stroke-width: 2.5; }
+.mod-zahl { font-family: "KaTeX_Main", var(--font); fill: var(--text-2); }
+.mod-zahl.ergebnis { fill: var(--plot-3); font-weight: 700; }
+.mod-sprung { fill: none; stroke: var(--plot-2); stroke-width: 2.6; stroke-linecap: round; }
+.mod-svg .mod-spitze { fill: var(--plot-2); }
+.mod-sprung-lbl { font-family: var(--font); font-weight: 700; font-size: 15px; fill: var(--plot-2); }
+.mod-sprung-nr { font-family: var(--font); font-size: 11px; font-weight: 700; fill: var(--text-2); paint-order: stroke; stroke: var(--surface-2); stroke-width: 3px; }
+.mod-formel { text-align: center; margin-top: 6px; overflow-x: auto; }
+.mod-rechnung { font-size: 14px; color: var(--text-2); }
+.mod-liste { display: grid; gap: 2px; justify-items: center; margin-top: 6px; font-size: 14.5px; overflow-x: auto; }
+
+/* ---------- Dominos ---------- */
+.domino-buehne { max-width: 560px; margin: 0 auto; }
+.domino-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.domino-boden { stroke: var(--text-3); stroke-width: 2.5; }
+.domino { transform-box: fill-box; transform-origin: right bottom; }
+.domino rect { fill: var(--surface-3); stroke: var(--text-2); stroke-width: 2; }
+.domino circle { fill: var(--text-2); }
+.domino line { stroke: var(--text-3); stroke-width: 1.5; }
+.domino.fokus rect { fill: var(--primary-soft-2); stroke: var(--primary); }
+.domino.an rect { fill: color-mix(in srgb, var(--plot-2) 30%, var(--surface)); stroke: var(--plot-2); }
+.domino-nr { font-family: "KaTeX_Main", var(--font); font-size: 15px; fill: var(--text-2); }
+.domino-nr.fokus { fill: var(--primary-text); font-style: italic; font-weight: 700; }
+.domino-lbl { font-family: var(--font); font-size: 17px; font-weight: 800; fill: var(--plot-2); }
+.domino-lbl.is { fill: var(--plot-1); }
+.domino-lbl.klein { font-size: 13px; font-weight: 600; fill: var(--text-2); }
+.domino-aussage { text-align: center; margin-bottom: 8px; font-size: 15px; }
+
+/* ---------- Folge ---------- */
+.plot .folge-schlauch { fill: color-mix(in srgb, var(--plot-3) 16%, transparent); }
+.plot .folge-schlauch-rand { stroke: var(--plot-3); stroke-width: 1.4; stroke-dasharray: 6 4; }
+.plot .folge-grenze { stroke: var(--plot-3); stroke-width: 2; }
+.plot .folge-schranke { stroke: var(--text-3); stroke-width: 1.3; stroke-dasharray: 2 4; }
+.plot .folge-n0 { stroke: var(--plot-4); stroke-width: 2; stroke-dasharray: 5 4; }
+.plot .folge-pkt { fill: var(--plot-1); }
+.plot .folge-pkt.drin { fill: var(--plot-3); }
+.plot .folge-pkt.draussen { fill: var(--plot-2); }
+.plot-etikett.folge-n0-lbl { color: var(--plot-4); }
+.folge-info { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; }
+
+@media (max-width: 600px) {
+  .venn-el { font-size: 19px; }
+  .wt-diskret th, .wt-diskret td { padding: 6px 7px; }
+}
+
+/* Breite Inhalte scrollen in sich, statt die Karte zu verbreitern (Beitrag 0 zur Mindestbreite). */
+.dk-scroll, .eu-rueck, .mod-formel, .mod-liste, .venn-info .katex-display { overflow-x: auto; width: 0; min-width: 100%; }

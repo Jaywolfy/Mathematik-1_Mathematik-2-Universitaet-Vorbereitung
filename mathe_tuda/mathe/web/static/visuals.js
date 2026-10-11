@@ -4,12 +4,26 @@ import { h, inline } from "./util.js";
 
 const MODUL = {
   zahlenstrahl: "vis_basis", bruch: "vis_basis", rechnung: "vis_basis", funktionsgraph: "vis_basis", parabel: "vis_basis",
+  // vis_diskret.js
+  venn: "vis_diskret", wahrheitstabelle: "vis_diskret", relation_graph: "vis_diskret", pascal: "vis_diskret",
+  euklid: "vis_diskret", modulo_uhr: "vis_diskret", induktion_domino: "vis_diskret", folge: "vis_diskret",
+  // vis_funktionen.js, vis_linalg.js
+  einheitskreis: "vis_funktionen", exp_log: "vis_funktionen", tangente: "vis_funktionen", riemann: "vis_funktionen",
+  vektoren2d: "vis_linalg", matrix_mult: "vis_linalg", gauss: "vis_linalg", komplexe_ebene: "vis_linalg",
 };
 export const VISUAL_TYPEN = Object.keys(MODUL);
 
 const TITEL = {
   zahlenstrahl: "📏 Zahlenstrahl", bruch: "🥧 Bruch", rechnung: "⚖️ Die Waage", funktionsgraph: "📈 Funktionsgraph",
   parabel: "⌒ Parabel",
+  // vis_diskret.js
+  venn: "🔵 Mengendiagramm", wahrheitstabelle: "🔢 Wahrheitstabelle", relation_graph: "➡️ Zuordnung",
+  pascal: "🔺 Pascalsches Dreieck", euklid: "➗ Euklidischer Algorithmus", modulo_uhr: "🕒 Modulo-Uhr",
+  induktion_domino: "⛓️ Induktion als Dominokette", folge: "📉 Folge",
+  // vis_funktionen.js, vis_linalg.js
+  einheitskreis: "⭕ Einheitskreis", exp_log: "📈 Exponential & Logarithmus", tangente: "📐 Sekante & Tangente",
+  riemann: "▥ Riemann-Summe", vektoren2d: "↗️ Vektoren", matrix_mult: "✖️ Matrixmultiplikation",
+  gauss: "🧮 Gauß-Verfahren", komplexe_ebene: "🌀 Komplexe Zahlenebene",
 };
 
 const geladen = new Map();

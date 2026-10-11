@@ -190,15 +190,26 @@ Ein Typ darf erst benutzt werden, wenn er in `visuals.VISUAL_FERTIG` steht (Fron
 | `rechnung` | `links`, `rechts`, `schritte[{op: "-5"\|"+2x"\|":3"\|"*2", text}]` | `variable` | Gleichung als Waage (lineare Terme), Python rechnet jeden Zustand |
 | `funktionsgraph` | `funktionen[{term, label?, farbe?: 1-4}]` | `parameter[{name, wert, von, bis, schritt, tex?}]`, `x`, `y`, `wertetabelle[x…]`, `nullstellen`, `scheitel`, `punkte[{x, y, label?}]`, `gleiche_achsen` | Graphen mit Reglern, Zoom/Verschieben; Nullstellen/Scheitel/Wertetabelle exakt für die Startwerte |
 | `parabel` | – | `a`, `b`, `c`, `form: allgemein\|scheitel`, `regler`, `x`, `y` | Parabel mit Reglern, Scheitel, Symmetrieachse |
-| `einheitskreis` | – | `winkel`, `regler`, `zeige`, `bogenmass` | geplant |
-| `exp_log` | – | `basis`, `umkehr`, `regler` | geplant |
-| `venn` | `mengen[{name, elemente}]` | `universum`, `markiert`, `interaktiv` | geplant |
-| `relation_graph` | `links`, `rechts`, `pfeile` | `namen` | geplant (injektiv/surjektiv) |
-| `wahrheitstabelle` | `variablen`, `ausdruecke` (¬ ∧ ∨ ⇒ ⇔ ⊕) | `darstellung`, `markiert` | Python berechnet `_zeilen`, `_kopf` |
-| `induktion_domino`, `beweisbaum` | – / `wurzel` | | geplant |
-| `binaer`, `modulo_uhr`, `euklid`, `pascal`, `kombi_baum`, `urne` | siehe `visuals.SCHEMA` | | geplant; `euklid`/`pascal` rechnen schon in Python |
-| `vektoren2d`, `vektoren3d`, `gerade_ebene`, `matrix_mult`, `gauss`, `lgs_geometrie`, `transformation2d` | siehe `visuals.SCHEMA` | | geplant; `matrix_mult`/`gauss` rechnen schon in Python |
-| `folge`, `reihe`, `stetigkeit`, `tangente`, `ableitung_graph`, `kurvendiskussion`, `riemann`, `flaeche_integral`, `landau`, `komplexe_ebene`, `graph`, `baum` | siehe `visuals.SCHEMA` | | geplant |
+| `einheitskreis` | – | `winkel` (Grad, Standard 30), `regler`, `zeige: [sin, cos, tan, kurve]`, `bogenmass` (Standard true) | Punkt (cos α, sin α) ziehbar/Regler/Tasten, Projektionen, tan an x = 1, sin-/cos-Kurve daneben; `_tabelle`: exakte Werte für alle Vielfachen von 15° |
+| `exp_log` | – | `basis` (Standard 2, auch `"e"`, `"1/2"`), `umkehr` (Standard true), `regler`, `x`, `y` | $a^x$ und $\log_a x$ mit Spiegelachse $y = x$, Punkte (0\|1), (1\|a), (1\|0), (a\|1), gespiegeltes Punktpaar P/P'; Regler für die Basis |
+| `tangente` | `term`, `x0` | `h` (Standard 1), `ableitung` (Term, empfohlen), `sekante` (Standard true), `x`, `y` | Sekante durch x0 und x0 + h, Steigungsdreieck, Tangente, Regler x0/h, Knopf „h → 0“; `ableitung` wird per Differenzenquotient-Stichprobe gegengeprüft (Abweichung = Schemafehler); exakt: `_y0_tex`, `_m_tex`, `_m_sek_tex`, `_tangente_tex` |
+| `riemann` | `term`, `von`, `bis` | `n` (Standard 4), `n_max` (Standard 50), `art: links\|rechts\|mitte\|unter\|ober`, `stammfunktion` (Term), `x`, `y` | Rechtecke, Regler n, Umschalter für die Art; `_summe` exakt für Startwerte; mit `stammfunktion` (gegengeprüft: F' = f) exakter Integralwert `_integral` |
+| `vektoren2d` | `vektoren[{x, y, label?, farbe?: 1-4}]` (1–4) | `zeige: [summe, differenz, kette, vielfaches, norm, skalarprodukt]`, `faktor` (λ, Standard 2), `interaktiv` (Spitzen ziehbar, Tab + Pfeiltasten), `x`, `y` | Pfeile, Parallelogramm/Pfeilkette, λ·a mit Regler, Normen und Skalarprodukt exakt (auch nach dem Ziehen, Raster 0,5) |
+| `matrix_mult` | `a`, `b` (Listen von Zeilen) | – | Falk-Schema, Zeile·Spalte Schritt für Schritt hervorgehoben, Einträge von C anklickbar; `_summanden`, `_rechnungen`, `_c` exakt |
+| `gauss` | `matrix` | `rechts` (Vektor → erweiterte Matrix), `reduziert` (Standard true) | Zeilenumformungen Schritt für Schritt (Vor/Zurück), Pivot markiert, geänderte Zeilen hervorgehoben; am Ende Rang und `_loesung_tex` |
+| `komplexe_ebene` | `z: [Re, Im]` | `w: [Re, Im]`, `op: keine\|konjugiert\|plus\|minus\|mal\|geteilt` (Standard mal mit w, sonst keine), `interaktiv`, `x`, `y` | Zeiger, Betrag/Argument mit Winkelbögen, Spiegelung, Parallelogramm, Drehstreckung; exakte Polarform (`_z`, `_w`, `_ergebnis`: `tex`, `betrag_tex`, `arg_tex`, `polar_tex`), Einträge wie `"sqrt(3)"` erlaubt |
+| `venn` | `mengen[{name, elemente}]` (2–3 Mengen, Elemente Zahlen/kurze Texte) | `universum` (Liste, enthält alle Elemente), `universum_name` (Standard „G“), `markiert` (Mengenausdruck: `∩ ∪ \ ` bzw. `\cap \cup \setminus`, Komplement als `Komplement A`, `A'`, `A^c`, `\overline{A}`, Klammern), `interaktiv` (Standard true) | Elemente in ihren Regionen; markierte Fläche farbig; Fläche antippen/Tab + Pfeiltasten zeigt Formel und Elemente. Python: `_regionen[{maske, elemente, tex, elemente_tex}]`, `_markiert` (Masken), `_markiert_tex`, `_markiert_elemente` |
+| `relation_graph` | `links`, `rechts` (je 1–10 Elemente), `pfeile[[l, r], …]` | `namen` (Standard `["A", "B"]`), `zeige` (Teilmenge von `abbildung, injektiv, surjektiv, bijektiv`), `aufdecken` (Ergebnisse erst nach „Auflösen“) | Pfeildiagramm; Eigenschaft antippen markiert Verstöße rot mit kurzer Erklärung. Python: `_abbildung` (jedes Element links genau ein Pfeil), `_injektiv`/`_surjektiv`/`_bijektiv` (`null`, wenn keine Abbildung), `_verstoesse[{eigenschaft, seite, element, pfeile, text}]` |
+| `wahrheitstabelle` | `variablen` (1–4), `ausdruecke` (¬ ∧ ∨ ⇒ ⇔ ⊕; auch `! & \| -> <-> and or not xor`) | `darstellung: wf` (Standard, w/f wie im Vorkurs) `\| 01`, `markiert` (Ausdrücke als Text oder Index ab 0), `schrittweise` (Standard true: Spalten einzeln aufdecken) | Python: `_kopf`, `_zeilen[{werte, ergebnisse}]`, `_art` (tautologie/kontradiktion/erfuellbar je Spalte), `_gleich` (Paare gleicher Spalten = äquivalent), `_markiert` |
+| `induktion_domino` | – | `anzahl` (3–12, Standard 8), `anfang` (n₀, Standard 1), `aussage` (Markup), `text_anfang`, `text_schritt` (Markup) | Dominokette: Knöpfe Induktionsanfang (erster Stein fällt, IA), Induktionsschritt (k stößt k+1 um, IS), alle fallen; ohne Animation bei reduzierter Bewegung |
+| `beweisbaum` | `wurzel` | | geplant |
+| `modulo_uhr` | `n` (2–36) | `start` (a), genau eins von `plus` (b: Sprung a → a+b), `mal` (b Sprünge der Weite a ab 0), `potenz` (k: a, a², …, aᵏ mod n); `interaktiv` (Regler für n, a, b) | Uhr mit n Positionen, Sprünge als Bögen/Sehnen (animiert), Ergebnis grün. Python: `_ergebnis`, `_spruenge[[von, bis, x]]`, `_tex` (z. B. `7 + 8 = 15 \equiv 3 \pmod{12}`), `_rechnung` (Division mit Rest), `_potenzen[{exp, wert, tex}]` |
+| `euklid` | `a`, `b` (positive ganze Zahlen) | `erweitert` (Rückwärtseinsetzen) | Tabelle der Divisionen mit Rest Schritt für Schritt (Vor/Zurück/Alles), dann ggT, dann Rückwärtseinsetzen mit Probe. Python: `_schritte[[a, b, q, r]]`, `_ggt`, `_rueckwaerts[{tex, text}]`, `_bezout{s, t, tex}` |
+| `pascal` | – | `zeilen` (1–16, Standard 7), `markiert[[n, k], …]` (Zeile und Stelle ab 0), `interaktiv` (Standard true) | Dreieck; gewählte Zelle zeigt die beiden Zahlen darüber und $\binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k}$. Python: `_zeilen`, `_markiert[{n, k, wert, tex}]` |
+| `folge` | `term` (in `n`) **oder** `start` + `rekursion` (in `a` = Vorgänger aₙ und `n`; ergibt aₙ₊₁) | `n_von` (Standard 1; bei Rekursion Index von `start`), `n_bis` (Standard n_von+19, höchstens 200 Glieder), `grenzwert`, `epsilon` (braucht `grenzwert`), `interaktiv` (ε-Regler, Standard true), `monotonie`, `schranken`, `y` | Punkte (n, aₙ), Grenzwert-Linie, ε-Schlauch, senkrechte Linie bei n₀. Python: `_werte`, `_tex`, `_n0` (kleinstes n₀, ab dem alle Glieder im Schlauch liegen; exakt mit Brüchen, nachgeprüft bis `_n0_bis` = 10 000; `null`, wenn es keins gibt), `_monotonie`/`_schranken` (nur für den gezeigten Bereich) |
+| `binaer`, `kombi_baum`, `urne` | siehe `visuals.SCHEMA` | | geplant |
+| `vektoren3d`, `gerade_ebene`, `lgs_geometrie`, `transformation2d` | siehe `visuals.SCHEMA` | | geplant |
+| `reihe`, `stetigkeit`, `ableitung_graph`, `kurvendiskussion`, `flaeche_integral`, `landau`, `graph`, `baum` | siehe `visuals.SCHEMA` | | geplant |
 
 Die Felder aller Typen stehen maschinenlesbar in `visuals.SCHEMA`. Die Demo-Seite `#/demo/visuals`
 zeigt jeden fertigen Typ mit den Beispieldaten aus `mathe/demo.py`. Mit jeder Welle wandern Typen
@@ -222,6 +233,18 @@ von „geplant“ nach `VISUAL_FERTIG`, und diese Tabelle wird ergänzt.
 `|x|`; `sqrt √ abs sin cos tan ln log2 log10 exp`; `pi π e` (Konstante e!); implizites Mal (`2x`,
 `3(x+1)`, `2pi r`); `-x^2 = -(x^2)`; `^` rechtsassoziativ; `log` ohne Basis ist ein Lesefehler mit Hinweis.
 Kein `eval`: Tokenizer + rekursiver Abstieg → AST aus Tupeln; Grenzen für Länge, Tiefe, Exponent.
+
+**Formchecks** (`form=` bei `term`/`vereinfache`, `formen=[…]` je Lücke bei `luecke`, mehrere mit `|`):
+`ausmultipliziert`, `faktorisiert`, `ohne_klammern`, `gekuerzt` (Zahlbruch bzw. Polynombruch),
+`wurzel_vereinfacht` (kein Quadratfaktor unter √, keine ganz ausrechenbare Wurzel, keine Wurzel im Nenner),
+`potenz` (jede Basis einmal pro Produkt, keine Potenz einer Potenz), `vereinfacht` (alles davor außer
+ausmultipliziert/faktorisiert, Zahlen zusammengerechnet, nicht deutlich länger als die Lösung).
+`ohne_gleiche(loesung, fehler)` filtert auch Terme und Lücken-Listen.
+
+**`:::rechnung`-Zeilen:** `!` = absichtlich falscher Schritt („So nicht!“); `#` = Widerspruch ohne
+Variable (z. B. `1 = 5`), daraus folgt $\mathbb{L} = \emptyset$; davor stehende Gleichungen werden dann
+auf „keine Lösung“ geprüft. Endet eine Rechnung mit `v = Term` (Term mit anderen Variablen), gilt sie
+als Formelumstellung: jede Zeile wird nach Einsetzen von `v` auf Äquivalenz geprüft.
 
 **Komma-Regel** (Mengen, Lösungsmengen, Intervalle): Enthält die Eingabe `;`, trennt `;` und `,` ist
 Dezimalkomma. Sonst trennt `,` und Dezimalzahlen brauchen `.`. Die Vorschau zeigt die Deutung.

@@ -378,7 +378,7 @@ k.erklaerung("Parabeln verschieben und strecken", r"""
     :::rechnung $f(x) = 2(x - 1)^2 - 8$ an der Stelle $x = 3$
     2 \cdot (3 - 1)^2 - 8 || Scheitelpunkt $S(1 \mid -8)$; $x = 3$ einsetzen
     = 2 \cdot 4 - 8 || erst die Klammer, dann quadrieren
-    = 0 || also ist $3$ eine Nullstelle
+    = 0 || also ist $3$ eine Nullstelle: $f(3) = 0$
     :::
 
     :::visual funktionsgraph
@@ -463,7 +463,14 @@ def _zeilen(*paare):
 
 def _gerade_text(m, b):
     """Term-Text m*x + b für die Musterlösung und Fehlwerte."""
-    return mathlib.Polynom({1: F(m), 0: F(b)}).term()
+    m, b = F(m), F(b)
+    if m.denominator == 1:
+        vorne = "x" if m == 1 else "-x" if m == -1 else f"{m.numerator}x"
+    else:
+        vorne = ("-" if m < 0 else "") + f"({abs(m.numerator)}/{m.denominator})x"
+    if b == 0:
+        return vorne
+    return vorne + (" + " if b > 0 else " - ") + mathlib.text(abs(b))
 
 
 def _term_fehler(loesung, fehler):
@@ -490,12 +497,15 @@ def gerade_durch_punkte(rng):
             break
     y1, y2 = m * x1 + b, m * x2 + b
     loesung = _gerade_text(m, b)
-    zeilen = [(f"\\frac{{{tex(y2)} - {tk(y1)}}}{{{x2} - {tk(x1)}}} = \\frac{{{tex(y2 - y1)}}}{{{x2 - x1}}}"
-               + ("" if (y2 - y1) == m * (x2 - x1) and (x2 - x1) == 1 else f" = {tex(m)}"),
-               "Steigung: $y$-Unterschied durch $x$-Unterschied"),
+    kette = f"\\frac{{{tex(y2)} - {tk(y1)}}}{{{x2} - {tk(x1)}}}"
+    if (y2 - y1).denominator == 1 and x2 - x1 != 1 and (y2 - y1) % (x2 - x1) != 0 or (m.denominator == 1 and x2 - x1 != 1):
+        kette += f" = \\frac{{{tex(y2 - y1)}}}{{{x2 - x1}}}"
+    kette += f" = {tex(m)}"
+    zeilen = [(kette, "Steigung: $y$-Unterschied durch $x$-Unterschied"),
               (f"{tex(y1)} = {tex(m)} \\cdot {tk(x1)} + b", f"Punkt $({x1} \\mid {tex(y1)})$ einsetzen"),
               (f"{tex(y1)} = {tex(m * x1)} + b", "ausrechnen"),
-              (f"b = {tex(b)}", f"auf beiden Seiten ${tex(m * x1)}$ abziehen")]
+              (f"b = {tex(b)}", f"auf beiden Seiten ${tex(m * x1)}$ abziehen" if m * x1 > 0
+               else f"auf beiden Seiten ${tex(-m * x1)}$ addieren")]
     fehler = [(_gerade_text(b, m) if b != m else None, "Du hast Steigung und $y$-Achsenabschnitt vertauscht: $m$ steht vor dem $x$."),
               (_gerade_text(-m, b), "Vorzeichen der Steigung: Rechne bei beiden Differenzen zuerst den zweiten Punkt."),
               (_gerade_text(1 / m, b) if abs(m) != 1 else None, "Die Steigung ist der Kehrwert: $y$-Unterschied in den Zähler."),
@@ -591,7 +601,7 @@ k.rechenweg_aufgabe(r"""
 
     Gegeben ist die Funktion
     $$f: \mathbb{R} \to \mathbb{R},\quad x \mapsto 2(x - 1)^2 - 8.$$
-    Bestimmen Sie den Scheitelpunkt, den Schnittpunkt mit der $y$-Achse und alle Nullstellen.
+    Bestimmen Sie den Scheitelpunkt, den Schnittpunkt mit der $y$-Achse und alle [[Nullstellen|Nullstelle]].
     Geben Sie alle Zwischenschritte an.
     """,
     [{"typ": "zahl", "frage": "Welche $x$-Koordinate hat der Scheitelpunkt?", "loesung": 1,

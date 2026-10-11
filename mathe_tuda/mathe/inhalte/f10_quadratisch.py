@@ -197,8 +197,8 @@ k.erklaerung("Einfache Fälle ohne Formel", r"""
 
     !! Ein Produkt ist genau dann $0$, wenn mindestens ein Faktor $0$ ist.
 
-    Das ist der [[Satz vom Nullprodukt]]. Fehlt die Zahl ohne $x$, klammerst du $x$
-    aus und nutzt diesen Satz.
+    Das ist der [[Satz vom Nullprodukt]]. Fehlt die Zahl ohne $x$, hilft [[Ausklammern]]
+    von $x$ und danach dieser Satz.
 
     :::rechnung $x^2 - 5x = 0$ lösen
     x^2 - 5x = 0 || Aufgabe: keine Zahl ohne $x$
@@ -262,7 +262,7 @@ k.erklaerung("Quadratische Ergänzung und die Lösungsformeln", r"""
     ## Ein Quadrat ergänzen
 
     Bei $x^2 + 6x + 5 = 0$ hilft Ausklammern nicht. Die Idee: Mach aus $x^2 + 6x$
-    ein vollständiges Quadrat. Die binomische Formel $(x + 3)^2 = x^2 + 6x + 9$
+    ein vollständiges Quadrat. Die [[binomische Formel|binomische Formeln]] $(x + 3)^2 = x^2 + 6x + 9$
     zeigt: Es fehlt nur die $9$. Du addierst sie und ziehst sie sofort wieder ab.
     Das heißt [[quadratische Ergänzung]].
 
@@ -425,7 +425,7 @@ k.zahl("Berechne die Diskriminante $D = b^2 - 4ac$ von $x^2 + 4x + 5 = 0$.", 4 *
        = -4 || negativ: keine Lösung
        :::
        """,
-       typische_fehler=[(36, "Du hast $+4ac$ gerechnet. In der Formel steht $b^2 \\mathbin{\\hl{-}} 4ac$."),
+       typische_fehler=[(36, "Du hast $+4ac$ gerechnet. In der Formel steht $b^2 \\hl{-} 4ac$."),
                         (-12, "$4^2 = 16$, nicht $8$. Quadrieren heißt mit sich selbst malnehmen.")])
 
 k.zuordnen("Ordne jeder Gleichung die Anzahl ihrer reellen Lösungen zu.",
@@ -464,7 +464,7 @@ k.erklaerung("Der Satz von Vieta", r"""
     Die Lösungen von $x^2 - 5x + 6 = 0$ sind also $2$ und $3$.
 
     :::achtung Vorzeichen in der Klammer
-    Die Lösung $2$ gehört zum Faktor $(x \mathbin{\hl{-}} 2)$, nicht zu $(x + 2)$.
+    Die Lösung $2$ gehört zum Faktor $(x \hl{-} 2)$, nicht zu $(x + 2)$.
     Prüfe: Bei $x = 2$ muss die Klammer $0$ werden.
     :::
 
@@ -591,6 +591,10 @@ def anzahl_loesungen(rng):
     fehler = [(n_falsch, f"Achte auf das Minus in $b^2 - 4ac$: Du hast vermutlich $b^2 + 4ac = {falsch_d}$ gerechnet.")]
     if n == 1:
         fehler.append((2, "$D = 0$ heißt: Plus und Minus der Wurzel geben dieselbe Zahl. Es ist nur **eine** Lösung."))
+    elif n == 2:
+        fehler.append((1, f"$D = {d}$ ist positiv. Dann liefern Plus und Minus der Wurzel **zwei** verschiedene Lösungen."))
+    else:
+        fehler.append((2, f"$D = {d}$ ist negativ. Aus einer negativen Zahl gibt es keine reelle Wurzel, also **keine** Lösung."))
     return {
         "frage": f"Wie viele reelle Lösungen hat ${gl.tex()} = 0$? Gib die Anzahl an.",
         "loesung": n,
