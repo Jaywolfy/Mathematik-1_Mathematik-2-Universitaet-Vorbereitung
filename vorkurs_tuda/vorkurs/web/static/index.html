@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python-Vorkurs · Lernquiz</title>
+<meta name="description" content="Interaktives Lernquiz zum Programmiervorkurs der TU Darmstadt">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script>
+  // Theme sofort setzen (kein Aufblitzen). Reihenfolge: ?theme=… > gespeichert > System.
+  (function () {
+    var t = "auto";
+    try { t = JSON.parse(localStorage.getItem("theme")) || "auto"; } catch (e) {}
+    var m = /[?&]theme=(\w+)/.exec(location.search);
+    if (m) t = { dark: "dunkel", light: "hell" }[m[1]] || m[1];
+    var dunkel = t === "dunkel" || (t === "auto" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", dunkel ? "dark" : "light");
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+<header class="kopf">
+  <button class="icon-btn menue-btn" id="menue-btn" type="button" aria-label="Kapitelmenü öffnen" aria-controls="seitenleiste" aria-expanded="false">☰</button>
+  <a class="marke" href="#/" aria-label="Zur Übersicht">
+    <span class="marke-logo" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5-5 5"/><path d="M13 17h6"/></svg></span>
+    <span class="marke-text"><strong>Python-Vorkurs</strong><span>TU Darmstadt · Lernquiz 2026</span></span>
+  </a>
+  <div class="kopf-mitte">
+    <div class="level-box" title="Dein Level">
+      <span class="xp-pill" id="xp-pill" aria-label="Erfahrungspunkte">⭐ <span id="xp-zahl">0</span> XP</span>
+      <div class="level-info">
+        <div class="level-name"><span id="level-name">Level 1</span><small id="level-xp"></small></div>
+        <div class="balken" id="level-balken" role="progressbar" aria-label="Fortschritt bis zum nächsten Level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="kopf-rechts">
+    <span class="serie aus" id="serie" title="Tagesserie: an so vielen Tagen hintereinander geübt">🔥 <span id="serie-zahl">0</span></span>
+    <button class="icon-btn" id="theme-btn" type="button" aria-label="Farbschema wechseln" title="Farbschema">🖥️</button>
+    <button class="icon-btn" id="einst-btn" type="button" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
+    <button class="btn btn-sm" id="beenden-btn" type="button" title="Lernquiz beenden"><span aria-hidden="true">⏻</span><span class="btn-text">Beenden</span></button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="seitenleiste" id="seitenleiste" aria-label="Navigation und Kapitel"></nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+
+<noscript><p style="padding:100px 20px;text-align:center">Für das Lernquiz muss JavaScript im Browser aktiviert sein.</p></noscript>
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>
