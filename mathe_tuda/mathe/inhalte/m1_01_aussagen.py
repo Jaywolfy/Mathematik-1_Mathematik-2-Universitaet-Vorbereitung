@@ -99,6 +99,16 @@ assert _aequivalent("P ⇔ Q", "(P ⇒ Q) ∧ (Q ⇒ P)")                       
 k.erklaerung("Aussagen und Aussageformen", r"""
     ## Definition 1.1: Aussage
 
+    Mathematik leitet aus Bekanntem neue Information her. Das Skript beginnt mit diesem Beispiel:
+
+    :::rechnung Der Einstieg im Skript
+    A: \text{ Der Einheitskreis hat Radius 1.} || bekannt
+    B: \text{ Hat ein Kreis Radius 1, so beträgt seine Fläche } \pi. || bekannt
+    C: \text{ Die Fläche des Einheitskreises beträgt } \pi. || daraus geschlossen
+    :::
+
+    $A$, $B$ und $C$ sind jeweils [[Aussagen|Aussage]]. Was das genau heißt, klärt die nächste Definition.
+
     :::analogie 🧾 Das Behördenformular
     Ein Formular fragt „Wohnsitz in Hessen? Ja / Nein“. Darauf gibt es genau eine richtige
     Antwort, auch wenn der Sachbearbeiter sie noch nicht kennt. „Füllen Sie das Formular aus!“
@@ -393,7 +403,7 @@ k.mc("Welche Aussage ist nach Satz 1.12 äquivalent zu „Wenn jemand im Saal An
      tipps=["Satz 1.12: $(P \\Rightarrow Q) \\Leftrightarrow (\\neg Q \\Rightarrow \\neg P)$.",
             "Negiere beide Teile **und** tausche die Richtung."],
      fehler={"Wenn niemand im Saal Anna heißt, dann heißt niemand in Darmstadt Anna.":
-             "Das ist $\\neg P \\Rightarrow \\neg Q$. Du hast negiert, aber die Richtung nicht getauscht. Es gibt sicher eine Anna in Darmstadt außerhalb des Saals.",
+             "Das ist $\\neg P \\Rightarrow \\neg Q$. Du hast negiert, aber die Richtung nicht getauscht. Es kann eine Anna in Darmstadt geben, ohne dass eine im Saal sitzt (Beispiel 1.13).",
              "Wenn jemand in Darmstadt Anna heißt, dann heißt jemand im Saal Anna.":
              "Das ist die Umkehrung $Q \\Rightarrow P$. Sie ist nicht äquivalent zu $P \\Rightarrow Q$."})
 

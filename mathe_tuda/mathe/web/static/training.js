@@ -11,7 +11,7 @@ const MODI = {
   thema: { icon: "⚙️", titel: "Endlos üben", text: "Immer neue Aufgaben mit neuen Zahlen – so oft du willst." },
   klausur: { icon: "🎓", titel: "Probeklausur", text: "Aufgaben wie in der echten Klausur: Rechnen, Mehrfachauswahl und Beweise auf Papier. Mit Zeitlimit, Punkten und Note. Feedback gibt es erst am Ende." },
 };
-const MODULE = [["mathe1", "Mathe 1"], ["mathe2", "Mathe 2"], ["vorkurs", "Vorkurs"], ["fundament", "Fundament (Schulstoff)"]];
+const MODULE = [["vorlesung", "Vorlesungen"], ["mathe1", "Mathe 1"], ["mathe2", "Mathe 2"], ["vorkurs", "Vorkurs"], ["fundament", "Fundament (Schulstoff)"]];
 
 export async function trainingAnsicht(main, modus, extra) {
   const m = MODI[modus];

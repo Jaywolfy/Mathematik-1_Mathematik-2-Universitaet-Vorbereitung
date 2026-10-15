@@ -527,7 +527,7 @@ def mengen_ausdruck(rng):
 
 def abzaehlen(rng):
     art = rng.choice(["potenz", "produkt", "hoch", "hoch", "potenz_liste", "produkt_liste"])
-    buchst = ["a", "b", "c", "d", "e", "f"]
+    buchst = ["a", "b", "c", "d", "x", "y"]
     if art == "potenz":
         n = rng.randint(2, 6)
         m = frozenset(rng.sample(range(0, 10), n))
@@ -555,6 +555,8 @@ def abzaehlen(rng):
     if art == "hoch":
         g = rng.randint(2, 4)
         n = rng.randint(0, 5)
+        while (g, n) == (2, 2):          # dort fallen alle typischen Fehler (g*n, n**g) mit dem Wert 4 zusammen
+            n = rng.randint(0, 5)
         a = frozenset(range(g))
         wert = len(list(itertools.product(sorted(a), repeat=n)))
         return {"typ": "zahl", "frage": f"Wie viele Elemente hat ${_tex(a)}^{{{n}}}$ (Definition 1.26)?", "loesung": wert,

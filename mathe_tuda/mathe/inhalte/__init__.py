@@ -14,7 +14,7 @@ from .formelsammlung import FORMELSAMMLUNG  # noqa: F401
 from .glossar import GLOSSAR  # noqa: F401
 
 KEINE_KAPITEL = {"glossar", "formelsammlung", "diagnose"}
-_GRUPPEN = ("f", "v", "m1_", "m2_", "b_", "k_")
+_GRUPPEN = ("vl_", "f", "v", "m1_", "m2_", "b_", "k_")
 
 
 def _sortierschluessel(name):

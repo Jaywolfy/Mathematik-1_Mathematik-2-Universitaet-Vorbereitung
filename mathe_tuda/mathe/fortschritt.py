@@ -46,6 +46,7 @@ ABZEICHEN = [
     {"id": "perfekt", "titel": "Volle Punktzahl", "icon": "🎯", "beschreibung": "Ein Kapitel mit allen Punkten abgeschlossen."},
     {"id": "fundament_komplett", "titel": "Festes Fundament", "icon": "🧱", "beschreibung": "Alle Fundament-Kapitel abgeschlossen."},
     {"id": "vorkurs_komplett", "titel": "Vorkurs geschafft", "icon": "🎒", "beschreibung": "Alle Vorkurs-Kapitel abgeschlossen."},
+    {"id": "vorlesung_komplett", "titel": "Alle Vorlesungen nachgelernt", "icon": "🎓", "beschreibung": "Alle Vorlesungs-Lektionen abgeschlossen."},
     {"id": "mathe1_komplett", "titel": "Mathe 1 geschafft", "icon": "1️⃣", "beschreibung": "Alle Kapitel von Mathe 1 abgeschlossen."},
     {"id": "mathe2_komplett", "titel": "Mathe 2 geschafft", "icon": "2️⃣", "beschreibung": "Alle Kapitel von Mathe 2 abgeschlossen."},
     {"id": "alles_komplett", "titel": "Alles durch", "icon": "👑", "beschreibung": "Alle Kapitel abgeschlossen."},
@@ -458,7 +459,7 @@ def _abzeichen_pruefen(daten):
         erreicht.add("fragen_500")
     if any(e.get("max", 0) > 0 and e.get("best", 0) >= e.get("max", 0) for e in kap.values()):
         erreicht.add("perfekt")
-    for teil in ("fundament", "vorkurs", "mathe1", "mathe2"):
+    for teil in ("fundament", "vorlesung", "vorkurs", "mathe1", "mathe2"):
         slugs = {k.slug for k in engine.kapitel_von_teil(teil)}
         if slugs and slugs <= fertig:
             erreicht.add(f"{teil}_komplett")

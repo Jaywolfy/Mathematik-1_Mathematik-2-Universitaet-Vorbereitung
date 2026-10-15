@@ -1,0 +1,34 @@
+{
+  "exportedAt": "2026-10-15T11:57:34.227Z",
+  "source": "docmost",
+  "version": "0.96.0",
+  "pages": {
+    "Vorlesungs-Dashboard.md": {
+      "pageId": "01a13ae6-4c2b-7f0e-8c66-838b02d8a7ec",
+      "slugId": "QolA441Tbk",
+      "icon": "📊",
+      "position": "Zz5eM",
+      "parentPath": null,
+      "createdAt": "2026-10-14T14:52:13.739Z",
+      "updatedAt": "2026-10-15T11:37:01.521Z"
+    },
+    "Vorlesungs-Dashboard/12.10.2026%20-%20Mathematik%20Vorlesung%201.md": {
+      "pageId": "01a1319f-55e7-76eb-ac67-df2e29d56e56",
+      "slugId": "37PFsqeHrb",
+      "icon": "📝",
+      "position": "a02Ju",
+      "parentPath": "Vorlesungs-Dashboard.md",
+      "createdAt": "2026-10-12T19:38:08.285Z",
+      "updatedAt": "2026-10-15T11:57:30.857Z"
+    },
+    "Vorlesungs-Dashboard/15.10.2026%20-%20Mathematik%20Vorlesung%202.md": {
+      "pageId": "01a13e8c-268e-7873-964a-91a8819993eb",
+      "slugId": "DTtbXFuRr9",
+      "icon": "📝",
+      "position": "a16xb",
+      "parentPath": "Vorlesungs-Dashboard.md",
+      "createdAt": "2026-10-15T07:52:14.734Z",
+      "updatedAt": "2026-10-15T11:35:54.954Z"
+    }
+  }
+}

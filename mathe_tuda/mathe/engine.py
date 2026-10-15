@@ -26,6 +26,8 @@ F = Fraction
 TEILE = [
     {"id": "fundament", "titel": "Fundament – Schulmathe von vorn",
      "untertitel": "Zahlen, Brüche, Terme, Gleichungen, Funktionen, Mathe lesen"},
+    {"id": "vorlesung", "titel": "Vorlesungen – Lernen zur Vorlesung",
+     "untertitel": "Pro Vorlesung eine Lektion nach Folien und Skript von Prof. Disser, von Null erklärt"},
     {"id": "vorkurs", "titel": "Vorkurs – Mathematik-Vorkurs der TU Darmstadt",
      "untertitel": "Mengen, Logik, Beweise, Funktionen, Folgen, Ableiten, Integrieren, Vektoren, Matrizen, komplexe Zahlen"},
     {"id": "mathe1", "titel": "Mathe 1 – Mathematik I für Informatik",

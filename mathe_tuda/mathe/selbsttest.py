@@ -590,16 +590,17 @@ def kapitel_pruefen(kap, bericht, pool):
             bericht.fehler_melden(ort, f"{len(kap.lernziele)} Lernziele (verlangt 3–5)")
         if not kap.warum_text:
             bericht.fehler_melden(ort, "keine Warum-Box (k.warum(...))")
-        if not 4 <= seiten_gesamt <= 10:
-            bericht.fehler_melden(ort, f"{seiten_gesamt} Erklärseiten (verlangt 4–10)")
+        vl = kap.teil == "vorlesung"  # Vorlesungs-Lektionen decken jede Folie ab: weitere Grenzen
+        if not 4 <= seiten_gesamt <= (14 if vl else 10):
+            bericht.fehler_melden(ort, f"{seiten_gesamt} Erklärseiten (verlangt 4–{14 if vl else 10})")
         boxen = [b for e in kap.erklaerungen() for b in markup.alle_bloecke(e.seiten())
                  if b["typ"] == "box" and b["art"] == "achtung"]
         if not boxen:
             bericht.fehler_melden(ort, "keine :::achtung-Box mit typischen Fehlern")
         ueben = [f for f in fragen if f.phase == "ueben"]
         praxis = [f for f in fragen if f.phase == "praxis"]
-        if not 6 <= len(ueben) <= 14:
-            bericht.fehler_melden(ort, f"{len(ueben)} Verständnis-/Rechenfragen (verlangt 6–14)")
+        if not 6 <= len(ueben) <= (18 if vl else 14):
+            bericht.fehler_melden(ort, f"{len(ueben)} Verständnis-/Rechenfragen (verlangt 6–{18 if vl else 14})")
         mit_fe = sum(1 for f in ueben if f.hat_fehlererkennung())
         if mit_fe < 3:
             bericht.fehler_melden(ort, f"nur {mit_fe} Fragen mit Fehlererkennung (verlangt mind. 3)")

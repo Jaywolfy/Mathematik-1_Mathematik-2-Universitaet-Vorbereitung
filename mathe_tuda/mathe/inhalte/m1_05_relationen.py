@@ -118,8 +118,9 @@ k.warum(r"""
 Relationale Datenbanken heißen so, weil jede Tabelle eine Relation ist: eine Menge von
 Tupeln. „Folgt“ bei sozialen Netzwerken, „hängt ab von“ beim Build-System, „ist Unterklasse
 von“ in Java: alles Relationen, alles gerichtete Graphen. Und die vier Eigenschaften
-haben handfeste Folgen. Ein Vergleich zum Sortieren **muss** transitiv sein, sonst wirft
-Javas `Collections.sort` die Ausnahme „Comparison method violates its general contract“.
+haben handfeste Folgen. Ein Vergleich zum Sortieren **sollte** transitiv sein, sonst kann
+Javas `Collections.sort` die Ausnahme „Comparison method violates its general contract“ werfen
+oder falsch sortieren.
 """)
 
 # ── Seite 1: Was ist eine Relation? ───────────────────────────────────────
@@ -309,7 +310,7 @@ Richtung, dann auch in die andere. Für „nicht“ genügt jeweils **ein** [[Ge
 
 :::rechnung $R = \{(1, 1), (1, 2), (2, 1), (2, 2)\}$ auf $X = \{1, 2, 3\}$
 (3, 3) \notin R || nicht reflexiv: Gegenbeispiel $x = 3$
-(1, 2) \in R,\ (2, 1) \in R || das einzige Paar mit $x \neq y$ hat seinen Partner
+(1, 2) \in R,\ (2, 1) \in R || die beiden Paare mit $x \neq y$ sind füreinander das Gegenstück
 (1, 1), (2, 2) \in R || $(x, x)$ ist sein eigener Partner: symmetrisch
 :::
 
@@ -492,7 +493,8 @@ k.erklaerung("Beispiel 1.40: Wenn es nichts zu prüfen gibt", r"""
 ## Die Relation $<$ und die leere Bedingung
 
 **Beispiel 1.40.** $< := \{(n, m) \in \mathbb{N} \times \mathbb{N} \mid n \le m \land n \neq m\}$ ist
-nicht reflexiv (denn $0 < 0$ gilt nicht), nicht symmetrisch, aber transitiv.
+nicht reflexiv (denn $0 < 0$ gilt nicht), nicht symmetrisch (denn $0 < 1$, aber nicht $1 < 0$), aber transitiv
+(aus $n < m$ und $m < p$ folgt $n < p$).
 
 Ist $<$ antisymmetrisch? Die Bedingung lautet: **Falls** $n < m$ und $m < n$, **dann** $n = m$.
 Es gibt aber gar keine Paare mit $n < m$ und $m < n$. Eine Allaussage über die
