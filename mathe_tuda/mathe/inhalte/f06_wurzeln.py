@@ -76,8 +76,8 @@ k.erklaerung("Die Quadratwurzel", r"""
     :::visual funktionsgraph
     {"funktionen": [{"term": "x^2", "label": "x^2", "farbe": 1}, {"term": "sqrt(x)", "label": "\\sqrt{x}", "farbe": 2}],
      "x": [-3, 5], "y": [-2, 6], "gleiche_achsen": true,
-     "punkte": [{"x": 3, "y": 9}, {"x": -3, "y": 9}, {"x": 9, "y": 3}],
-     "unterschrift": "Der Graph von $\\sqrt{x}$ liegt nie unter der $x$-Achse und beginnt bei $0$."}
+     "punkte": [{"x": 2, "y": 4}, {"x": -2, "y": 4}, {"x": 4, "y": 2}],
+     "unterschrift": "$2^2 = (-2)^2 = 4$, aber $\\sqrt{4} = 2$. Der Graph von $\\sqrt{x}$ liegt nie unter der $x$-Achse und beginnt bei $0$."}
     :::
 
     :::rechnung Beispiel vorgerechnet
@@ -243,7 +243,7 @@ k.luecke("Ziehe teilweise die Wurzel.",
          :::
          """,
          typische_fehler=[([25], "Vor die Wurzel kommt $\\sqrt{25} = 5$, nicht $25$."),
-                          ([F(25, 1) / 2], "Du hast $50 : 2$ gerechnet. Vor die Wurzel gehört die Wurzel des Quadratfaktors.")])
+                          ([50], "Vor die Wurzel kommt nur die Wurzel des Quadratfaktors: $50 = 25 \\cdot 2$, also $\\sqrt{25} = 5$.")])
 
 k.luecke("Ziehe die Wurzel so weit wie möglich.",
          "\\sqrt{72} = \\luecke \\sqrt{\\luecke}", [[6], [2]],
@@ -268,8 +268,9 @@ k.erklaerung("n-te Wurzel und Wurzeln als Potenzen", r"""
     die Zahl, die dreimal malgenommen $8$ ergibt: $2$ Zentimeter.
     :::
 
-    Die [[n-te Wurzel]] $\sqrt[n]{a}$ ist die nicht negative Zahl, deren $n$-te
-    Potenz $a$ ergibt. Bei ungeradem $n$ geht es auch für negative $a$.
+    Für $a \ge 0$ ist die [[n-te Wurzel]] $\sqrt[n]{a}$ die nicht negative Zahl, deren
+    $n$-te Potenz $a$ ergibt. Bei ungeradem $n$ schreibt man auch $\sqrt[3]{-8} = -2$.
+    Viele Uni-Skripte definieren $\sqrt[n]{a}$ aber nur für $a \ge 0$.
 
     :::rechnung Beispiel vorgerechnet
     \sqrt[3]{8} = 2 || denn $2^3 = 8$
@@ -286,8 +287,8 @@ k.erklaerung("n-te Wurzel und Wurzeln als Potenzen", r"""
     ## Wurzeln als Potenzen
 
     Nach dem Potenzgesetz ist $\left(a^{\frac{1}{2}}\right)^2 = a^1 = a$. Also muss
-    $a^{\frac{1}{2}} = \sqrt{a}$ sein. Allgemein gilt für $a \ge 0$ ein
-    [[rationaler Exponent]]:
+    $a^{\frac{1}{2}} = \sqrt{a}$ sein. Allgemein gilt für $a \ge 0$ (bei negativem
+    Exponenten $a > 0$) ein [[rationaler Exponent]]:
 
     $$a^{\frac{1}{n}} = \sqrt[n]{a} \qquad a^{\frac{m}{n}} = \left(\sqrt[n]{a}\right)^m$$
 
@@ -380,7 +381,7 @@ k.erklaerung("Den Nenner rational machen", r"""
     = 2\sqrt{3} + 2 || kürzen mit $2$
     :::
 
-    :::achtung Nur mit dem Nenner erweitern
+    :::achtung Nicht nur den Nenner erweitern
     Den **Zähler** musst du auch mit $\sqrt{3} + 1$ malnehmen. Sonst ändert sich der Wert.
     :::
 
@@ -466,21 +467,25 @@ def rationaler_exponent(rng):
         n = rng.choice([2, 3, 4])
         m = rng.choice([1, 2, 3, -1, -2])
         a = b ** n
-        if a <= 625 and F(b) ** abs(m) <= 125 and F(m, n).denominator == n:
+        if a <= 625 and F(b) ** abs(m) <= 125 and F(m, n).denominator == n and (b, n, m) != (2, 2, 1):
             break
     w = F(b) ** m
-    zeile1 = (f"{a}^{{{tex(F(m, n))}}} = \\left(\\sqrt[{n}]{{{a}}}\\right)^{{{m}}}", f"Nenner ${n}$: ${n}$. Wurzel, Zähler ${m}$: Potenz")
+    wurzel = f"\\sqrt{{{a}}}" if n == 2 else f"\\sqrt[{n}]{{{a}}}"
+    wname = "Quadratwurzel" if n == 2 else f"{n}. Wurzel"
+    zeile1 = (f"{a}^{{{tex(F(m, n))}}} = \\left({wurzel}\\right)^{{{m}}}", f"Nenner ${n}$: {wname}, Zähler ${m}$: Potenz")
     zeilen = [zeile1, (f"= {b}^{{{m}}}", f"${b}^{{{n}}} = {a}$")]
     if m != 1:
         zeilen.append((f"= {tex(w)}", "ausrechnen" if m > 0 else "negativer Exponent: Kehrwert"))
     fehler = [(F(a * m, n), f"Der Exponent ist kein Faktor: ${a}^{{{tex(F(m, n))}}} \\neq {a} \\cdot {tex(F(m, n))}$."),
-              (F(b), f"Du hast nur die {n}. Wurzel gezogen. Danach noch hoch ${m}$."),
-              (-w, "Ein negativer Exponent macht das Ergebnis nicht negativ. Er bildet den Kehrwert.")]
+              (F(b), f"Du hast nur die {wname} gezogen. Danach noch hoch ${m}$.")]
+    if m < 0:
+        fehler += [(-w, "Ein negativer Exponent macht das Ergebnis nicht negativ. Er bildet den Kehrwert."),
+                   (F(b) ** (-m), "Du hast den Kehrwert vergessen: Ein negativer Exponent bildet den Kehrwert.")]
     return {
         "frage": f"Berechne ${a}^{{{tex(F(m, n))}}}$.",
         "loesung": w, "gekuerzt": True,
-        "tipps": [f"Der Nenner ${n}$ im Exponenten bedeutet {n}. Wurzel.",
-                  f"$\\sqrt[{n}]{{{a}}} = {b}$, denn ${b}^{{{n}}} = {a}$.",
+        "tipps": [f"Der Nenner ${n}$ im Exponenten bedeutet {wname}.",
+                  f"${wurzel} = {b}$, denn ${b}^{{{n}}} = {a}$.",
                   f"Jetzt noch ${b}^{{{m}}}$ ausrechnen."],
         "rechenweg": _zeilen(*zeilen),
         "erklaerung": "$a^{\\frac{m}{n}} = (\\sqrt[n]{a})^m$: erst die Wurzel, dann die Potenz.",
@@ -495,7 +500,8 @@ def nenner_rational(rng):
     zeilen = [(f"\\frac{{{c}}}{{\\sqrt{{{m}}}}} = \\frac{{{c}\\sqrt{{{m}}}}}{{\\sqrt{{{m}}}\\sqrt{{{m}}}}}", f"erweitern mit $\\sqrt{{{m}}}$"),
               (f"= \\frac{{{c}\\sqrt{{{m}}}}}{{{m}}}", f"$\\sqrt{{{m}}}\\sqrt{{{m}}} = {m}$")]
     if math.gcd(c, m) > 1:
-        zeilen.append((f"= {tex(w)}\\sqrt{{{m}}}", "kürzen"))
+        vor = "" if w == 1 else tex(w)
+        zeilen.append((f"= {vor}\\sqrt{{{m}}}", "kürzen"))
     fehler = [([F(c, m * m)], f"$\\sqrt{{{m}}} \\cdot \\sqrt{{{m}}} = {m}$, nicht ${m * m}$."),
               ([c], f"Der Nenner ${m}$ fehlt noch.")]
     fehler = [(f, t) for f, t in fehler if f[0] != w]
@@ -503,6 +509,7 @@ def nenner_rational(rng):
         "typ": "luecke",
         "frage": "Mache den Nenner rational. Gib den Vorfaktor gekürzt an (Bruch oder ganze Zahl).",
         "formel": f"\\frac{{{c}}}{{\\sqrt{{{m}}}}} = \\luecke \\cdot \\sqrt{{{m}}}", "antworten": [[w]],
+        "formen": ["gekuerzt"],
         "tipps": [f"Erweitere mit $\\sqrt{{{m}}}$.", f"Im Nenner steht dann ${m}$.", f"Vorfaktor: $\\frac{{{c}}}{{{m}}}$, gekürzt."],
         "rechenweg": _zeilen(*zeilen),
         "erklaerung": "Mit der Wurzel im Nenner erweitern, denn $\\sqrt{a} \\cdot \\sqrt{a} = a$.",
@@ -537,7 +544,7 @@ _summe = _ka + _kb - _kc
 k.rechenweg_aufgabe(r"""
     ## Übungsblatt-Stil: Wurzelterme zusammenfassen
 
-    Vereinfachen Sie so weit wie möglich und geben Sie alle Zwischenschritte an:
+    Vereinfache so weit wie möglich und gib alle Zwischenschritte an:
     $$\sqrt{50} + \sqrt{18} - \sqrt{8}$$
     """,
     [{"typ": "luecke", "frage": "Ziehe teilweise die Wurzel.", "formel": "\\sqrt{50} = \\luecke \\sqrt{2}", "antworten": [[_ka]],
@@ -595,16 +602,16 @@ k.zusammenfassung(r"""
     | Regel | Formel | Beispiel |
     |---|---|---|
     | Quadratwurzel | $\sqrt{a} \ge 0$ und $(\sqrt{a})^2 = a$ | $\sqrt{49} = 7$ |
-    | n-te Wurzel | $(\sqrt[n]{a})^n = a$ | $\sqrt[3]{8} = 2$ |
-    | Produkt | $\sqrt{a} \cdot \sqrt{b} = \sqrt{ab}$ | $\sqrt{2} \cdot \sqrt{8} = 4$ |
-    | Quotient | $\frac{\sqrt{a}}{\sqrt{b}} = \sqrt{\frac{a}{b}}$ | $\frac{\sqrt{75}}{\sqrt{3}} = 5$ |
+    | n-te Wurzel ($a \ge 0$) | $(\sqrt[n]{a})^n = a$ | $\sqrt[3]{8} = 2$ |
+    | Produkt ($a, b \ge 0$) | $\sqrt{a} \cdot \sqrt{b} = \sqrt{ab}$ | $\sqrt{2} \cdot \sqrt{8} = 4$ |
+    | Quotient ($a \ge 0$, $b > 0$) | $\frac{\sqrt{a}}{\sqrt{b}} = \sqrt{\frac{a}{b}}$ | $\frac{\sqrt{75}}{\sqrt{3}} = 5$ |
     | teilweise ziehen | größte Quadratzahl herausholen | $\sqrt{72} = 6\sqrt{2}$ |
-    | als Potenz | $a^{\frac{m}{n}} = (\sqrt[n]{a})^m$ | $8^{\frac{2}{3}} = 4$ |
+    | als Potenz ($a > 0$) | $a^{\frac{m}{n}} = (\sqrt[n]{a})^m$ | $8^{\frac{2}{3}} = 4$ |
     | Nenner rational | mit der Wurzel erweitern | $\frac{6}{\sqrt{3}} = 2\sqrt{3}$ |
 
     !! $\sqrt{a + b} \neq \sqrt{a} + \sqrt{b}$: $\sqrt{9 + 16} = 5$, nicht $7$.
 
     - $\sqrt{9} = 3$, nicht $\pm 3$. Aber $x^2 = 9$ hat die Lösungen $3$ und $-3$.
     - Aus negativen Zahlen gibt es keine Quadratwurzel in $\mathbb{R}$.
-    - Summe im Nenner: mit $\sqrt{a} + b$ bzw. $\sqrt{a} - b$ erweitern.
+    - Steht $\sqrt{a} - b$ im Nenner, erweitere mit $\sqrt{a} + b$; steht $\sqrt{a} + b$ dort, mit $\sqrt{a} - b$.
 """)

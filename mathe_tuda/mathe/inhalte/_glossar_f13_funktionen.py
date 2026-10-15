@@ -3,9 +3,13 @@
 from .glossar import eintrag
 
 eintrag("Funktion", "Eine Zuordnung, die jedem Element $x$ der Definitionsmenge $D$ **genau ein** Element $f(x)$ "
-        "der Zielmenge $W$ zuordnet. Schreibweise: $f: D \\to W,\\ x \\mapsto f(x)$. In Mathe 1 sagt man auch Abbildung.",
-        r"$f: \mathbb{R} \to \mathbb{R},\ x \mapsto 2x + 1$ ordnet der $3$ den Wert $7$ zu.",
+        "der Zielmenge $W$ zuordnet. Schreibweise: $f\\colon D \\to W,\\ x \\mapsto f(x)$. In Mathe 1 sagt man auch Abbildung.",
+        r"$f\colon \mathbb{R} \to \mathbb{R},\ x \mapsto 2x + 1$ ordnet der $3$ den Wert $7$ zu.",
         "funktionen", ["Funktionen"])
+eintrag("Zielmenge", "Die Menge $W$ in $f\\colon D \\to W$, in der die Funktionswerte liegen dürfen. "
+        "Sie muss nicht ganz getroffen werden: Die Menge der tatsächlich angenommenen Werte (Wertemenge, Bild) kann kleiner sein.",
+        r"$f\colon \mathbb{R} \to \mathbb{R},\ x \mapsto x^2$ hat die Zielmenge $\mathbb{R}$, nimmt aber nur Werte $\ge 0$ an.",
+        "funktionen")
 eintrag("Funktionswert", "Die Zahl $f(x)$, die eine Funktion einer Stelle $x$ zuordnet.",
         r"Für $f(x) = x^2$ ist der Funktionswert an der Stelle $3$ gleich $f(3) = 9$.", "funktionen",
         ["Funktionswerte"])
@@ -15,7 +19,8 @@ eintrag("Graph", "Die Menge aller Punkte $(x \\mid f(x))$ einer Funktion, gezeic
         r"Der Graph von $f(x) = 2x + 1$ ist eine Gerade durch $(0 \mid 1)$ und $(1 \mid 3)$.", "funktionen",
         ["Graphen", "Funktionsgraph"])
 eintrag("Definitionsmenge", "Die Menge $D$ aller Zahlen, die man in eine Funktion einsetzen darf. "
-        "Verboten sind zum Beispiel Stellen, an denen ein Nenner $0$ wird.",
+        "Verboten sind zum Beispiel Stellen, an denen ein Nenner $0$ wird. In der Schule sucht man die größtmögliche "
+        "Definitionsmenge; an der Uni gehört $D$ zur Angabe der Funktion dazu.",
         r"$f(x) = \frac{1}{x - 2}$ hat $D = \mathbb{R} \setminus \{2\}$.", "funktionen",
         ["Definitionsbereich"])
 eintrag("lineare Funktion", "Eine Funktion der Form $f(x) = mx + b$. Ihr Graph ist eine Gerade mit Steigung $m$ "

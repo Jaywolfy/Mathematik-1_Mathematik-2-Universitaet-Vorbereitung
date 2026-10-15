@@ -71,7 +71,8 @@ k.erklaerung("Variablen und Zusammenfassen", r"""
     Setz für $x$ und $y$ Zahlen ein, zum Beispiel $x = 10$ und $y = 1$.
     Dann ist $3x + 2y + 4x - y = 30 + 2 + 40 - 1 = 71$. Und $7x + y = 70 + 1 = 71$.
     Beide Terme liefern denselben Wert, also war das Zusammenfassen richtig.
-    $5xy$ ergäbe $50$: falsch.
+    Und die falsche Umformung $3x + 2y = 5xy$? Links $30 + 2 = 32$, rechts
+    $5 \cdot 10 \cdot 1 = 50$. Verschiedene Werte: falsch.
     :::
     ---
     ## Produkte vereinfachen
@@ -186,7 +187,7 @@ k.erklaerung("Klammern auflösen", r"""
     :::
     """)
 
-k.vereinfache("3(2x + 1) - 2(x - 4)", "4x + 11", form="ausmultipliziert",
+k.vereinfache("3(2x + 1) - 2(x - 4)", "4x + 11", form="ausmultipliziert|vereinfacht",
               frage="Multipliziere aus und fasse zusammen: $\\displaystyle {term}$.",
               erklaerung="$3(2x + 1) = 6x + 3$ und $-2(x - 4) = -2x + 8$. Zusammen $4x + 11$.",
               tipps=["Löse jede Klammer einzeln auf.",
@@ -199,7 +200,7 @@ k.vereinfache("3(2x + 1) - 2(x - 4)", "4x + 11", form="ausmultipliziert",
               :::
               """,
               typische_fehler=[("4x - 5", "Vorzeichenfehler: $-2 \\cdot (-4) = +8$, nicht $-8$."),
-                               ("4x + 1", "Du hast nur den ersten Summanden in der Klammer malgenommen. Jeder Summand bekommt den Faktor ab.")])
+                               ("4x - 3", "Du hast nur den ersten Summanden in der Klammer malgenommen. Jeder Summand bekommt den Faktor ab.")])
 
 k.vereinfache("(x + 2)(x + 3)", "x^2 + 5x + 6", form="ausmultipliziert",
               frage="Multipliziere aus: $\\displaystyle {term}$.",
@@ -258,7 +259,7 @@ k.erklaerung("Die binomischen Formeln", r"""
     :::
 
     :::achtung Hinten wird nicht minus
-    Bei $(a - b)^2$ ist nur der Mittelteil negativ. $b^2$ ist immer positiv: $(-5)^2 = 25$.
+    Bei $(a - b)^2$ ist nur der Mittelteil negativ. $b^2$ ist nie negativ: $(-5)^2 = 25$.
     :::
 
     :::alt Mit Kopfrechnen erklärt
@@ -357,7 +358,7 @@ k.erklaerung("Ausklammern", r"""
     """)
 
 k.term("Klammere den größten gemeinsamen Faktor aus: $6x + 9$.", "3(2x + 3)",
-       "In $6x$ und in $9$ steckt die $3$: $6x + 9 = 3(2x + 3)$.", variablen="x", form="faktorisiert",
+       "In $6x$ und in $9$ steckt die $3$: $6x + 9 = 3(2x + 3)$.", variablen="x", form="ggt_ausgeklammert",
        tipps=["Welche Zahl teilt $6$ und $9$?", "Der ggT ist $3$. Teile jeden Summanden durch $3$.",
               "$6x : 3 = 2x$ und $9 : 3 = 3$."],
        rechenweg=r"""
@@ -369,7 +370,7 @@ k.term("Klammere den größten gemeinsamen Faktor aus: $6x + 9$.", "3(2x + 3)",
        typische_fehler=[("3(2x + 9)", "Auch die $9$ muss durch $3$ geteilt werden: $9 : 3 = 3$."),
                         ("3(3x + 3)", "$6x : 3 = 2x$, nicht $3x$.")])
 
-k.term("Faktorisiere mit einer binomischen Formel: $x^2 - 25$.", "(x + 5)(x - 5)",
+k.term("[[Faktorisiere|Faktorisieren]] mit einer binomischen Formel: $x^2 - 25$.", "(x + 5)(x - 5)",
        "$x^2 - 25 = x^2 - 5^2$. Das ist die rechte Seite der dritten binomischen Formel: $(x + 5)(x - 5)$.",
        variablen="x", form="faktorisiert",
        tipps=["Schreibe $25$ als Quadrat.", "$x^2 - 5^2$ hat die Form $a^2 - b^2$.",
@@ -387,7 +388,7 @@ k.term("Faktorisiere mit einer binomischen Formel: $x^2 - 25$.", "(x + 5)(x - 5)
 k.erklaerung("Bruchterme kürzen", r"""
     ## Nur Faktoren kürzen, nie Summanden
 
-    Ein [[Bruchterm]] ist ein Bruch mit Variablen, zum Beispiel $\frac{4x + 8}{4}$.
+    Ein [[Bruchterm]] ist ein Bruch mit Variablen, zum Beispiel $\frac{4x + 8}{4}$ oder $\frac{x^2 - 9}{x + 3}$.
     Kürzen darfst du nur, wenn oben und unten ein **Produkt** steht. Deshalb wird
     zuerst ausgeklammert, dann gekürzt.
 
@@ -500,9 +501,9 @@ def ausmultiplizieren_zusammenfassen(rng):
         fehler = fehler[1:]          # ohne Minus gibt es keinen Vorzeichenfehler
     return {
         "frage": f"Multipliziere aus und fasse zusammen: ${_tex(aufgabe)}$.",
-        "loesung": _ptext(loes), "variablen": "x", "form": "ausmultipliziert",
+        "loesung": _ptext(loes), "variablen": "x", "form": "ausmultipliziert|vereinfacht",
         "tipps": ["Löse jede Klammer einzeln auf.",
-                  f"Der zweite Faktor ist ${d}$: Das Vorzeichen gehört dazu.",
+                  f"Der Vorfaktor der zweiten Klammer ist ${d}$." + (" Das Minus gehört dazu." if d < 0 else ""),
                   f"Nach dem Auflösen: ${zw}$. Jetzt zusammenfassen."],
         "rechenweg": _zeilen((f"{_tex(aufgabe)} = {zw}", "beide Klammern ausmultiplizieren"),
                              (f"= {loes.tex()}", "gleichartige Terme zusammenfassen")),
@@ -580,7 +581,7 @@ def ausklammern(rng):
         faktor_tex = f"{g}x"
         loes = f"{g}x({_lin(p, q)})"
         zerlegt = f"{g}x \\cdot {px}x {'+' if q > 0 else '-'} {g}x \\cdot {abs(q)}"
-        fehler = [(f"{g}({_lin(p, q)})", f"In beiden Summanden steckt auch ein $x$. Klammere ${g}x$ aus."),
+        fehler = [(f"{g}x({px}x {_vz(q)}x)", f"Nach dem Ausklammern von ${g}x$ bleibt vom zweiten Summanden nur ${q}$ übrig, ohne $x$."),
                   (f"{g}x({px}x)", "Der zweite Summand fehlt in der Klammer.")]
         tipp2 = f"Gemeinsam sind die Zahl ${g}$ und ein $x$."
     else:
@@ -593,7 +594,7 @@ def ausklammern(rng):
         tipp2 = f"Der größte gemeinsame Teiler von ${g * p}$ und ${abs(g * q)}$ ist ${g}$."
     return {
         "frage": f"Klammere den größten gemeinsamen Faktor aus: ${_tex(aufgabe)}$.",
-        "loesung": loes, "variablen": "x", "form": "faktorisiert",
+        "loesung": loes, "variablen": "x", "form": "ggt_ausgeklammert",
         "tipps": ["Was steckt in jedem Summanden?", tipp2, f"Teile jeden Summanden durch ${faktor_tex}$."],
         "rechenweg": _zeilen((f"{_tex(aufgabe)} = {zerlegt}", f"${faktor_tex}$ steckt in jedem Summanden"),
                              (f"= {_tex(loes)}", "ausklammern")),
@@ -625,7 +626,7 @@ k.vereinfache("(a + b)^2 - (a - b)^2", "4ab", variablen="a, b", form="vereinfach
 k.rechenweg_aufgabe(r"""
     ## Übungsblatt-Stil: Bruchterm kürzen
 
-    Vereinfachen Sie so weit wie möglich und geben Sie an, für welche $x$ die Umformung gilt:
+    Vereinfache so weit wie möglich und gib an, für welche $x$ die Umformung gilt:
     $$\frac{x^2 - 6x + 9}{x^2 - 9}$$
     """,
     [{"typ": "term", "frage": "Schreibe den Zähler $x^2 - 6x + 9$ als Produkt.", "loesung": "(x - 3)^2",
@@ -644,7 +645,14 @@ k.rechenweg_aufgabe(r"""
       "tipps": ["Oben steht $(x - 3)(x - 3)$, unten $(x + 3)(x - 3)$.", "Kürze einmal $(x - 3)$."],
       "rechenweg": "$\\frac{(x - 3)^2}{(x + 3)(x - 3)} = \\frac{x - 3}{x + 3}$ für $x \\neq 3$ und $x \\neq -3$",
       "typische_fehler": [("(x - 3)/(x - 3)", "Gekürzt wird der gemeinsame Faktor $(x - 3)$, einmal oben und einmal unten."),
-                          ("-1", "Aus Summen darf man nicht kürzen: $\\frac{x - 3}{x + 3}$ ist nicht $-1$.")]}],
+                          ("-1", "Aus Summen darf man nicht kürzen: $\\frac{x - 3}{x + 3}$ ist nicht $-1$.")]},
+     {"typ": "menge", "frage": "Für welche $x$ gilt die Umformung **nicht**? Gib die ausgeschlossenen Werte als Menge an.",
+      "loesung": "{3; -3}",
+      "tipps": ["Die Umformung gilt nur, wo der **ursprüngliche** Nenner $x^2 - 9$ nicht $0$ ist.",
+                "$x^2 - 9 = (x + 3)(x - 3)$ wird $0$, wenn einer der Faktoren $0$ wird."],
+      "rechenweg": "$(x + 3)(x - 3) = 0$ für $x = -3$ oder $x = 3$. Für diese Werte ist der Ausgangsterm nicht definiert.",
+      "typische_fehler": [("{-3}", "Auch $x = 3$ macht den ursprünglichen Nenner zu $0$, selbst wenn der Faktor $(x - 3)$ weggekürzt ist."),
+                          ("{3}", "Auch $x = -3$ macht den Nenner zu $0$: $(-3 + 3) = 0$.")]}],
     "Erst Zähler und Nenner in Faktoren zerlegen (binomische Formeln), dann gemeinsame Faktoren kürzen. "
     "Die Umformung gilt nur, wo der ursprüngliche Nenner nicht $0$ ist: $x \\neq 3$ und $x \\neq -3$.",
     uebungsblatt=True,

@@ -19,5 +19,5 @@ eintrag("binomische Formeln", r"Drei Abkürzungen fürs Ausmultiplizieren: $(a +
 eintrag("Ausklammern", "Einen Faktor, der in jedem Summanden steckt, vor eine Klammer ziehen. Das Gegenteil von "
         "Ausmultiplizieren. Eine Summe wird so zum Produkt (faktorisieren).", r"$6x + 9 = 3(2x + 3)$", "terme",
         ["Faktorisieren"])
-eintrag("Bruchterm", "Ein Bruch, in dessen Nenner (oft auch im Zähler) eine Variable steht. Kürzen darf man nur gemeinsame "
+eintrag("Bruchterm", "Ein Bruch, in dem Variablen vorkommen, meist im Nenner. Kürzen darf man nur gemeinsame "
         "Faktoren, nie Summanden.", r"$\frac{x^2 - 9}{x + 3} = x - 3$ für $x \neq -3$", "terme", ["Bruchterme"])

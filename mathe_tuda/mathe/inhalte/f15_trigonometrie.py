@@ -42,7 +42,7 @@ k.erklaerung("Sinus, Kosinus und Tangens im Dreieck", r"""
     Im rechtwinkligen Dreieck liegt die längste Seite, die [[Hypotenuse]], gegenüber
     dem rechten Winkel. Für einen spitzen Winkel $\alpha$ gibt es die
     **Gegenkathete** (gegenüber von $\alpha$) und die **Ankathete** (liegt an $\alpha$).
-    Ihre Verhältnisse heißen [[Sinus]], [[Kosinus]] und Tangens:
+    Ihre Verhältnisse heißen [[Sinus]], [[Kosinus]] und [[Tangens]]:
 
     $$\sin(\alpha) = \frac{\text{Gegenkathete}}{\text{Hypotenuse}},\quad \cos(\alpha) = \frac{\text{Ankathete}}{\text{Hypotenuse}},\quad \tan(\alpha) = \frac{\text{Gegenkathete}}{\text{Ankathete}}$$
 
@@ -105,12 +105,12 @@ k.erklaerung("Bogenmaß", r"""
     :::
 
     :::visual einheitskreis
-    {"winkel": 60, "bogenmass": true, "zeige": ["sin", "cos"], "regler": true,
-     "unterschrift": "Der orange Bogen ist so lang wie der Winkel im Bogenmaß."}
+    {"winkel": 60, "bogenmass": true, "zeige": [], "regler": true,
+     "unterschrift": "Der Winkel im Bogenmaß ist die Länge des Kreisbogens von $(1 \\mid 0)$ bis zum Punkt."}
     :::
 
     :::achtung DEG oder RAD
-    $\sin(30)$ heißt in der Uni-Mathematik: $30$ im Bogenmaß, fast fünf Halbkreise.
+    $\sin(30)$ heißt in der Uni-Mathematik: $30$ im Bogenmaß, fast fünf volle Umdrehungen ($30 : 2\pi \approx 4{,}8$).
     Taschenrechner auf RAD stellen. Python, Java und C rechnen immer im Bogenmaß.
     :::
 
@@ -134,7 +134,7 @@ k.zahl("Rechne $60^\\circ$ ins Bogenmaß um. Tippe zum Beispiel `pi/4`.", "pi/3"
                         ("3pi", "Kehrwert: Es heißt $\\frac{60}{180}$, nicht $\\frac{180}{60}$.")])
 
 k.zahl("Rechne $\\frac{3\\pi}{4}$ in Grad um.", 135,
-       "$\\frac{3}{4} \\cdot 180^\\circ = 135^\\circ$.",
+       "$\\frac{3}{4} \\cdot 180^\\circ = 135^\\circ$.", einheit="°",
        tipps=["$\\pi$ entspricht $180^\\circ$.", "Ersetze $\\pi$ durch $180$.", "$\\frac{3 \\cdot 180}{4}$"],
        rechenweg=r"""
        :::rechnung
@@ -143,7 +143,8 @@ k.zahl("Rechne $\\frac{3\\pi}{4}$ in Grad um.", 135,
        :::
        """,
        typische_fehler=[(270, "Du hast $\\pi$ als $360^\\circ$ gerechnet. Ein halber Kreis, $\\pi$, sind $180^\\circ$."),
-                        (240, "Kehrwert: $\\frac{4}{3} \\cdot 180 = 240$. Es heißt $\\frac{3}{4}$.")])
+                        (240, "Kehrwert: $\\frac{4}{3} \\cdot 180 = 240$. Es heißt $\\frac{3}{4}$."),
+                        ("3pi/4", "Das ist noch das Bogenmaß. Gesucht sind Grad: Ersetze $\\pi$ durch $180^\\circ$.")])
 
 # ── 3: Einheitskreis ───────────────────────────────────────────────────────
 k.erklaerung("Der Einheitskreis", r"""
@@ -193,6 +194,29 @@ k.erklaerung("Der Einheitskreis", r"""
     Schreib die Sinuswerte so: $\frac{\sqrt{0}}{2}, \frac{\sqrt{1}}{2}, \frac{\sqrt{2}}{2},
     \frac{\sqrt{3}}{2}, \frac{\sqrt{4}}{2}$. Unter der Wurzel zählst du $0, 1, 2, 3, 4$.
     Der Kosinus ist dieselbe Reihe rückwärts.
+    :::
+    ---
+    ## Spiegeln am Einheitskreis
+
+    Für Winkel außerhalb des ersten Viertels brauchst du keine neue Tabelle. Miss den
+    **Bezugswinkel**, den Abstand des Punkts zur $x$-Achse: bei $150^\circ$ sind es
+    $180^\circ - 150^\circ = 30^\circ$. Der Betrag des Werts ist der von $30^\circ$, das
+    Vorzeichen liest du an der Lage ab.
+
+    :::visual einheitskreis
+    {"winkel": 150, "zeige": ["sin", "cos"], "regler": true, "bogenmass": true,
+     "unterschrift": "Der Punkt zu $150^\\circ$ ist das Spiegelbild des Punkts zu $30^\\circ$ an der $y$-Achse."}
+    :::
+
+    :::rechnung $\varphi = \frac{5\pi}{6}$, also $150^\circ$, links oben
+    \cos\left(\frac{5\pi}{6}\right) = -\cos\left(\frac{\pi}{6}\right) = -\frac{\sqrt{3}}{2} || links: $x$ negativ
+    \sin\left(\frac{5\pi}{6}\right) = \sin\left(\frac{\pi}{6}\right) = \frac{1}{2} || oben: $y$ positiv
+    :::
+
+    :::alt Mit einem Spiegel erklärt
+    Stell einen Spiegel auf die $y$-Achse. Der Punkt bei $30^\circ$, $\left(\frac{\sqrt{3}}{2} \mid \frac{1}{2}\right)$,
+    erscheint im Spiegel bei $150^\circ$. Spiegeln ändert nur das Vorzeichen von $x$:
+    $\left(-\frac{\sqrt{3}}{2} \mid \frac{1}{2}\right)$. Ein Spiegel an der $x$-Achse ändert das Vorzeichen von $y$.
     :::
     """)
 
@@ -384,8 +408,8 @@ def grad_bogen(rng):
               (F(g, 180) * F(314, 100),
                "Du hast nur $\\pi \\approx 3{,}14$ eingesetzt. Für Grad ersetzt man $\\pi$ durch $180^\\circ$.")]
     return {
-        "frage": f"Rechne ${wt}$ in Grad um. Gib nur die Zahl ein.",
-        "loesung": g,
+        "frage": f"Rechne ${wt}$ in Grad um.",
+        "loesung": g, "einheit": "°",
         "tipps": ["$\\pi$ entspricht $180^\\circ$.", "Ersetze $\\pi$ durch $180$.",
                   f"${wt} \\cdot \\frac{{180}}{{\\pi}}$"],
         "rechenweg": _zeilen((f"{wt} \\cdot \\frac{{180}}{{\\pi}} = {g}", "$\\pi$ kürzt sich, es bleiben Grad")),
@@ -408,27 +432,46 @@ def exakter_wert(rng):
     wt, _ = _winkel(g)
     wert = {"sin": _sin_text, "cos": _cos_text, "tan": _tan_text}[fn](g)
     arg = f"\\left({wt}\\right)"
-    quadrant = ("rechts oben" if g < 90 else "links oben" if g < 180 else "links unten" if g < 270 else "rechts unten")
-    if g % 90 == 0:
-        quadrant = "auf einer Achse"
+    achsen = {0: ("(1 \\mid 0)", "auf der positiven $x$-Achse"), 90: ("(0 \\mid 1)", "auf der positiven $y$-Achse"),
+              180: ("(-1 \\mid 0)", "auf der negativen $x$-Achse"), 270: ("(0 \\mid -1)", "auf der negativen $y$-Achse")}
+    if g in achsen:
+        punkt, wo = achsen[g]
+        lage = f"Punkt ${punkt}$ {wo}"
+        zeilen = [(f"\\{fn}{arg} = {_wert_tex(wert)}", f"${wt} = {g}^\\circ$: {lage}")]
+        tipp2 = f"Der Punkt zu ${g}^\\circ$ ist ${punkt}$: Lies $x$ (Kosinus) und $y$ (Sinus) ab."
+    else:
+        quadrant = ("rechts oben" if g < 90 else "links oben" if g < 180 else "links unten" if g < 270 else "rechts unten")
+        r = g if g < 90 else 180 - g if g < 180 else g - 180 if g < 270 else 360 - g
+        rt, _ = _winkel(r)
+        lage = f"Punkt {quadrant}"
+        if r == g:
+            zeilen = [(f"\\{fn}{arg} = {_wert_tex(wert)}", f"${wt} = {g}^\\circ$, Punkt rechts oben: Wert aus der Tabelle")]
+            tipp2 = "Der Winkel liegt im ersten Viertel: Der Wert steht direkt in der Tabelle."
+        else:
+            neg = wert.startswith("-")
+            zeilen = [(f"\\{fn}{arg} = {'-' if neg else ''}\\{fn}\\left({rt}\\right) = {_wert_tex(wert)}",
+                       f"${wt} = {g}^\\circ$, Punkt {quadrant}; Bezugswinkel ${r}^\\circ$ zur $x$-Achse, "
+                       f"Vorzeichen {'minus' if neg else 'plus'}")]
+            tipp2 = (f"Der Punkt liegt {quadrant}. Sein Bezugswinkel zur $x$-Achse ist ${r}^\\circ$: "
+                     f"Nimm den Wert von ${r}^\\circ$ und bestimme das Vorzeichen aus der Lage.")
     fehler = []
     if fn in ("sin", "cos"):
         anderer = _cos_text(g) if fn == "sin" else _sin_text(g)
         fehler.append((anderer, "Das ist der Wert von $\\" + ("cos" if fn == "sin" else "sin") + "$. "
                        "Der Sinus ist die Höhe ($y$), der Kosinus die $x$-Koordinate."))
     if wert != "0":
-        fehler.append((_neg(wert), f"Das Vorzeichen stimmt nicht. Der Punkt zu ${g}^\\circ$ liegt {quadrant}."))
+        fehler.append((_neg(wert), f"Das Vorzeichen stimmt nicht. Zu ${g}^\\circ$ gehört der {lage}."))
     if fn == "tan" and wert not in ("0",):
         fehler.append(("1/(" + wert + ")", "Kehrwert: $\\tan = \\frac{\\sin}{\\cos}$, nicht $\\frac{\\cos}{\\sin}$."))
     return {
         "frage": f"Gib den exakten Wert an: $\\{fn}{arg}$. Tippe zum Beispiel `sqrt(3)/2` oder `-1/2`.",
         "loesung": wert,
-        "tipps": [f"Rechne in Grad um: ${wt} = {g}^\\circ$.",
-                  f"Der Punkt auf dem Einheitskreis liegt {quadrant}." if g % 90 else "Der Punkt liegt auf einer Achse: Lies $x$ und $y$ ab.",
+        "tipps": [f"Rechne in Grad um: ${wt} = {g}^\\circ$.", tipp2,
                   "Merkreihe für den Sinus: $\\frac{\\sqrt{0}}{2}, \\frac{\\sqrt{1}}{2}, \\frac{\\sqrt{2}}{2}, \\frac{\\sqrt{3}}{2}, \\frac{\\sqrt{4}}{2}$."
                   + (" Tangens: $\\frac{\\sin}{\\cos}$." if fn == "tan" else "")],
-        "rechenweg": _zeilen((f"\\{fn}{arg} = {_wert_tex(wert)}", f"${wt} = {g}^\\circ$, Punkt {quadrant}")),
-        "erklaerung": "Am Einheitskreis: $\\cos$ ist die $x$-, $\\sin$ die $y$-Koordinate, $\\tan = \\frac{\\sin}{\\cos}$.",
+        "rechenweg": _zeilen(*zeilen),
+        "erklaerung": "Am Einheitskreis: $\\cos$ ist die $x$-, $\\sin$ die $y$-Koordinate, $\\tan = \\frac{\\sin}{\\cos}$. "
+                      "Außerhalb des ersten Viertels: Wert des Bezugswinkels nehmen, Vorzeichen aus der Lage.",
         "typische_fehler": ohne_gleiche(wert, fehler),
     }
 

@@ -39,7 +39,7 @@ k.erklaerung("Exponentielles Wachstum", r"""
     ## Immer wieder verdoppeln
 
     :::analogie 🦠 Bakterien
-    Eine Bakterie teilt sich jede Stunde in zwei. Nach $1$ Stunde sind es $2$, nach
+    Ein Bakterium teilt sich jede Stunde in zwei. Nach $1$ Stunde sind es $2$, nach
     $2$ Stunden $4$, nach $3$ Stunden $8$. Jede Stunde wird **mal** $2$ genommen,
     nicht plus $2$.
     :::
@@ -131,9 +131,10 @@ k.zahl("Berechne $2^{-2}$.", F(1, 4),
        = \frac{1}{4} || ausrechnen
        :::
        """,
-       typische_fehler=[(-4, "Der negative Exponent macht die Zahl nicht negativ. Er bedeutet Kehrwert: $\\frac{1}{4}$."),
+       typische_fehler=[(-4, "Du hast $2 \\cdot (-2)$ gerechnet. Potenz heißt mehrfach malnehmen, nicht Basis mal Exponent. "
+                             "Und der negative Exponent macht die Zahl nicht negativ, er bedeutet Kehrwert: $\\frac{1}{4}$."),
                         (F(-1, 4), "Das Minus gehört nicht vor das Ergebnis. $2^{-2} = \\frac{1}{4}$ ist positiv."),
-                        (-1, "Du hast $2 \\cdot (-2)$ gerechnet. Potenz heißt mehrfach malnehmen, nicht Basis mal Exponent.")])
+                        (4, "Du hast das Minus im Exponenten weggelassen. $2^{-2}$ ist der Kehrwert von $2^2$.")])
 
 k.zahl("In einer Petrischale sind $5$ Bakterien. Ihre Anzahl verdoppelt sich jede Stunde. Wie viele sind es nach $3$ Stunden?",
        5 * 2 ** 3,
@@ -167,7 +168,7 @@ k.erklaerung("Der Logarithmus", r"""
     ## Die Frage nach dem Exponenten
 
     :::analogie 🔁 Wie oft verdoppeln?
-    Aus $1$ Bakterie sollen $8$ werden. Wie viele Stunden musst du warten? Gesucht
+    Aus $1$ Bakterium sollen $8$ werden. Wie viele Stunden musst du warten? Gesucht
     ist nicht das Ergebnis, sondern **wie oft** verdoppelt wird.
     :::
 
@@ -176,11 +177,11 @@ k.erklaerung("Der Logarithmus", r"""
     $$\log_a(y) = x \quad\Leftrightarrow\quad a^x = y$$
 
     Gelesen: „Logarithmus von $y$ zur Basis $a$“. Er ist die Zahl, mit der man $a$
-    potenzieren muss, um $y$ zu erhalten. Erlaubt sind nur $y > 0$.
+    potenzieren muss, um $y$ zu erhalten. Erlaubt sind nur $y > 0$ und Basen $a > 0$, $a \neq 1$.
 
     :::rechnung Beispiele
     2^3 = 8 || darum ist $\log_2(8) = 3$
-    \log_2(8) = 3 || die Probe rechnet der Computer nach
+    \log_2(8) = 3 || der Exponent ist das Ergebnis
     10^3 = 1000 || darum ist $\log_{10}(1000) = 3$
     2^{-1} = \frac{1}{2} || darum ist $\log_2\left(\frac{1}{2}\right) = -1$
     :::
@@ -467,7 +468,9 @@ def log_berechnen(rng):
     fehler = [(-e, "Vorzeichen: " + ("Eine Zahl kleiner als $1$ hat einen **negativen** Logarithmus." if e < 0
                                      else "Eine Zahl größer als $1$ hat einen **positiven** Logarithmus.")),
               (y / b if e > 1 else None, f"Du hast ${ytex}$ durch ${b}$ geteilt. Gesucht ist der Exponent: ${b}^? = {ytex}$."),
-              (b ** -e if e < 0 else None, f"Das ist der Nenner. Gesucht ist der Exponent: ${b}^? = {ytex}$.")]
+              (b ** -e if e < 0 and b != 10 else None, f"Das ist der Nenner. Gesucht ist der Exponent: ${b}^? = {ytex}$."),
+              (b ** -e if e < 0 and b == 10 else None, f"${ytex} = \\frac{{1}}{{{b ** -e}}}$: Du hast den Nenner angegeben. "
+                                                       f"Gesucht ist der Exponent: ${b}^? = {ytex}$.")]
     fehler = [(w, m) for w, m in fehler if w is not None]
     return {
         "frage": f"Berechne $\\log_{{{b}}}\\left({ytex}\\right)$.",
@@ -499,7 +502,8 @@ def exp_gleichung(rng):
                   (f"{b}^x = {b}^{{{x}}}", f"${b ** x}$ als Potenz von ${b}$"),
                   (f"x = {x}", "Exponenten vergleichen")]
         fehler = [(b ** x, f"${b ** x}$ ist der Wert von ${b}^x$. Gesucht ist der Exponent $x$."),
-                  (F(d, c * b), f"${c} \\cdot {b}^x$ ist nicht $({c} \\cdot {b})^x$. Teile nur durch ${c}$ und bestimme dann den Exponenten.")]
+                  (F(d, c * b), f"Du hast ${b ** x}$ noch einmal durch ${b}$ geteilt. Gesucht ist, wie oft man ${b}$ "
+                                f"malnehmen muss, um ${b ** x}$ zu erhalten.")]
         frage = f"Löse ${c} \\cdot {b}^x = {d}$."
         tipps = [f"Stell die Potenz allein: Teile durch ${c}$.", f"${b}^x = {b ** x}$",
                  f"${b ** x}$ ist ${b}$ hoch ${x}$."]
@@ -615,7 +619,7 @@ k.zusammenfassung(r"""
     | Regel | Beispiel |
     |---|---|
     | $a^0 = 1$, $a^{-n} = \frac{1}{a^n}$ | $2^{-3} = \frac{1}{8}$ |
-    | $\log_a(y) = x \Leftrightarrow a^x = y$ | $\log_2(8) = 3$ |
+    | $\log_a(y) = x \Leftrightarrow a^x = y$ (für $a > 0$, $a \neq 1$, $y > 0$) | $\log_2(8) = 3$ |
     | $\log_a(u \cdot v) = \log_a(u) + \log_a(v)$ | $\log_2(32) = \log_2(8) + \log_2(4)$ |
     | $\log_a\left(\frac{u}{v}\right) = \log_a(u) - \log_a(v)$ | $\log_2\left(\frac{8}{2}\right) = 3 - 1$ |
     | $\log_a(u^r) = r \cdot \log_a(u)$ | $\log_2(4^5) = 5 \cdot 2 = 10$ |

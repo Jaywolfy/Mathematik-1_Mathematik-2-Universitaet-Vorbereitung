@@ -475,7 +475,8 @@ class Zahlfrage(Frage):
     def pruefen(self, antwort):
         text = str(antwort or "").strip()
         if self.einheit:
-            text = re.sub(re.escape(self.einheit) + r"\s*$", "", text).strip()
+            for e in [self.einheit] + _EINHEIT_SYNONYME.get(self.einheit, []):
+                text = re.sub(r"\s*" + re.escape(e) + r"\s*$", "", text, flags=re.I).strip()
         if not text:
             return Ergebnis(False, "Bitte gib zuerst eine Zahl ein.", lesefehler=True)
         try:
@@ -493,6 +494,10 @@ class Zahlfrage(Frage):
                 m = pruefer.bruch_gekuerzt(text)
                 if m:
                     return self._ergebnis(False, "Fast!", hinweis=m, fast=True)
+            if isinstance(self.soll, Fraction):
+                m = pruefer.ausgerechnet_meldung(text)
+                if m:
+                    return self._ergebnis(False, "Fast!", hinweis=m, fast=True)
             return self._ergebnis(True)
 
         gerundet = bool(re.search(r"\d[.,]\d{2,}", text))
@@ -504,6 +509,10 @@ class Zahlfrage(Frage):
             # gerundet eingegeben (z. B. 1,333 für 4/3): auf 3 Nachkommastellen genau zählt als derselbe Fehler
             return gerundet and abs(float(ist) - float(fw)) <= 5e-4 * max(1.0, abs(float(fw)))
         return self._falsch(vergleich, _auto_hinweis_zahl(ist, self.soll))
+
+
+_EINHEIT_SYNONYME = {"€": ["Euro", "EUR"], "%": ["Prozent"], "°": ["Grad"], "GB": ["Gigabyte"],
+                     "MB": ["Megabyte"], "kB": ["Kilobyte", "KB"]}
 
 
 def _ist_bruch_eingabe(text):
@@ -721,7 +730,8 @@ class Mengefrage(Frage):
         if a < b:
             auto = f"Alle deine Elemente gehören dazu, aber es fehlen noch {len(b - a)}."
         elif a > b:
-            auto = f"{len(a - b)} deiner Elemente gehören nicht in die Menge."
+            n = len(a - b)
+            auto = "1 deiner Elemente gehört nicht in die Menge." if n == 1 else f"{n} deiner Elemente gehören nicht in die Menge."
         if "," in text and ";" not in text and re.search(r"\d,\d", text):
             auto = ((auto + " ") if auto else "") + ("Achtung: Ohne ; liest das System jedes Komma als "
                                                      "Trennzeichen. Für Kommazahlen trenne Elemente mit ;.")
@@ -1000,6 +1010,14 @@ class Luecke(Frage):
         details = [{"name": f"Lücke {i + 1}", "ok": self._passt(e, a)} for i, (e, a) in enumerate(zip(eingaben, self.antworten))]
         richtig = sum(d["ok"] for d in details)
         if richtig == len(details):
+            for i, e in enumerate(eingaben):
+                try:
+                    soll_einfach = pruefer._einfache_zahl(pruefer.parse(self.antworten[i][0]).ast)
+                except pruefer.TermFehler:
+                    soll_einfach = False
+                m = pruefer.ausgerechnet_meldung(e) if soll_einfach else None
+                if m:
+                    return self._ergebnis(False, "Fast!", hinweis=f"Lücke {i + 1}: {m}", fast=True, details=details)
             for i, (e, form) in enumerate(zip(eingaben, self.formen)):
                 if not form:
                     continue

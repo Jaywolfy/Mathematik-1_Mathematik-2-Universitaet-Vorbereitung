@@ -16,7 +16,7 @@ eintrag("Zweierpotenz", "Eine Potenz mit der Basis $2$. Mit $n$ Bits gibt es $2^
         r"$2^8 = 256$, $2^{10} = 1024$", "potenzen", ["Zweierpotenzen"])
 eintrag("Zehnerpotenz", "Eine Potenz mit der Basis $10$. $10^n$ ist eine $1$ mit $n$ Nullen, $10^{-n}$ hat die $1$ an der $n$-ten Nachkommastelle.",
         r"$10^3 = 1000$, $10^{-3} = 0{,}001$", "potenzen", ["Zehnerpotenzen"])
-eintrag("wissenschaftliche Schreibweise", "Eine Zahl als Produkt aus einer Zahl zwischen $1$ und $10$ und einer Zehnerpotenz.",
+eintrag("wissenschaftliche Schreibweise", "Eine Zahl als Produkt aus einer Zahl, die mindestens $1$ und kleiner als $10$ ist, und einer Zehnerpotenz.",
         r"$3200000 = 3{,}2 \cdot 10^6$ und $0{,}0004 = 4 \cdot 10^{-4}$ (in Python `4e-4`)", "potenzen")
 eintrag("Bit", "Die kleinste Informationseinheit: $0$ oder $1$. Acht Bit sind ein Byte.",
         r"Mit $3$ Bit gibt es $2^3 = 8$ Muster: $000$, $001$, …, $111$.", "potenzen", ["Bits"])

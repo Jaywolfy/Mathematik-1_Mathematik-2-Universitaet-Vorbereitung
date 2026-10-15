@@ -252,7 +252,7 @@ k.erklaerung("Betragsgleichungen", r"""
     Ohne Bild geht es auch. Fall $x \ge 3$: Dann ist $|x - 3| = x - 3$, also
     $x - 3 = 5$ und $x = 8$. Das erfüllt $x \ge 3$. Fall $x < 3$: Dann ist
     $|x - 3| = 3 - x$, also $3 - x = 5$ und $x = -2$. Das erfüllt $x < 3$. Beide
-    Fälle zusammen ergeben $\mathbb{L} = \{-2; 8\}$.
+    Fälle zusammen ergeben $\mathbb{L} = \{-2, 8\}$.
     :::
     ---
     ## Mit Faktor und Sonderfälle
@@ -325,7 +325,7 @@ k.loesungsmenge("Löse $|x + 4| = -2$. Gib die Lösungsmenge an (leere Menge: {}
                 |x + 4| \ge 0 > -2 || Betrag ist nie negativ, aber rechts steht $-2$
                 :::
 
-                Also $\mathbb{L} = \{\}$.
+                Also $\mathbb{L} = \emptyset$.
                 """,
                 typische_fehler=[("{-6; -2}", "Probe mit $-6$: $|-6 + 4| = 2$, nicht $-2$. Ein Betrag ist nie negativ, "
                                               "die Gleichung hat keine Lösung.")])
@@ -336,7 +336,8 @@ k.erklaerung("Betragsungleichungen", r"""
 
     :::analogie 🐕 Der Hund an der Leine
     Ein Hund ist mit einer $3$ Meter langen Leine an einem Pfahl bei der $1$
-    angebunden. Er kommt überall hin, wo der Abstand zum Pfahl höchstens $3$ ist.
+    angebunden. Ganz straff zieht er die Leine nie. Er bleibt also immer weniger
+    als $3$ Meter vom Pfahl entfernt.
     :::
 
     $|x - 1| < 3$ heißt: $x$ ist von der $1$ weniger als $3$ entfernt. Das sind alle
@@ -520,7 +521,7 @@ def betragsgleichung(rng):
         falsch = sorted({F(-c - n, m), F(c - n, m)})
         fehler = [(_menge(falsch), f"Ein Betrag ist nie negativ. $|{innen}| = {c}$ hat keine Lösung.")]
         weg = (f"Ein Betrag ist immer $\\ge 0$, rechts steht aber ${c}$. Keine Zahl erfüllt die Gleichung.\n\n"
-               "Also $\\mathbb{L} = \\{\\}$.")
+               "Also $\\mathbb{L} = \\emptyset$.")
         tipps = ["Kann ein Betrag negativ sein?", f"$|{innen}| \\ge 0$, aber rechts steht ${c}$.",
                  "Die Lösungsmenge ist leer."]
     elif c == 0:
@@ -665,7 +666,7 @@ k.rechenweg_aufgabe(r"""
       "typische_fehler": [("(-inf; -4)", "$2 \\le -4$ ist **falsch**. Also erfüllt kein $x$ dieses Falls die Ungleichung.")]},
      {"typ": "loesungsmenge", "frage": "Gib die gesamte Lösungsmenge an.", "loesung": "[-1; inf)",
       "tipps": ["Vereinige die drei Teillösungen.", "$[-1, 2) \\cup [2, \\infty)$"],
-      "rechenweg": "$\\mathbb{L} = \\{\\} \\cup [-1, 2) \\cup [2, \\infty) = [-1, \\infty)$",
+      "rechenweg": "$\\mathbb{L} = \\emptyset \\cup [-1, 2) \\cup [2, \\infty) = [-1, \\infty)$",
       "typische_fehler": [("[2; inf)", "Auch der mittlere Fall liefert Lösungen: $[-1, 2)$.")]}],
     "Bei mehreren Beträgen teilt man die Zahlengerade an den Stellen, an denen ein Inneres $0$ wird. "
     "In jedem Bereich fallen die Beträge weg. Zum Schluss werden die Teillösungen vereinigt. "

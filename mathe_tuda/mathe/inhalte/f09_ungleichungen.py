@@ -40,17 +40,17 @@ k.erklaerung("Ungleichungen und Intervalle", r"""
     ## Viele Lösungen auf einmal
 
     :::analogie 🎢 Achterbahn
-    Am Eingang steht: „Mindestens $18$ Jahre“. Wer $18$, $19$ oder $40$ ist, darf
-    fahren. Für das Alter $x$ gilt $x \ge 18$. Es gibt nicht eine Lösung, sondern
-    unendlich viele.
+    Am Eingang steht: „Mindestens $140$ cm groß“. Wer $140$, $152$ oder $185$ cm
+    groß ist, darf fahren. Für die Körpergröße $x$ in cm gilt $x \ge 140$. Es gibt
+    nicht eine Lösung, sondern unendlich viele.
     :::
 
     Eine [[Ungleichung]] vergleicht zwei Terme mit $<$ (kleiner), $\le$ (kleiner
     oder gleich), $>$ (größer) oder $\ge$ (größer oder gleich).
 
     :::visual zahlenstrahl
-    {"von": 10, "bis": 25, "intervalle": [{"von": 18, "bis": "inf", "von_zu": true, "label": "x ≥ 18"}],
-     "unterschrift": "Alle Zahlen ab $18$: Die $18$ selbst gehört dazu (voller Punkt)."}
+    {"von": 120, "bis": 160, "schritt": 5, "intervalle": [{"von": 140, "bis": "inf", "von_zu": true, "label": "x ≥ 140"}],
+     "unterschrift": "Alle Zahlen ab $140$: Die $140$ selbst gehört dazu (voller Punkt)."}
     :::
 
     Ob eine Zahl passt, prüfst du wie bei Gleichungen durch Einsetzen.
@@ -61,8 +61,8 @@ k.erklaerung("Ungleichungen und Intervalle", r"""
     :::
 
     :::alt Mit einem Programm erklärt
-    Ein Kino-Programm prüft `if alter >= 18:`. Für jedes Alter ist die Antwort ja
-    oder nein. Die Lösungsmenge der Ungleichung ist die Menge aller Werte, bei denen
+    Die Kasse der Achterbahn prüft `if groesse >= 140:`. Für jede Größe ist die
+    Antwort ja oder nein. Die Lösungsmenge der Ungleichung ist die Menge aller Werte, bei denen
     das Programm „ja“ sagt.
     :::
     ---
@@ -86,11 +86,11 @@ k.erklaerung("Ungleichungen und Intervalle", r"""
 
     In manchen Büchern steht $]-2, 3]$ statt $(-2, 3]$. Das bedeutet dasselbe.
 
-    :::alt Mit einer Tür erklärt
-    Eine eckige Klammer $[$ ist wie eine offene Tür mit Boden davor: Der Rand ist
-    noch drin. Eine runde Klammer $($ ist eine Kante ohne Boden: Du kommst beliebig
-    nah heran, aber nicht auf den Rand. $\infty$ ist keine Zahl, die man erreicht,
-    deshalb steht dort immer die runde Klammer.
+    :::alt Mit einer Gästeliste erklärt
+    Das Intervall ist eine Party, die Ränder sind zwei Gäste. Eckige Klammer: Der
+    Gast am Rand steht auf der Liste und darf rein. Runde Klammer: Er steht nicht
+    drauf, aber alle, die ihm beliebig nahe stehen, schon. $\infty$ ist gar kein
+    Gast, nur „immer weiter“. Darum steht dort immer die runde Klammer.
     :::
     """)
 
@@ -253,9 +253,10 @@ _D_LO, _D_HI = F(-1 - 3, 2), F(7 - 3, 2)
 k.erklaerung("Doppelungleichungen und Sonderfälle", r"""
     ## Zwei Bedingungen auf einmal
 
-    :::analogie 🛗 Aufzug
-    Der Aufzug fährt nur, wenn mindestens eine Person drin ist und höchstens $630$ kg.
-    Zwei Grenzen gleichzeitig: Das ist eine [[Doppelungleichung]].
+    :::analogie 🌡️ Heizung
+    Die Heizung hält die Zimmertemperatur $T$ zwischen $18$ und $22$ Grad:
+    $18 \le T \le 22$. Eine Größe, zwei Grenzen gleichzeitig: Das ist eine
+    [[Doppelungleichung]].
     :::
 
     Bei $-1 < 2x + 3 \le 7$ formst du **alle drei Teile** gleichzeitig um.
@@ -287,8 +288,10 @@ k.erklaerung("Doppelungleichungen und Sonderfälle", r"""
     1 < 3 || wahr für jedes $x$: $\mathbb{L} = \mathbb{R}$
     :::
 
-    Nie wahr: Aus $3x + 2 > 3x + 3$ wird mit $-3x$ die Aussage $2 > 3$. Sie ist
-    falsch, egal was $x$ ist: $\mathbb{L} = \emptyset$.
+    :::rechnung Nie wahr
+    3x + 2 > 3x + 3 \quad | -3x || $x$ fällt weg
+    # 2 > 3 || falsch für jedes $x$: $\mathbb{L} = \emptyset$
+    :::
 
     :::alt Mit Wettlauf erklärt
     Zwei Läufer starten bei $1$ und bei $3$ und laufen gleich schnell ($2x$). Der
@@ -303,12 +306,14 @@ k.erklaerung("Doppelungleichungen und Sonderfälle", r"""
     getrennt. Das heißt [[Fallunterscheidung]]. $x = 0$ ist verboten.
 
     :::rechnung Fall 1: $x > 0$, Zeichen bleibt
-    6 > 2x \quad | :2 || mit $x > 0$ malgenommen
+    \frac{6}{x} > 2 \;\text{für}\; x > 0 \quad | \cdot x || Ausgangsungleichung im Fall $x > 0$
+    6 > 2x \quad | :2 || mit dem positiven $x$ malgenommen: Zeichen bleibt
     x < 3 || zusammen mit $x > 0$: $(0, 3)$
     :::
 
     :::rechnung Fall 2: $x < 0$, Zeichen kippt
-    6 < 2x \quad | :2 || mit $x < 0$ malgenommen
+    \frac{6}{x} > 2 \;\text{für}\; x < 0 \quad | \cdot x || Ausgangsungleichung im Fall $x < 0$
+    6 < 2x \quad | :2 || mit dem negativen $x$ malgenommen: Zeichen kippt
     x > 3 || aber $x < 0$ und $x > 3$ geht nicht: keine Lösung
     :::
 
@@ -340,21 +345,21 @@ k.loesungsmenge("Löse die Doppelungleichung $-1 < 2x + 3 \\le 7$. Gib die Lösu
                 """,
                 typische_fehler=[("[-2; 2]", "Links steht $<$: Die $-2$ gehört nicht dazu."),
                                  ("(-2; 2)", "Rechts steht $\\le$: Die $2$ gehört dazu."),
-                                 ("(-1; 5]", "Du hast vergessen, durch $2$ zu teilen.")])
+                                 ("(-4; 4]", "Du hast vergessen, durch $2$ zu teilen: Aus $-4 < 2x \\le 4$ folgt erst nach $:2$ das Ergebnis.")])
 
 k.gleichung("3x + 2 > 3(x + 1)", loesung="keine",
             erklaerung="$3x + 2 > 3x + 3$. Nach $-3x$ bleibt $2 > 3$, das ist nie wahr: $\\mathbb{L} = \\emptyset$.",
             tipps=["Löse die Klammer auf.", "Sammle die $x$-Terme. Was bleibt übrig?",
                    "$2 > 3$: wahr oder falsch?"],
             rechenweg=r"""
-            Klammer auflösen: $3x + 2 > 3x + 3$.
-
-            Mit $-3x$ auf beiden Seiten fällt $x$ weg. Übrig bleibt $2 > 3$.
-
-            Diese Aussage ist für kein $x$ wahr, also $\mathbb{L} = \emptyset$.
+            :::rechnung
+            3x + 2 > 3(x + 1) || Klammer auflösen
+            3x + 2 > 3x + 3 \quad | -3x || $x$ fällt weg
+            # 2 > 3 || falsch für jedes $x$: $\mathbb{L} = \emptyset$
+            :::
             """,
             typische_fehler=[("R", "Übrig bleibt $2 > 3$. Das ist falsch, also erfüllt keine Zahl die Ungleichung."),
-                             ("(1; inf)", "Beim Auflösen der Klammer fehlt etwas: $3(x + 1) = 3x + 3$. Dann fällt $x$ ganz weg.")])
+                             ("(1/2; inf)", "Beim Auflösen der Klammer wurde nur die $1$ mit $3$ malgenommen, nicht das $x$. Richtig ist $3(x + 1) = 3x + 3$, dann fällt $x$ ganz weg.")])
 
 k.loesungsmenge("Löse $\\frac{6}{x} > 2$. Gib die Lösungsmenge an.", "(0; 3)",
                 "Fallunterscheidung: Für $x > 0$ folgt $x < 3$, also $(0, 3)$. Für $x < 0$ folgt $x > 3$, Widerspruch.",
@@ -363,11 +368,13 @@ k.loesungsmenge("Löse $\\frac{6}{x} > 2$. Gib die Lösungsmenge an.", "(0; 3)",
                        "Fall $x > 0$: $6 > 2x$. Fall $x < 0$: $6 < 2x$."],
                 rechenweg=r"""
                 :::rechnung Fall 1: $x > 0$
+                \frac{6}{x} > 2 \;\text{für}\; x > 0 \quad | \cdot x || mit positivem $x$ malnehmen
                 6 > 2x \quad | :2 || Zeichen bleibt
                 x < 3 || mit $x > 0$: $(0, 3)$
                 :::
 
                 :::rechnung Fall 2: $x < 0$
+                \frac{6}{x} > 2 \;\text{für}\; x < 0 \quad | \cdot x || mit negativem $x$ malnehmen
                 6 < 2x \quad | :2 || Zeichen gekippt beim Malnehmen mit $x$
                 x > 3 || Widerspruch zu $x < 0$
                 :::
@@ -455,7 +462,7 @@ def lineare_ungleichung(rng):
         fehler.insert(0, (_halbgerade(rel, F(g)), "Du hast durch eine **negative** Zahl geteilt. Dabei kippt das Zeichen."))
     else:
         fehler.insert(0, (_halbgerade(_KIPP[rel], F(g)), "Das Zeichen kippt nur bei negativen Zahlen. Hier hast du durch eine positive geteilt."))
-    fehler.append((_halbgerade(loes_rel, F(d + b, m)), "Vorzeichenfehler beim Herüberholen der Zahl: Aus $+b$ wird auf der anderen Seite $-b$."))
+    fehler.append((_halbgerade(loes_rel, F(d + b, m)), f"Vorzeichenfehler beim Herüberholen der Zahl: Aus ${_vz(b)}$ links wird rechts ${_vz(-b)}$."))
     return {
         "frage": f"Löse ${links} {r} {rechts}$. Gib die Lösungsmenge als Intervall an.",
         "loesung": loes,
@@ -504,7 +511,7 @@ def doppelungleichung(rng):
         "frage": f"Löse ${lo} {r_lo} {mitte} {r_hi} {hi}$. Gib die Lösungsmenge als Intervall an.",
         "loesung": loes,
         "tipps": ["Forme alle drei Teile gleichzeitig um.",
-                  f"Zuerst überall {'-' if b > 0 else '+'}${abs(b)}$: ${lo - b} {r_lo} {_lin(a, 0)} {r_hi} {hi - b}$.",
+                  f"Zuerst überall ${'-' if b > 0 else '+'}{abs(b)}$: ${lo - b} {r_lo} {_lin(a, 0)} {r_hi} {hi - b}$.",
                   f"Dann überall durch ${a}$." + (" Negativ: Beide Zeichen kippen." if a < 0 else "")],
         "rechenweg": _zeilen(*zeilen) + f"\n\nAlso $\\mathbb{{L}} = {pruefer.bereich_latex(pruefer.bereich_parsen(loes, 'x'))}$.",
         "erklaerung": "Bei einer Doppelungleichung formst du alle drei Teile gleich um. Teilen durch eine negative Zahl kippt beide Zeichen.",

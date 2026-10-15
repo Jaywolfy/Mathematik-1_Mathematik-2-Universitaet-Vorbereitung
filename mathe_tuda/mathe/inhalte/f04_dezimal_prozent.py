@@ -165,13 +165,13 @@ k.erklaerung("Bruch und Dezimalzahl umwandeln", r"""
 
     !! Das klappt genau dann, wenn der gekürzte Nenner nur die Primfaktoren $2$ und $5$ hat.
 
-    Bei $\frac{1}{3}$ geht das nicht: Keine Zahl mal $3$ ergibt $10$, $100$ oder $1000$.
+    Bei $\frac{1}{3}$ geht das nicht: Keine ganze Zahl mal $3$ ergibt $10$, $100$ oder $1000$.
 
     :::alt Mit Teilen erklärt
     Stell dir vor, $3$ Pizzen werden an $8$ Leute verteilt. Jeder bekommt
-    $3 : 8$ Pizzen. Rechne schriftlich: $30 : 8 = 3$ Rest $6$, dann $60 : 8 = 7$
-    Rest $4$, dann $40 : 8 = 5$ Rest $0$. Fertig: $0{,}375$. Der Rest $0$ zeigt,
-    dass die Division aufgeht.
+    $3 : 8$ Pizzen. Rechne schriftlich: $3 : 8 = 0$ Rest $3$, also $0{,}\ldots$
+    Dann $30 : 8 = 3$ Rest $6$, $60 : 8 = 7$ Rest $4$ und $40 : 8 = 5$ Rest $0$.
+    Fertig: $0{,}375$. Der Rest $0$ zeigt, dass die Division aufgeht.
     :::
     """)
 
@@ -223,7 +223,7 @@ k.erklaerung("Periodische Dezimalzahlen", r"""
     :::warum Warum `0.1 + 0.2` in Python nicht `0.3` ist
     Computer rechnen im Zweiersystem. Dort ist $\frac{1}{10}$ periodisch, so wie
     $\frac{1}{3}$ bei uns. Eine [[Gleitkommazahl]] hat nur $64$ Bit, also wird
-    abgeschnitten. Darum liefert Python `0.30000000000000004`.
+    gerundet. Darum liefert Python `0.30000000000000004`.
     :::
 
     :::alt Mit einer Uhr erklärt
@@ -248,8 +248,18 @@ k.erklaerung("Periodische Dezimalzahlen", r"""
 
     !! Merkregel: Periode durch so viele Neunen, wie sie Ziffern hat: $0{,}\overline{27} = \frac{27}{99}$.
 
-    Steht vor der Periode noch eine Ziffer, wie bei $0{,}4\overline{3}$, schiebst du
-    sie zuerst mit $\cdot\, 10$ vor das Komma.
+    Steht vor der Periode noch eine Ziffer, schiebst du sie zuerst mit $\cdot\, 10$
+    vor das Komma. Danach geht es wie oben:
+
+    :::rechnung Beispiel mit Vorziffer vorgerechnet
+    x = 0{,}1\overline{6} || die $1$ steht vor der Periode
+    10x = 1{,}\overline{6} || mal $10$: Vorziffer vor das Komma
+    100x = 16{,}\overline{6} || noch mal $10$: eine Periode weiter
+    100x - 10x = 15 || abziehen: die Periode fällt weg
+    90x = 15 || zusammenfassen
+    x = \frac{15}{90} || durch $90$ teilen
+    x = \frac{1}{6} || kürzen mit $15$
+    :::
 
     :::alt Mit Neunteln erklärt
     Merk dir eine einzige Zahl: $\frac{1}{9} = 0{,}111\ldots$ Dann ist
@@ -406,8 +416,8 @@ k.erklaerung("Prozent", r"""
     :::
 
     :::warum Laufzeiten
-    Ein Algorithmus wird zweimal um $10\,\%$ schneller. Seine Laufzeit sinkt auf
-    $0{,}9 \cdot 0{,}9 = 0{,}81$, also um $19\,\%$, nicht um $20\,\%$.
+    Die Laufzeit eines Programms sinkt zweimal hintereinander um $10\,\%$. Dann
+    bleiben $0{,}9 \cdot 0{,}9 = 0{,}81$, also sinkt sie insgesamt um $19\,\%$, nicht um $20\,\%$.
     :::
 
     :::alt Mit dem Laden erklärt
@@ -523,6 +533,12 @@ def _runde(x, s):
     return F(math.floor(q + F(1, 2)), 10 ** s)
 
 
+def _fest(w, s):
+    """Gerundeter Wert mit genau s Nachkommastellen (68{,}0 statt 68)."""
+    t = f"{float(w):.{s}f}"
+    return t.replace(".", "{,}")
+
+
 def runden(rng):
     s = rng.choice([0, 1, 1, 2, 2])
     while True:
@@ -555,8 +571,11 @@ def runden(rng):
         "tipps": [f"Die Rundungsstelle sind die {_STELLEN_NAME[s]}.",
                   f"Die Ziffer direkt dahinter ist ${entscheid}$.",
                   f"${entscheid}$ heißt {richtung}."],
-        "rechenweg": _zeilen((f"{dz(x)} \\approx {dz(w)}", f"Ziffer hinter den {_STELLEN_NAME[s]}n ist ${entscheid}$: {richtung}")),
-        "erklaerung": "Nur die Ziffer direkt hinter der Rundungsstelle entscheidet: $0$ bis $4$ ab, $5$ bis $9$ auf.",
+        "rechenweg": _zeilen((f"{dz(x)} \\approx {_fest(w, s)}", f"Ziffer hinter den {_STELLEN_NAME[s]}n ist ${entscheid}$: {richtung}")),
+        "erklaerung": (f"Gerundet {_STELLEN_TEXT[s]}: ${_fest(w, s)}$. "
+                       + ("Die Null am Ende zeigt, wie genau gerundet wurde; die Eingabe ohne sie zählt auch. "
+                          if _fest(w, s) != dz(w) else "")
+                       + "Nur die Ziffer direkt hinter der Rundungsstelle entscheidet: $0$ bis $4$ ab, $5$ bis $9$ auf."),
         "typische_fehler": ohne_gleiche(w, fehler),
     }
 
@@ -571,10 +590,10 @@ def prozent_rechnen(rng):
             break
     pd = F(p, 100)
     if art == "W":
-        frage = rng.choice([f"Wie viel sind ${p}\\,\\%$ von ${g}$?",
-                            f"Ein Gerät kostet ${g}$ Euro. Es gibt ${p}\\,\\%$ Rabatt. Wie viel Euro sparst du?",
-                            f"Eine Festplatte hat ${g}$ GB. ${p}\\,\\%$ davon sind belegt. Wie viele GB sind belegt?"])
-        loes, einheit = w, None
+        frage, einheit = rng.choice([(f"Wie viel sind ${p}\\,\\%$ von ${g}$?", None),
+                                     (f"Ein Gerät kostet ${g}$ Euro. Es gibt ${p}\\,\\%$ Rabatt. Wie viel Euro sparst du?", "€"),
+                                     (f"Eine Festplatte hat ${g}$ GB. ${p}\\,\\%$ davon sind belegt. Wie viele GB sind belegt?", "GB")])
+        loes = w
         weg = _zeilen((f"{dz(pd)} \\cdot {g} = {dz(w)}", f"${p}\\,\\% = {dz(pd)}$, Prozentwert $W = p \\cdot G$"))
         tipps = [f"Schreibe ${p}\\,\\%$ als Dezimalzahl.", f"${p}\\,\\% = {dz(pd)}$.", f"Rechne ${dz(pd)} \\cdot {g}$."]
         fehler = [(g * p, f"Du hast ${p} \\cdot {g}$ gerechnet. ${p}\\,\\%$ sind aber ${dz(pd)}$."),
@@ -591,9 +610,10 @@ def prozent_rechnen(rng):
         fehler = [(pd, f"Das ist der Anteil als Dezimalzahl. In Prozent: mal $100$."),
                   (F(g, w) * 100, f"Du hast ${g} : {dz(w)}$ gerechnet. Teile den Teil durch das Ganze.")]
     else:
-        frage = rng.choice([f"${dz(w)}$ sind ${p}\\,\\%$ des Grundwerts. Wie groß ist der Grundwert?",
-                            f"Ein Download hat ${dz(w)}$ MB geladen. Das sind ${p}\\,\\%$ der Datei. Wie groß ist die Datei in MB?"])
-        loes, einheit = F(g), None
+        frage, einheit = rng.choice([(f"${dz(w)}$ sind ${p}\\,\\%$ des Grundwerts. Wie groß ist der Grundwert?", None),
+                                     (f"Ein Download hat ${dz(w)}$ MB geladen. Das sind ${p}\\,\\%$ der Datei. "
+                                      "Wie groß ist die Datei in MB?", "MB")])
+        loes = F(g)
         weg = _zeilen((f"{dz(w)} : {dz(pd)} = {g}", f"Grundwert $G = W : p$ mit $p = {dz(pd)}$"),
                       (f"{dz(pd)} \\cdot {g} = {dz(w)}", "Probe"))
         tipps = ["Gesucht ist das Ganze, der Grundwert $G$.", f"$G = W : p$ mit $p = {dz(pd)}$.",
@@ -658,8 +678,8 @@ _x = F(13, 30)
 k.rechenweg_aufgabe(r"""
     ## Übungsblatt-Stil: gemischt periodische Dezimalzahl
 
-    Stellen Sie $x = 0{,}4\overline{3}$ als vollständig gekürzten Bruch dar.
-    Geben Sie alle Zwischenschritte an.
+    Stelle $x = 0{,}4\overline{3}$ als vollständig gekürzten Bruch dar.
+    Gib alle Zwischenschritte an.
     """,
     [{"typ": "zahl", "frage": "Mit welcher Zahl nimmst du $x$ zuerst mal, damit die $4$ vor dem Komma steht?",
       "loesung": 10,

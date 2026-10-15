@@ -30,7 +30,8 @@ INLINE_CODE_RE = re.compile(r"`([^`]+)`")
 INLINE_FORMEL_RE = re.compile(r"(?<!\\)\$(?!\$)((?:\\.|[^$\\])+?)(?<!\\)\$")
 INLINE_FETT_RE = re.compile(r"(?<![\w*])\*\*(?=\S)(.+?)(?<=\S)\*\*(?![\w*])")
 INLINE_KURSIV_RE = re.compile(r"(?<![\w*])\*(?=[^\s*`])([^*`\n]*?[^\s*`])\*(?![\w*])")
-GLOSSAR_RE = re.compile(r"\[\[([^\]|]+)(?:\|([^\]]+))?\]\]")
+# Begriff beginnt mit Buchstabe: JSON wie [[5, 2]] in :::visual ist kein Glossar-Link
+GLOSSAR_RE = re.compile(r"\[\[([^\W\d_][^\]|]*)(?:\|([^\]]+))?\]\]")
 
 
 # ──────────────────────────────────────────────────────────────────────────

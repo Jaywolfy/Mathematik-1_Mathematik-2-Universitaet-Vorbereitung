@@ -17,6 +17,7 @@ eintrag("Definition", "Legt fest, was ein Begriff bedeutet. Oft mit $:=$ (ist de
 eintrag("Satz", "Eine bewiesene mathematische Aussage der Form Voraussetzung $\\Rightarrow$ Behauptung. "
         "Kleinere Sätze heißen Lemma, direkte Folgerungen Korollar.",
         "Sind $m, n$ gerade, so ist $m + n$ gerade.", "mathe_lesen", ["Sätze", "Lemma", "Korollar"])
-eintrag("Beweis", "Eine lückenlose Begründung, warum ein Satz gilt. Sie beginnt bei der Voraussetzung und endet mit "
-        "der Behauptung, markiert durch $\\square$ oder „q.e.d.“.", r"$m + n = 2k + 2l = 2(k + l)$, also gerade. $\square$",
+eintrag("Beweis", "Eine lückenlose Begründung, warum ein Satz gilt. Oft steht vorne „z. z.:“ (zu zeigen) mit der Behauptung. "
+        "Die Argumentation beginnt bei der Voraussetzung (die Behauptung darf man nicht annehmen) und endet mit "
+        "der Behauptung, markiert durch $\\square$, „q.e.d.“ oder „w.z.z.w.“.", r"$m + n = 2k + 2l = 2(k + l)$, also gerade. $\square$",
         "mathe_lesen", ["Beweise"])

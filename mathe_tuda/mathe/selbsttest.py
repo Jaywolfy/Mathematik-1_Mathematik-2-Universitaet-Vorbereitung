@@ -394,6 +394,9 @@ def _markup_probleme(text):
     return list(dict.fromkeys(probleme))
 
 
+_RECHENWEG_SCHRITT_TYPEN = {"zahl", "term", "loesungsmenge", "menge", "text", "vektor", "matrix", "mc", "luecke", "wf"}
+
+
 def konkrete_frage_pruefen(q, ist_generator=False, glatt=False):
     """Prüft eine konkrete Frage. Rückgabe: (fehler, warnungen)."""
     fehler, warn = [], []
@@ -404,6 +407,11 @@ def konkrete_frage_pruefen(q, ist_generator=False, glatt=False):
             if b["typ"] == "rechnung":
                 f, _, _ = rechnung_pruefen(b["schritte"])
                 fehler += [f":::rechnung: {x}" for x in f]
+    if q.typ == "rechenweg":
+        for i, st in enumerate(q.schritte):
+            if st.typ not in _RECHENWEG_SCHRITT_TYPEN:
+                fehler.append(f"Rechenweg-Schritt {i + 1}: Typ {st.typ!r} kann die Oberfläche als Teilschritt "
+                              f"nicht anzeigen (erlaubt: {', '.join(sorted(_RECHENWEG_SCHRITT_TYPEN))})")
     if q.typ == "mc":
         if len(q.optionen) < 2:
             fehler.append("MC hat weniger als 2 Optionen")

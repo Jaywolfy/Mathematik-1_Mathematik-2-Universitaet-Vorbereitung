@@ -719,6 +719,10 @@ def form_pruefen(term, form, referenz=None):
             meldung = _gekuerzt_meldung(term.ast)
             if meldung:
                 return meldung
+        if f == "ggt_ausgeklammert":
+            meldung = _ggt_meldung(term.ast)
+            if meldung:
+                return meldung
         if f == "linearfaktoren":
             meldung = _linearfaktoren_meldung(term.ast)
             if meldung:
@@ -759,6 +763,34 @@ def _linearfaktoren_meldung(ast):
             continue
         if pol is not None and pol.grad() >= 2 and pol.rationale_nullstellen():
             return "Richtig, aber ein Faktor lässt sich noch weiter zerlegen. Suche seine Nullstellen."
+    return None
+
+
+def _ggt_meldung(ast):
+    """Formcheck 'ggt_ausgeklammert': Zahl (und Potenz der Variablen) mal Klammer, in der kein
+    gemeinsamer Faktor mehr steckt (ganzzahlige Koeffizienten mit ggT 1, kein gemeinsames x)."""
+    from . import mathlib
+    if _ist_summe(ast):
+        return "Dein Term ist richtig, aber noch keine Produktform. Klammere den größten gemeinsamen Faktor aus."
+    summen = [f for f, e in _faktoren(_ohne_neg(ast)) if _ist_summe(f)]
+    if len(summen) != 1:
+        return "Dein Term ist richtig, aber klammere den größten gemeinsamen Faktor aus: Zahl mal Klammer."
+    try:
+        pol = mathlib.Polynom.aus_ast(_ohne_neg(summen[0]))
+    except ValueError:
+        return None
+    if pol is None:
+        return None
+    koeff = {e: c for e, c in pol.k.items() if c != 0}
+    if any(Fraction(c).denominator != 1 for c in koeff.values()):
+        return "Richtig, aber in der Klammer sollen ganze Zahlen stehen. Klammere eine ganze Zahl aus."
+    g = 0
+    for c in koeff.values():
+        g = math.gcd(g, int(c))
+    if g > 1:
+        return f"Richtig, aber in der Klammer steckt noch der gemeinsame Faktor {g}. Klammere ihn mit aus."
+    if koeff and min(koeff) > 0:
+        return "Richtig, aber jeder Summand in der Klammer enthält noch die Variable. Klammere sie mit aus."
     return None
 
 
@@ -826,6 +858,17 @@ def _nur_zahlen(ast):
     return all(k[0] in ("zahl", "neg", "add", "sub", "mul", "div", "pow") for k in _knoten(ast))
 
 
+def ausgerechnet_meldung(text):
+    """Für Rechenfragen: Eingabe besteht nur aus Zahlen, ist aber noch kein einzelner Wert (z. B. 3,45*100)."""
+    try:
+        t = parse(text)
+    except TermFehler:
+        return None
+    if _nur_zahlen(t.ast) and not _einfache_zahl(t.ast):
+        return "Der Wert stimmt, aber rechne ihn noch ganz aus und gib eine einzelne Zahl an."
+    return None
+
+
 def _einfache_zahl(ast):
     a = _ohne_neg(ast)
     return a[0] == "zahl" or (a[0] == "div" and _ohne_neg(a[1])[0] == "zahl" and a[2][0] == "zahl")
@@ -834,6 +877,10 @@ def _einfache_zahl(ast):
 def _zahlen_meldung(ast):
     """Teil von 'vereinfacht': mehrere reine Zahlfaktoren in einem Produkt zusammenrechnen."""
     for k in _knoten(ast):
+        if k[0] == "div" and k[1][0] == "zahl" and k[2][0] == "zahl" and k is not ast:
+            p_, q_ = k[1][1], k[2][1]
+            if p_.denominator == q_.denominator == 1 and (q_ == 1 or math.gcd(p_.numerator, q_.numerator) > 1):
+                return "Richtig, aber ein Zahlbruch lässt sich noch kürzen oder ausrechnen."
         if k[0] == "mul":
             zahlen = [f for f, e in _faktoren(k) if e == 1 and _ohne_neg(f)[0] == "zahl"]
             if len(zahlen) > 1:
@@ -1086,7 +1133,24 @@ def liste_zerlegen(text):
         else:
             aktuell += c
     teile.append(aktuell)
-    return [t.strip() for t in teile], trenner == ";"
+    erg = []
+    for t in teile:
+        erg.extend(_plusminus_aufspalten(t.strip()))
+    return erg, trenner == ";"
+
+
+def _plusminus_aufspalten(t):
+    """'±5' -> ['5', '-5'];  '2 ± sqrt(10)' -> ['2 + sqrt(10)', '2 - sqrt(10)'];  'x = ±1' -> ['x = 1', 'x = -1']."""
+    t = t.replace("+/-", "±").replace("+-", "±")
+    i = t.find("±")
+    if i < 0:
+        return [t]
+    vorne = t[:i].rstrip()
+    if not vorne or vorne.endswith(("=", "{", "(")):
+        plus, minus = t[:i] + t[i + 1:], t[:i] + "-" + t[i + 1:]
+    else:
+        plus, minus = t[:i] + "+" + t[i + 1:], t[:i] + "-" + t[i + 1:]
+    return _plusminus_aufspalten(plus) + _plusminus_aufspalten(minus)
 
 
 _LEER = {"", "{}", "∅", "ø", "leer", "leeremenge", "keine", "keinelösung", "keineloesung",
@@ -1143,6 +1207,8 @@ def menge_parsen(text):
     if _ist_leer(s):
         return []
     s = s.strip()
+    # leere Menge als Element: {∅; {1}} wie {{}; {1}}
+    s = re.sub(r"\\(?:emptyset|varnothing)|∅|ø", "{}", s)
     if s.startswith("{") and s.endswith("}"):
         s = s[1:-1]
     if not s.strip():
@@ -1285,6 +1351,10 @@ def bereich_parsen(text, variable="x"):
     s = str(text).strip()
     s = s.replace("−", "-").replace("–", "-").replace("≦", "≤").replace("≧", "≥")
     s = re.sub(r"^\s*L\s*=\s*", "", s)
+    # "x = ±5" bzw. "x = 2 ± sqrt(3)" -> "5; -5"
+    m = re.fullmatch(r"\s*[a-zA-Z](?:_\w+)?\s*=\s*([^;{}]*(?:±|\+/-|\+-)[^;{}]*)", s)
+    if m:
+        s = "; ".join(_plusminus_aufspalten(m.group(1).strip()))
     if _ist_leer(s):
         return []
     roh = re.sub(r"\s+", "", s.lower())
@@ -1376,7 +1446,9 @@ def _bereich_latex(ivs):
     if len(ivs) == 1 and math.isinf(ivs[0].lo.f()) and math.isinf(ivs[0].hi.f()):
         return "\\mathbb{R}"
     if all(i.punkt() for i in ivs):
-        return "\\{" + "; ".join(i.lo.latex for i in ivs) + "\\}"
+        el = [i.lo.latex for i in ivs]
+        trenner = ";\\ " if any("{,}" in e for e in el) else ", "
+        return "\\{" + trenner.join(el) + "\\}"
     teile = []
     for i in ivs:
         if i.punkt():
@@ -1489,7 +1561,7 @@ color textcolor colorbox htmlClass hl luecke boxed cancel bcancel xcancel phanto
 underset overset stackrel substack prime ast star dagger aleph ell hbar Re Im mod bmod pmod
 equiv not uparrow downarrow updownarrow Uparrow Downarrow mathfrak checkmark square blacksquare Box
 tag notag nonumber limits nolimits
- mathbin colon lg""".split())
+ mathbin colon lg top oplus Longleftrightarrow preccurlyeq succcurlyeq prec succ bigcup bigcap coloneqq ominus otimes bigoplus nRightarrow nLeftrightarrow bot nexists""".split())
 LATEX_UMGEBUNGEN = {"pmatrix", "bmatrix", "vmatrix", "matrix", "array", "cases", "aligned", "align*",
                     "gathered", "smallmatrix", "Bmatrix", "Vmatrix", "rcases", "split"}
 

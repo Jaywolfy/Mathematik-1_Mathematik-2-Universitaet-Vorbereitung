@@ -52,6 +52,11 @@ def _zeilen(*paare):
     return ":::rechnung\n" + "\n".join(f"{t} || {g}" for t, g in paare) + "\n:::"
 
 
+def _xglied(c):
+    """'+ 3x', '- x' (Koeffizient 1 wird weggelassen)."""
+    return ("- " if c < 0 else "+ ") + ("" if abs(c) == 1 else str(abs(c))) + "x"
+
+
 def _linearfaktor(r):
     """(x - r) als LaTeX bzw. Term-Text; r = 0 ergibt x."""
     return "x" if r == 0 else f"(x {vz(-r)})"
@@ -222,7 +227,7 @@ k.erklaerung("Einfache Fälle ohne Formel", r"""
     """)
 
 k.gleichung("x^2 = 25",
-            erklaerung="Wurzel ziehen, beide Vorzeichen: $x = 5$ oder $x = -5$, denn $(-5)^2 = 25$.",
+            erklaerung="Wurzel ziehen, beide Vorzeichen: $x = 5$ oder $x = -5$, denn $(-5)^2 = 25$. Eingeben kannst du das als {5; -5} oder kurz als ±5.",
             tipps=["Welche Zahl ergibt mal sich selbst $25$?", "Es gibt eine positive und eine negative Zahl.",
                    "$5^2 = 25$ und $(-5)^2 = 25$."],
             rechenweg=r"""
@@ -366,7 +371,7 @@ k.gleichung("x^2 + 2x - 15 = 0",
                              ("{3}", "Es fehlt die zweite Lösung. Rechne $-1 - 4$ mit dem Minus der Formel.")])
 
 k.gleichung("2x^2 - 5x + 2 = 0",
-            erklaerung="Mitternachtsformel mit $a = 2$, $b = -5$, $c = 2$: $D = 25 - 16 = 9$, "
+            erklaerung="Mitternachtsformel mit $a = 2$, $b = -5$, $c = 2$: unter der Wurzel $25 - 16 = 9$, "
                        "$x = \\frac{5 \\pm 3}{4}$, also $2$ und $\\frac{1}{2}$.",
             tipps=["Lies $a$, $b$ und $c$ mit Vorzeichen ab.",
                    "$b^2 - 4ac = (-5)^2 - 4 \\cdot 2 \\cdot 2 = 9$.",
@@ -479,7 +484,7 @@ k.erklaerung("Der Satz von Vieta", r"""
 k.term("Zerlege $x^2 - x - 12$ in Linearfaktoren, also in die Form $(x - x_1)(x - x_2)$.",
        "(x - 4)(x + 3)",
        "Gesucht sind zwei Zahlen mit Produkt $-12$ und Summe $1$: $4$ und $-3$. Also $(x - 4)(x + 3)$.",
-       variablen="x", form="faktorisiert",
+       variablen="x", form="linearfaktoren",
        tipps=["Suche zwei Zahlen mit Produkt $q = -12$ und Summe $-p = 1$.",
               "Ein Produkt von $-12$ heißt: eine Zahl ist positiv, eine negativ.",
               "$4 \\cdot (-3) = -12$ und $4 + (-3) = 1$."],
@@ -517,17 +522,22 @@ def quadratische_gleichung_loesen(rng):
         zeilen.append((f"\\frac{{{gl.tex()}}}{{{tex(a)}}} = {norm.tex()}",
                        f"durch $a = {tex(a)}$ teilen: Normalform"))
     rad = p * p / 4 - q
-    zeilen.append((f"-\\frac{{{tex(p)}}}{{2}} = {tex(-p / 2)}",
-                   f"$p = {tex(p)}$ und $q = {tex(q)}$ ablesen; $-\\frac{{p}}{{2}}$ berechnen"))
+    ablesen = f"$p = {tex(p)}$ und $q = {tex(q)}$ ablesen"
+    erste = f"-\\frac{{{tex(p)}}}{{2}}"
+    if erste != tex(-p / 2):
+        zeilen.append((f"{erste} = {tex(-p / 2)}", ablesen + "; $-\\frac{p}{2}$ berechnen"))
+        grund = "unter der Wurzel"
+    else:
+        grund = ablesen + f"; $-\\frac{{p}}{{2}} = {tex(-p / 2)}$; unter der Wurzel"
     zeilen.append((f"\\left(\\frac{{{tex(p)}}}{{2}}\\right)^2 - {tk(q)} = {tex(p * p / 4)} - {tk(q)} = {tex(rad)}",
-                   "unter der Wurzel"))
+                   grund))
     fehler = []
     if rad < 0:
         loesung = "{}"
         zeilen.append((f"{tex(rad)} < 0", "negativ: Aus einer negativen Zahl gibt es keine reelle Wurzel"))
         falsch = pruefer.bereich_text(mathlib.loese(f"x^2 + ({mathlib.text(p)})*x + ({mathlib.text(p * p / 2 - q)}) = 0"))
         fehler.append((falsch, "Unter der Wurzel steht eine negative Zahl. Du hast ihr Minus einfach weggelassen. "
-                               "Dann gibt es aber keine reelle Lösung: $\\mathbb{L} = \\{\\}$."))
+                               "Dann gibt es aber keine reelle Lösung: $\\mathbb{L} = \\emptyset$."))
         erkl = "Die Zahl unter der Wurzel ist negativ, also gibt es keine reelle Lösung."
     else:
         w = F(abs(r1 - r2), 2)
@@ -622,10 +632,10 @@ def vieta_zerlegen(rng):
                "Die Vorzeichen in den Klammern sind vertauscht. Zur Lösung $x_1$ gehört der Faktor $(x - x_1)$."),
               (f"{_linearfaktor(r1)}{_linearfaktor(-r2)}",
                "Ein Vorzeichen stimmt nicht. Probe: Multipliziere aus und vergleiche mit der Aufgabe.")]
-    mitte = f"x^2 {vz(-r2)}x {vz(-r1)}x {vz(q)}"
+    mitte = f"x^2 {_xglied(-r2)} {_xglied(-r1)} {vz(q)}"
     return {
         "frage": f"Zerlege ${poly.tex()}$ in Linearfaktoren, also in die Form $(x - x_1)(x - x_2)$.",
-        "loesung": loesung, "variablen": "x", "form": "faktorisiert",
+        "loesung": loesung, "variablen": "x", "form": "linearfaktoren",
         "tipps": [f"Suche zwei Zahlen mit Produkt $q = {q}$ und Summe $-p = {-p}$.",
                   "Ist $q$ negativ, hat eine Zahl ein Minus. Ist $q$ positiv, haben beide dasselbe Vorzeichen.",
                   f"Eine der Zahlen ist ${r1}$."],
@@ -723,7 +733,7 @@ k.rechenweg_aufgabe(r"""
     x_2 = 2 - \sqrt{10} || mit Minus
     :::
 
-    Also $\mathbb{L} = \{2 - \sqrt{10};\ 2 + \sqrt{10}\}$.
+    Also $\mathbb{L} = \{2 - \sqrt{10},\ 2 + \sqrt{10}\}$.
     """)
 
 k.papier(r"""

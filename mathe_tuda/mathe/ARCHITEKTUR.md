@@ -110,7 +110,7 @@ vermutlich gemacht hat und warum es nicht geht), `uebungsblatt=False`, `punkte=1
 | `k.ordnen(frage, schritte, erkl, ablenker=(), alternativen=())` | [zeilen_id] | Parsons-Prinzip für Rechen-/Beweisschritte |
 | `k.luecke(frage, formel_mit_\luecke, [[akzeptiert], …], erkl)` | [str] | je Lücke Zahl/Term-Äquivalenz |
 | `k.graph_punkt(frage, visual, modus="setzen", ziel=(x, y) / modus="ablesen", loesung=…, toleranz=0.25, raster=0.5)` | [x, y] / str | Funktionsgraph aus `visual` (Schema wie `funktionsgraph`) |
-| `k.rechenweg_aufgabe(frage, [{"typ": "zahl", "frage": …, "loesung": …, "tipps": …, …}, …])` | {schritt, antwort} | 2–5 Teilschritte, jeder einzeln, Teilpunkte; nach jedem Schritt wird der richtige Wert gezeigt |
+| `k.rechenweg_aufgabe(frage, [{"typ": "zahl", "frage": …, "loesung": …, "tipps": …, …}, …])` | {schritt, antwort} | 2–5 Teilschritte (Typen: zahl, term, loesungsmenge, menge, text, vektor, matrix, mc, luecke, wf), jeder einzeln, Teilpunkte; nach jedem Schritt wird der richtige Wert gezeigt |
 | `k.papier(aufgabe, musterloesung, [checkliste], erkl)` | [bool] | Selbstbewertung pro Punkt, XP 5 je Punkt |
 | `k.generator(fn, typ, titel, glatt=False, probe=None)` | wie `typ` | siehe unten |
 
@@ -237,9 +237,13 @@ Kein `eval`: Tokenizer + rekursiver Abstieg → AST aus Tupeln; Grenzen für Lä
 **Formchecks** (`form=` bei `term`/`vereinfache`, `formen=[…]` je Lücke bei `luecke`, mehrere mit `|`):
 `ausmultipliziert`, `faktorisiert`, `ohne_klammern`, `gekuerzt` (Zahlbruch bzw. Polynombruch),
 `wurzel_vereinfacht` (kein Quadratfaktor unter √, keine ganz ausrechenbare Wurzel, keine Wurzel im Nenner),
-`potenz` (jede Basis einmal pro Produkt, keine Potenz einer Potenz), `vereinfacht` (alles davor außer
+`potenz` (jede Basis einmal pro Produkt, keine Potenz einer Potenz), `ggt_ausgeklammert` (Zahl·Klammer, Klammer
+ganzzahlig mit ggT 1 und ohne gemeinsames x), `linearfaktoren` (zerfällt über ℚ nicht weiter), `vereinfacht` (alles davor außer
 ausmultipliziert/faktorisiert, Zahlen zusammengerechnet, nicht deutlich länger als die Lösung).
-`ohne_gleiche(loesung, fehler)` filtert auch Terme und Lücken-Listen.
+`ohne_gleiche(loesung, fehler)` filtert auch Terme und Lücken-Listen. Zahlfragen und Lücken mit rationaler
+Lösung verlangen automatisch einen ausgerechneten Wert (`3,45*100` → „Fast!“). Einheiten-Synonyme: € = Euro,
+% = Prozent, ° = Grad, GB/MB/kB ausgeschrieben. In Mengen und Lösungsmengen versteht der Prüfer `±`
+(`±5`, `x = ±5`, `2 ± sqrt(3)`, `{±1; ±2}`). Angezeigte Mengen trennen mit Komma (TU-Stil), mit `;` nur bei Dezimalzahlen.
 
 **`:::rechnung`-Zeilen:** `!` = absichtlich falscher Schritt („So nicht!“); `#` = Widerspruch ohne
 Variable (z. B. `1 = 5`), daraus folgt $\mathbb{L} = \emptyset$; davor stehende Gleichungen werden dann
@@ -278,6 +282,8 @@ Auftreten erklärt und als `[[…]]` verlinkt. `:::alt` erklärt mit einem **and
 Deutsch, Du-Form, kurze Sätze, kleine Zahlen. Keine Floskeln, keine Gedankenstriche als Stilmittel.
 Vereinfachungen müssen stimmen und werden später präzisiert. Beweise: jeder Schritt begründet,
 Induktionsanfang, -voraussetzung und -schritt ausdrücklich benannt.
+
+**Mathe 1 folgt dem Skript von Prof. Disser (WS 26/27):** Notation, Begriffe und Satznummern siehe LEHRPLAN.md, Abschnitt Mathe 1. Bei Widerspruch zu den Regeln unten gilt dort das Skript.
 
 **Notation (wie an der TU Darmstadt):** Dezimalkomma; Intervalle mit runden Klammern $(a, b]$
 (die Schreibweise $]a, b]$ wird erwähnt); Malpunkt `\cdot`; Abbildungen $f\colon D \to W,\ x \mapsto \ldots$;

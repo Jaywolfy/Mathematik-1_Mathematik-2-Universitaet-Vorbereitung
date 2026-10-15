@@ -8,6 +8,7 @@ Fundstelle aus der Spalte „Quelle“.
 | Kürzel | Dokument | Ort |
 |---|---|---|
 | **MHB** | Modulhandbuch B.Sc. Informatik, PO 2023 (Stand 30.09.2022): „Mathematik I für Informatik“ (04-10-0118, 9 CP, WiSe) und „Mathematik II für Informatik“ (04-10-0119, 9 CP, SoSe). Prüfung: Klausur 90 Minuten; Zulassung über Hausübungen | `Unterlagen/TU_Recherche/Modulhandbuch_BSc_Informatik_PO2023.pdf` (S. 12 und 20) |
+| **DIS** | **Verbindlich für Mathe 1:** Skript „Mathematik I für Informatik“, Prof. Dr. Yann Disser, WS 2026/27 (Stand 11.10.2026, Kap. 1–7) und Vorlesungsfolien (VL 1 vom 12.10.2026) | `Unterlagen/Mathe1_Disser_2026/` |
 | **MVK** | Mathematik-Vorkurs TU Darmstadt 2026/27 (A. Ihrig), Vorlesungen 1–15 als Handout/Prehandout, Übung „Folgen“, Induktionsaufgabe | `Unterlagen/Vorkurs/` |
 | **SKR** | Skript „Mathematik I/II für Inf, WInf“, R. Haller-Dintelmann, TU Darmstadt (Fassungen WS 15/16 und 2015/16). Gliederung entspricht genau den Lerninhalten des MHB | `Unterlagen/TU_Recherche/Skript_*.pdf` |
 | **UEB** | Offizielle Übungsblätter mit Lösungen, Mathe I für Inf (WS 09/10) und Mathe II für Inf (SoSe 10) | `Unterlagen/TU_Recherche/Uebungen_*` |
@@ -27,7 +28,7 @@ Praxisaufgaben mit `uebungsblatt=True` folgen diesem Stil: Aufgabenstellung im S
 zitieren ist erlaubt, Erklärungen bleiben in der Du-Form.
 
 **Notation:** siehe ARCHITEKTUR.md Abschnitt 6. Wichtig: Der Vorkurs setzt $\mathbb{N} = \{1, 2, \ldots\}$,
-das Skript Mathe I/II setzt $\mathbb{N} = \{0, 1, 2, \ldots\}$ und $\mathbb{N}^* = \{1, 2, \ldots\}$.
+das Skript Mathe I (DIS) setzt $\mathbb{N} = \{0, 1, 2, \ldots\}$ und schreibt $\mathbb{N} \setminus \{0\}$ für die positiven.
 
 ## Fundament (Schulstoff, `teil="fundament"`, Quelle „Schulstoff (Voraussetzung für den TU-Vorkurs)“)
 
@@ -67,6 +68,7 @@ Die Lernziele der Folien sind die Lernziele der Kapitel.
 | v09_induktion | induktion | Vollständige Induktion | MVK VL 3 + Induktionsaufgabe | IA, IV, IS, Summenformeln, Teilbarkeit, Beweisschritte ordnen |
 | v10_abbildungen | abbildungen | Funktionen, Bild und Urbild | MVK VL 4 | $f\colon D \to W$, Definitions-/Zielmenge, Graph, Bild $f(A)$, Urbild $f^{-1}(B)$ |
 | v11_injektiv | injektiv | Injektiv, surjektiv, bijektiv | MVK VL 4–5 | Definitionen, Nachweis, Gegenbeispiel, Umkehrfunktion |
+| *(zurückgestellt seit 13.10.2026: v12–v26, Mathe 1 nach DIS hat Vorrang)* | | | | |
 | v12_verkettung | verkettung | Verkettung und Umkehrfunktion | MVK VL 5 | $g \circ f$, Rechenoperationen, Umkehrfunktion der Verkettung |
 | v13_reelle_funktionen | reelle_funktionen | Eigenschaften reeller Funktionen | MVK VL 5–6 | gerade/ungerade, Monotonie, Beschränktheit, Zusammenhänge |
 | v14_folgen | folgen | Folgen | MVK VL 6 | explizit, rekursiv, Monotonie, Beschränktheit |
@@ -83,47 +85,64 @@ Die Lernziele der Folien sind die Lernziele der Kapitel.
 | v25_inverse_det | inverse_det | Inverse und Determinante | MVK VL 14 | Invertierbarkeit, Determinante 2×2 und 3×3 (Sarrus), Inverse 2×2 |
 | v26_komplexe_zahlen | komplexe_zahlen | Komplexe Zahlen | MVK VL 15 | $i$, Real-/Imaginärteil, Rechnen, Konjugation, Division, Zahlenebene, Polarkoordinaten |
 
-## Mathe 1 (`teil="mathe1"`, Quelle „Mathe I (PO 2023); Skript Kap. x“)
+## Mathe 1 (`teil="mathe1"`, Quelle „Skript Disser WS 26/27, Abschn. x“)
 
-MHB-Lerninhalt: Mengen, Relationen, Funktionen, algebraische Grundstrukturen; modulare Arithmetik,
-RSA; endlichdimensionale Vektorräume, lineare Abbildungen und Matrizen, Gauß-Algorithmus,
-Determinanten, Eigenwerte; reelle und komplexe Zahlen; Folgen und Konvergenz.
+**Grundlage ist ausschließlich das aktuelle Skript DIS** (es ersetzt die frühere Planung nach SKR).
+Reihenfolge, Definitionen, Satznummern, Beispiele und Notation folgen DIS. Kapitel zitieren die
+Nummern („nach Satz 1.17“), damit Jason Skript und Lernsystem nebeneinander nutzen kann.
+Vorlesung: Mo 13:30 und Do 9:50; Gruppenübungen ab 19.10.; **Zwischenprüfung 30.11.–4.12.2026
+(Klausurzulassung)**, 12 Übungsquizze (≥ 9 bestanden ⇒ Notenbonus). Diese Termine bestimmen die
+Reihenfolge der Bearbeitung: zuerst Kap. 1, dann 2, 3 usw.
 
-| Datei | Slug | Titel | Skript | Inhalt |
+**Notation DIS (verbindlich in allen m1-Kapiteln):** $\mathbb{N} = \{0, 1, 2, \ldots\}$, positive
+natürliche Zahlen $\mathbb{N} \setminus \{0\}$; $Z_{\geq 0}$; Wahrheitswerte „wahr/falsch“; $:=$
+definierend; Beweisende □, Beispielende △; Mengenschreibweise $\{x \in G \mid E(x)\}$; Intervalle
+$(a, b]$; Vektoren fett als Spalten $(x_1, \ldots, x_n)^\top$, Einheitsvektoren $e^{(j)}$;
+Standardskalarprodukt $(x \mid y)$, Norm $\lVert x \rVert$; lineare Hülle $\langle M \rangle$;
+Koordinatenvektor $[v]_{\mathfrak{B}}$; Darstellungsmatrix $[f]_{\mathfrak{C} \leftarrow \mathfrak{B}}$,
+Basiswechsel $S_{\mathfrak{C} \leftarrow \mathfrak{B}}$; Spalte $A_{\cdot j}$, Eintrag $A_{ij}$;
+Einheitsmatrix $\mathbb{I}_n$; Restklassen $[a]_n$, $\mathbb{Z}/n\mathbb{Z}$, $\mathbb{F}_2$;
+$a \operatorname{div} b$, $a \bmod b$; charakteristisches Polynom $\chi_A(t) = \det(A - t\mathbb{I}_n)$;
+Landau-Symbole $\mathcal{O}, \Omega, \Theta, o, \omega$.
+
+| Datei | Slug | Titel | DIS | Inhalt |
 |---|---|---|---|---|
-| m1_01_aussagen_mengen | uni_mengen | Aussagen und Mengen an der Uni | 1.1–1.2 | Aussageformen, Quantoren präzise, Mengenalgebra, Potenzmenge, ℕ-Konvention des Skripts |
-| m1_02_ordnungsrelationen | ordnungsrelationen | Relationen und Ordnungen | 1.3.1 | Relation als Teilmenge, reflexiv, antisymmetrisch, transitiv, total, Halbordnung |
-| m1_03_aequivalenzrelationen | aequivalenzrelationen | Äquivalenzrelationen | 1.3.2 | symmetrisch, Klassen, Partition, Repräsentanten, Restklassen als Beispiel |
-| m1_04_abbildungen | uni_abbildungen | Abbildungen präzise | 1.4 | Abbildung als Relation, Komposition, Umkehrabbildung, Bild/Urbild-Regeln, Mächtigkeit |
-| m1_05_beweisprinzipien | beweisprinzipien | Beweisprinzipien | 1.5 | direkt, Kontraposition, Widerspruch, Induktion (Ungleichungen, Teilbarkeit, starke Induktion) |
-| m1_06_teilbarkeit | teilbarkeit | Teilbarkeit und Primzahlen | 2.1 | Teiler, Division mit Rest, Primzahlen, Primfaktorzerlegung, ggT/kgV |
-| m1_07_modulo | modulo | Modulare Arithmetik | 2.1.1 | Kongruenz, Rechnen mod n, $\mathbb{Z}_n$, Rechenregeln, schnelles Potenzieren |
-| m1_08_euklid | euklid | Euklidischer Algorithmus | 2.1.2 | ggT per Euklid, erweiterter Euklid, Bézout, modulare Inverse |
-| m1_09_fermat | fermat | Kleiner Satz von Fermat | 2.1.3 | Fermat, Euler-φ, Satz von Euler |
-| m1_10_rsa | rsa | RSA | 2.2 | Schlüsselerzeugung, Verschlüsseln, Entschlüsseln, warum es funktioniert |
-| m1_11_gruppen | gruppen | Gruppen | 2.3 | Verknüpfung, Axiome, Beispiele, Eindeutigkeit von neutralem/inversem Element, Ordnung |
-| m1_12_untergruppen | untergruppen | Untergruppen und Homomorphismen | 2.3.1–2.3.2 | Untergruppenkriterium, Homomorphismus, Kern, Bild, Isomorphismus |
-| m1_13_ringe_koerper | ringe_koerper | Ringe und Körper | 2.4 | Ring, Körper, Nullteiler, $\mathbb{Z}_n$ Körper genau für n prim |
-| m1_14_komplex_koerper | komplex_koerper | Der Körper ℂ | 2.5 | ℂ als Paare, Rechnen, Betrag, Polardarstellung, Euler-Formel, Wurzeln, Einheitswurzeln |
-| m1_15_vektorraeume | vektorraeume | Vektorräume | 3.1 | Axiome, $K^n$, Polynome, Funktionen, Summenschreibweise |
-| m1_16_unterraeume | unterraeume | Untervektorräume und Spann | 3.2.1 | Unterraumkriterium, Linearkombination, Erzeugnis |
-| m1_17_basis | basis | Lineare Unabhängigkeit, Basis, Dimension | 3.2.2 | linear unabhängig, Basis, Dimension, Basisergänzung |
-| m1_18_skalarprodukt | skalarprodukt | Normen und Skalarprodukte | 3.4 | Norm, Skalarprodukt, Cauchy-Schwarz, Winkel, Orthogonalität, Orthonormalbasis, Gram-Schmidt |
-| m1_19_geometrie | geometrie | Geometrie im ℝⁿ | 3.5 | Geraden, Ebenen, Kreuzprodukt, Hesse-Normalform, Abstände, Schnittpunkte |
-| m1_20_lineare_abbildungen | lineare_abbildungen | Lineare Abbildungen | 3.6 | Linearität, Kern, Bild, Dimensionsformel, injektiv ⇔ Kern = {0} |
-| m1_21_abbildungsmatrix | abbildungsmatrix | Matrizen und Abbildungsmatrix | 3.7 | Matrixrechnung, Abbildungsmatrix bzgl. Basen, Komposition = Produkt |
-| m1_22_lgs | lgs | Lineare Gleichungssysteme | 3.8 | Lösbarkeit, Rang, Lösungsstruktur (partikulär + Kern), Gauß-Algorithmus, Inverse per Gauß |
-| m1_23_basiswechsel | basiswechsel | Basiswechsel | 3.9 | Koordinaten, Transformationsmatrix, $T^{-1} A T$ |
-| m1_24_determinanten | determinanten | Determinanten | 3.10 | Eigenschaften, Laplace-Entwicklung, Zeilenumformungen, $\det(AB)$, Invertierbarkeit |
-| m1_25_eigenwerte | eigenwerte | Eigenwerte und Eigenvektoren | 3.11 | Definition, charakteristisches Polynom, Eigenräume, Vielfachheiten |
-| m1_26_diagonalisierung | diagonalisierung | Diagonalisierung | 3.11 | diagonalisierbar, $S^{-1} A S = D$, symmetrische Matrizen, Potenzen |
-| m1_27_reelle_zahlen | reelle_zahlen | Die reellen Zahlen | 5.1–5.2 | Körper- und Anordnungsaxiome, Betrag, Supremum/Infimum, Vollständigkeit, Bernoulli |
-| m1_28_konvergenz | konvergenz | Konvergenz von Folgen | 5.3.1 | ε-Definition sauber, Beweise von Grenzwerten, wichtige Beispiele ($q^n$, $\sqrt[n]{n}$) |
-| m1_29_konvergenzkriterien | konvergenzkriterien | Konvergenzkriterien für Folgen | 5.3.2–5.3.3 | monoton + beschränkt, Cauchy-Folgen, Teilfolgen, Häufungswerte, Bolzano-Weierstraß, $e$ |
-| m1_30_asymptotik | asymptotik | Asymptotik und Landau-Symbole | 5.4 | $O$, $o$, $\Theta$, Wachstumsvergleich, Laufzeiten |
-| m1_31_reihen | reihen | Reihen | 5.5 | Partialsummen, geometrische, harmonische, Teleskop-Reihe, notwendiges Kriterium |
-| m1_32_reihenkriterien | reihenkriterien | Konvergenzkriterien für Reihen | 5.5.1–5.5.2 | Majorante/Minorante, Quotienten-, Wurzel-, Leibniz-Kriterium, absolute Konvergenz, Cauchy-Produkt |
-| m1_33_normierte_raeume | normierte_raeume | Konvergenz in normierten Räumen | 5.6 | Normen im $\mathbb{R}^n$, Konvergenz komponentenweise, offen, abgeschlossen, kompakt |
+| m1_01_aussagen | uni_aussagen | Aussagen und logische Verknüpfungen | 1.1–1.2 | Aussage, Aussageform, ¬ ∧ ∨ ⊕ ⇒ ⇔, Wahrheitstabellen, hinreichend/notwendig, ex falso quodlibet, Kontrapositionsgesetz, De Morgan, Bem. 1.9 |
+| m1_02_beweisformen | beweisformen | Logisches Schließen und Beweisformen | 1.3 | Satz/Theorem/Lemma/Korollar, Schlussregeln (Modus ponens/tollens, Elimination), direkt, Äquivalenzumformung, Kontraposition, Widerspruch ($\sqrt 2$), Fallunterscheidung (Satz 1.19, 1.20) |
+| m1_03_mengen | uni_mengen | Mengen | 1.4 | Aufzählung, Aussonderung, ℕ und ℤ, ∪ ∩ \, disjunkt, Distributivgesetz beweisen (Satz 1.23), Tupel, kartesisches Produkt, $A^0$, Potenzmenge |
+| m1_04_quantoren | uni_quantoren | All- und Existenzquantor | 1.5 | ∀, ∃, Negation von Quantoren, Vereinigung und Schnitt über Mengensysteme, leerer Schnitt |
+| m1_05_relationen | relationen | Relationen und ihre Eigenschaften | 1.6 | Relation als Teilmenge, gerichteter Graph, reflexiv, symmetrisch, antisymmetrisch, transitiv (Beispiele 1.39–1.41) |
+| m1_06_ordnungen | ordnungen | Ordnungen, Supremum und Infimum | 1.6 | Ordnungsrelation, Totalordnung, Maximum/Minimum, Schranken, sup/inf, Satz 1.58 |
+| m1_07_aequivalenzrelationen | aequivalenzrelationen | Äquivalenzrelationen | 1.6 | Äquivalenzklasse, Satz 1.63, Faktormenge, ℚ als Faktormenge (Bsp. 1.65) |
+| m1_08_abbildungen | uni_abbildungen | Abbildungen | 1.7 | Abbildung als Relation, Bild/Urbild, injektiv/surjektiv/bijektiv, Verkettung, Umkehrabbildung, Einschränkung, Satz 1.82 |
+| m1_09_induktion | peano_induktion | Natürliche Zahlen und vollständige Induktion | 2.1–2.2 | Peano-Axiome, ℕ als Mengen, Nachfolger, Induktionsanfang/-schritt, Abwandlungen (Bem. 2.9) |
+| m1_10_zaehlen | zaehlen | Endliche Mengen, Addition und Subtraktion | 2.3–2.4 | Kardinalität über Bijektionen, $\lvert A \cup B\rvert$, Summenzeichen, Subtraktion, Satz 2.27 |
+| m1_11_division | division_rest | Multiplikation, Division und Division mit Rest | 2.5 | $\lvert A \times B \rvert$, Produktzeichen, Summenformel per Induktion, Teilbarkeit, div und mod, Rechnen mit Resten (Satz 2.44) |
+| m1_12_kombinatorik | kombinatorik | Potenz, Fakultät und Binomialkoeffizient | 2.6–2.8 | Abbildungen zählen, $\lvert\mathcal{P}(M)\rvert = 2^{\lvert M\rvert}$, Permutationen, $n!$, $\binom{n}{k}$, Pascal, binomischer Lehrsatz |
+| m1_13_rsa | rsa | Kryptographie: RSA | 2.9 | Primzahl, Primzahllemma, kleiner Satz von Fermat, RSA-Schlüssel, Ver-/Entschlüsseln, Korrektheit, Beispiel $n = 55$ |
+| m1_14_ganze_zahlen | ganze_zahlen | Die ganzen Zahlen | 3.1 | ℤ als $\mathbb{N}^2/\sim$, Addition, Subtraktion, Multiplikation, Vorzeichenregeln |
+| m1_15_gruppen | gruppen | Gruppen | 3.2 | Gruppenaxiome, abelsch, Eindeutigkeit (Satz 3.9), Lösbarkeit, Kürzungsregeln, Beispiele: ℤ, Bitgruppe, Permutationen, $\mathbb{Z}/n\mathbb{Z}$ |
+| m1_16_homomorphismen | gruppenhomomorphismen | Untergruppen und Homomorphismen | 3.2 | Untergruppenkriterium, erzeugte Untergruppe, Homomorphismus, Iso-/Automorphismus, Kern, Injektivität ⇔ Kern trivial |
+| m1_17_ringe_koerper | ringe_koerper | Ringe, Körper und die rationalen Zahlen | 3.3–3.5 | Ring, Vorzeichenregeln, Restklassenring, Nullteiler, ℚ, Körper, $\mathbb{Z}/p\mathbb{Z}$, Körperhomomorphismus, angeordnete Körper |
+| m1_18_reelle_zahlen | reelle_zahlen | Die reellen Zahlen | 3.6 | Vollständigkeitsaxiom, Intervalle, ℚ dicht, n-te Wurzel, rationale Potenz, Betrag, Dreiecksungleichung |
+| m1_19_komplexe_zahlen | komplexe_zahlen_uni | Die komplexen Zahlen | 3.7–3.8 | ℂ = ℝ², i, kartesische Darstellung, Konjugation, Betrag, Inverse, nicht anordenbar, Fundamentalsatz, Zahlbereiche |
+| m1_20_geometrie_rn | geometrie_rn | Geometrie des ℝⁿ | 4.1 | Vektoren, Geraden, Ebenen, Schnittpunkte, Skalarprodukt, Länge, Orthogonalität, Hyperebene, Abstand (Satz 4.15), Kreuzprodukt, Fläche und Spatvolumen |
+| m1_21_vektorraeume | vektorraeume | Vektorräume und Untervektorräume | 4.2–4.3 | Axiome, $K^n$, $K[X]$, Funktionenräume, Unterraumkriterium, lineare Hülle, Linearkombination |
+| m1_22_basis_dimension | basis_dimension | Basen und Dimension | 4.4–4.5 | lineare Unabhängigkeit, Basis, Koordinatenvektor, Austauschsatz, Basisergänzung, Dimensionsformel für Untervektorräume |
+| m1_23_skalarprodukt | skalarprodukt | Skalarprodukte, Normen und Orthonormalbasen | 4.6–4.7 | Skalarprodukt-Axiome, Cauchy–Schwarz, Normen ($\lVert\cdot\rVert_1$, $\lVert\cdot\rVert_\infty$), Abstand, Orthonormalbasis, Gram–Schmidt |
+| m1_24_projektionen | projektionen | Projektionen und affine Räume | 4.8–4.9 | orthogonales Komplement, Orthogonalprojektion, affiner Raum, Dimension einer Hyperebene |
+| m1_25_lineare_abbildungen | lineare_abbildungen | Lineare Abbildungen, Kern, Bild und Rang | 5.1–5.2 | Linearität, Basisbilder (Satz 5.9), $\mathrm{Hom}_K(V,W)$, Kern, Bild, Rang, Urbilder, Dimensionsformel, Isomorphie |
+| m1_26_matrizen | matrizen_uni | Matrizen und Rechnen mit Matrizen | 5.3–5.4 | Matrix-Vektor-Produkt, Darstellungsmatrix, Matrixprodukt = Verkettung, Rechenregeln, Nullteiler, Transponierte |
+| m1_27_invertierbarkeit | invertierbarkeit | Invertierbarkeit | 5.5 | Inverse, Äquivalenzen (Satz 5.65), $AB = \mathbb{I}_n \Rightarrow BA = \mathbb{I}_n$, $\mathrm{GL}_n(K)$ |
+| m1_28_basiswechsel | basiswechsel | Basiswechsel und Ähnlichkeit | 5.6–5.7 | Basiswechselmatrix, $S^{-1}AS$, Ähnlichkeit, Haar-Bildcodierung |
+| m1_29_lgs_gauss | lgs_gauss | Lineare Gleichungssysteme und Gauß-Verfahren | 6.1–6.2 | Lösungsstruktur, Rangkriterium, Zeilenumformungen, (reduzierte) Zeilenstufenform, Kernbasis, Bildbasis, Inverse per Gauß, über $\mathbb{F}_2$, $\mathbb{F}_5$ |
+| m1_30_determinanten | determinanten | Determinanten | 6.3 | Axiome (multilinear, alternierend, normiert), Spaltenumformungen, Berechnung per Gauß, Produktregel, $\det(A^\top)$, Fläche/Volumen |
+| m1_31_eigenwerte | eigenwerte | Eigenwerte und Diagonalisierung | 6.4 | Eigenvektor, Eigenraum, $\chi_A$, Ähnlichkeit, Diagonalisierbarkeit, Matrixpotenzen, Fibonacci |
+| m1_32_symmetrische_matrizen | symmetrische_matrizen | Symmetrische Matrizen und quadratische Formen | 6.5 | orthogonale Matrizen, Spektralsatz, orthogonale Diagonalisierung, Definitheit |
+| m1_33_folgen | folgen_uni | Folgen und Konvergenz | 7.1 | Folge, beschränkt, monoton, ε-Definition, Grenzwertregeln, Einschließung, bestimmt divergent, geometrische Folge, Monotoniekriterium |
+| m1_34_teilfolgen | teilfolgen | Teilfolgen und Cauchy-Folgen | 7.1 | Teilfolge, Häufungswert, Bolzano–Weierstraß, Cauchy-Kriterium |
+| m1_35_reihen | reihen | Reihen und Konvergenzkriterien | 7.2 | Partialsummen, geometrische/harmonische/Teleskopreihe, absolute Konvergenz, Majorante/Minorante, Leibniz, Quotient, Wurzel, Produktsatz |
+| m1_36_asymptotik | asymptotik | Asymptotik und Landau-Symbole | 7.3 | $\mathcal{O}, \Omega, \Theta, o, \omega$, Rechenregeln, Wachstumshierarchie, Laufzeiten |
 
 ## Mathe 2 (`teil="mathe2"`, Quelle „Mathe II (PO 2023); Skript Kap. x“)
 
@@ -167,6 +186,7 @@ Fourierreihen; gewöhnliche Differentialgleichungen (elementare Lösungsmethoden
 | Datei | Teil | Inhalt |
 |---|---|---|
 | b_01_python | bonus | Mathe mit Python (niedrige Priorität) |
+| k_00_zwischenpruefung | klausur | Übungs-Zwischenprüfung Mathe I (Woche 30.11.–4.12.2026, Klausurzulassung), Stoff DIS Kap. 1 bis zum dann erreichten Stand, Stil der Übungsquizze |
 | k_01_klausur_mathe1 | klausur | Aufgabenpool im Stil von Mathe I: Beweis (Induktion), Relation/Abbildung, Modulo/RSA, Gruppe/Körper, LGS mit Parameter, Determinante, Eigenwerte, Grenzwert, Reihenkonvergenz |
 | k_02_klausur_mathe2 | klausur | Aufgabenpool im Stil von KL: Stetigkeit, Potenzreihe, Taylor, Extrema in 2 Variablen, Lagrange, Integral, Fourier, AWP, DGL-System |
 

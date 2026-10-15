@@ -444,6 +444,24 @@ function rechenwegKarte(f, opts, karte) {
       g = zellenGitter({ zeilen: s.zeilen, spalten: s.spalten || 1, onEnter: () => pruefen.click() });
       li.append(g.el);
       holen = () => g.werte();
+    } else if (s.typ === "luecke") {
+      let k = 0;
+      const tex = String(s.formel || "").replace(/\\luecke/g, () => `\\boxed{\\,\\textsf{${++k}}\\,}`);
+      const felder = [];
+      const lliste = h("div", { class: "luecken-liste" });
+      for (let j = 0; j < k; j++) {
+        const e = eingabeFeld({ modus: "term", label: `Lücke ${j + 1}`, onEnter: () => (j < k - 1 ? felder[j + 1].fokus() : pruefen.click()) });
+        e.el.querySelector(".pad-kopf")?.remove(); e.el.querySelector(".pad")?.remove();
+        felder.push(e);
+        lliste.append(h("div", { class: "luecke-zeile" }, h("span", { class: "luecke-nr", text: j + 1 }), e.el));
+      }
+      li.append(h("div", { class: "formel-block gross", html: texHtml(tex, true) }), lliste);
+      holen = () => (felder.some(x => !x.wert().trim()) ? "" : felder.map(x => x.wert()));
+    } else if (s.typ === "wf") {
+      let wahl = null;
+      const bs = [["wahr", true], ["falsch", false]].map(([t, w]) => { const b = h("button", { class: "option", type: "button", text: t }); b.onclick = () => { wahl = w; bs.forEach(x => x.classList.toggle("gewaehlt", x === b)); }; return b; });
+      li.append(h("div", { class: "optionen" }, bs));
+      holen = () => wahl;
     } else if (s.typ === "mc") {
       let wahl = null;
       const bs = (s.optionen || []).map(o => { const b = h("button", { class: "option", type: "button", html: inline(o) }); b.onclick = () => { wahl = o; bs.forEach(x => x.classList.toggle("gewaehlt", x === b)); }; return b; });

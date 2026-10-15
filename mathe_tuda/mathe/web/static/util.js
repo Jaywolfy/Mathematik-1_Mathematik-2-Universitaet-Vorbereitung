@@ -56,7 +56,7 @@ export function inline(text) {
     let t = esc(teil).replace(/\\\$/g, "$");
     t = t.replace(/(?<![\w*])\*\*(?=\S)(.+?)(?<=\S)\*\*(?![\w*])/g, "<strong>$1</strong>");
     t = t.replace(/(?<![\w*])\*(?=[^\s*`])([^*`\n]*?[^\s*`])\*(?![\w*])/g, "<em>$1</em>");
-    t = t.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) =>
+    t = t.replace(/\[\[([\p{L}][^\]|]*)(?:\|([^\]]+))?\]\]/gu, (_, a, b) =>
       `<span class="glossar" tabindex="0" role="button" data-begriff="${(b || a).trim()}">${a}</span>`);
     html += t;
   });
@@ -67,7 +67,7 @@ export function inline(text) {
 export function nurText(text) {
   return String(text ?? "").split(INLINE_TEIL).map((teil, i) => {
     if (i % 2 === 1) return teil.startsWith("`") ? teil.slice(1, -1) : texText(teil.slice(1, -1));
-    return teil.replace(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g, "$1").replace(/\*\*/g, "").replace(/\\\$/g, "$");
+    return teil.replace(/\[\[([\p{L}][^\]|]*)(?:\|[^\]]+)?\]\]/gu, "$1").replace(/\*\*/g, "").replace(/\\\$/g, "$");
   }).join("");
 }
 

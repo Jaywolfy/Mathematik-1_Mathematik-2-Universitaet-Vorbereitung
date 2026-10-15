@@ -129,7 +129,8 @@ async function versuch(karte, typ, antwort, richtig, variante, prueferKnopf) {
     felder.forEach((f, i) => eingeben(f, richtig ? antwort[i] : FALSCH));
     prueferKnopf.click();
   } else if (typ === "graph_punkt") {
-    karte._punktSetzen(richtig ? antwort.map(Number) : [Number(antwort[1]) + 3, Number(antwort[0]) - 3]);
+    const zahl = (t) => { const [p, q] = String(t).split("/"); return q === undefined ? Number(p) : Number(p) / Number(q); };
+    karte._punktSetzen(richtig ? antwort.map(zahl) : [zahl(antwort[1]) + 3, zahl(antwort[0]) - 3]);
     prueferKnopf.click();
   } else throw new Error("unbekannter Fragetyp " + typ);
 }
@@ -150,7 +151,7 @@ async function beantworten(karte, richtig = true, variante = 0) {
     for (;;) {
       const schritt = [...karte.querySelectorAll(".teilschritt.aktiv")].pop();
       if (!schritt) break;
-      const stTyp = schritt.querySelector(".optionen") ? "mc" : schritt.querySelector("input.zelle") ? "vektor" : "zahl";
+      const stTyp = schritt.querySelector(".optionen") ? "mc" : schritt.querySelector("input.zelle") ? "vektor" : schritt.querySelector(".luecken-liste") ? "luecke" : "zahl";
       const antwort = await loesungHolen(karte, n);
       const knopf = schritt.querySelector(".frage-aktionen .btn-primary");
       await versuch(schritt, stTyp, antwort, richtig || n > 0, variante, knopf);

@@ -84,9 +84,10 @@ k.erklaerung("Was ist eine Potenz?", r"""
     !! Negative Basis: Gerader Exponent gibt plus, ungerader Exponent gibt minus.
 
     :::alt Mit Python erklärt
-    Python hält sich an dieselbe Regel: `-2**4` ergibt `-16`, `(-2)**4` ergibt `16`.
-    Ohne Klammer bindet der Hochpfeil stärker als das Minus. Das Minus ist dann wie
-    ein Schild „Gegenzahl bilden“, das erst am Schluss gelesen wird.
+    In Python schreibst du Potenzen mit `**`. Das Zeichen `^` bedeutet dort etwas
+    ganz anderes. `-2**4` ergibt `-16`, `(-2)**4` ergibt `16`. Ohne Klammer bindet
+    `**` stärker als das Minus. Das Minus ist dann wie ein Schild „Gegenzahl bilden“,
+    das erst am Schluss gelesen wird.
     :::
     """)
 
@@ -194,7 +195,7 @@ k.luecke("Welcher Exponent gehört in die Lücke?",
          :::
          """,
          typische_fehler=[([12], "Bei gleicher Basis werden die Exponenten **addiert**, nicht malgenommen."),
-                          ([1], "Das wäre beim Teilen. Hier wird malgenommen: addieren.")])
+                          ([1], "Du hast die Exponenten subtrahiert ($4 - 3$). Beim Malnehmen wird addiert.")])
 
 k.luecke("Welcher Exponent gehört in die Lücke?",
          "\\left(5^{2}\\right)^{3} = 5^{\\luecke}", [[6]],
@@ -302,7 +303,7 @@ k.zahl("Berechne $7^0$.", 1,
        = 1 || eine Zahl durch sich selbst
        :::
        """,
-       typische_fehler=[(0, "Null Faktoren heißt nicht null. Das leere Produkt ist $1$, siehe $\\frac{7}{7} = 7^0$."),
+       typische_fehler=[(0, "Hoch $0$ ergibt nicht $0$. Eine Stufe unter $7^1 = 7$ teilst du durch $7$: $7 : 7 = 1$."),
                         (7, "$7^1 = 7$. Bei $7^0$ wird noch einmal durch $7$ geteilt.")])
 
 # ── 4: Zweier- und Zehnerpotenzen ──────────────────────────────────────────
@@ -318,10 +319,12 @@ k.erklaerung("Zweier- und Zehnerpotenzen", r"""
 
     :::rechnung Beispiel vorgerechnet
     2^8 = 256 || ein Byte: $8$ Bit, Werte $0$ bis $255$
-    2^{10} = 1024 || ein Kibibyte hat $1024$ Byte
+    2^{10} = 1024 || ein Kibibyte (KiB) hat $2^{10} = 1024$ Byte
     2^{20} = 2^{10} \cdot 2^{10} || Potenzgesetz
-    = 1048576 || ein Mebibyte, rund eine Million
+    = 1048576 || ein Mebibyte (MiB), rund eine Million Byte
     :::
+
+    Die Vorsilbe „Ki“ (kibi) steht für $2^{10} = 1024$, „Mi“ (mebi) für $2^{20}$.
 
     :::warum Lerne die Tabelle auswendig
     Du brauchst sie für Binärzahlen, Speichergrößen und Laufzeiten. $2^{10} \approx 1000$
@@ -337,22 +340,23 @@ k.erklaerung("Zweier- und Zehnerpotenzen", r"""
     ## Zehnerpotenzen: sehr große und sehr kleine Zahlen
 
     $10^n$ ist eine $1$ mit $n$ Nullen. In der [[wissenschaftlichen Schreibweise|wissenschaftliche Schreibweise]]
-    schreibst du eine Zahl als Zahl zwischen $1$ und $10$ mal [[Zehnerpotenz]].
+    schreibst du eine Zahl als Zahl von mindestens $1$ und kleiner als $10$ mal [[Zehnerpotenz]].
+    Der Exponent sagt, wie weit das Komma von dort aus wandert: plus nach rechts, minus nach links.
 
     :::rechnung Beispiel vorgerechnet
-    3200000 = 3{,}2 \cdot 10^6 || Komma $6$ Stellen nach links geschoben
-    0{,}0004 = 4 \cdot 10^{-4} || Komma $4$ Stellen nach rechts geschoben
+    3{,}2 \cdot 10^6 = 3200000 || von $3{,}2$ aus: Komma $6$ Stellen nach rechts
+    4 \cdot 10^{-4} = 0{,}0004 || von $4$ aus: Komma $4$ Stellen nach links
     :::
 
     | Vorsilbe | kilo | mega | giga | milli | mikro | nano |
     |---|---|---|---|---|---|---|
     | Faktor | $10^3$ | $10^6$ | $10^9$ | $10^{-3}$ | $10^{-6}$ | $10^{-9}$ |
 
-    :::alt Mit dem Komma erklärt
-    Der Exponent zählt, wie weit das Komma wandert. Plus: nach rechts, die Zahl wird
-    groß. Minus: nach links, die Zahl wird klein. $4 \cdot 10^{-4}$: Starte bei
-    $4{,}0$ und schiebe das Komma $4$ Stellen nach links, ergibt $0{,}0004$. In Python
-    schreibst du dafür `4e-4`.
+    :::alt Mit Zahlwörtern erklärt
+    Die Zeitung schreibt „$3{,}2$ Millionen“. Eine Million ist $1\,000\,000 = 10^6$, also
+    sind es $3{,}2 \cdot 10^6$. Ein Millimeter ist ein Tausendstel Meter, $10^{-3}$ m. Ein
+    Haar ist etwa $0{,}1$ mm dick, also $10^{-1} \cdot 10^{-3} = 10^{-4}$ m. Die Zehnerpotenz
+    ist nur ein Zahlwort in Kurzform. In Python schreibst du `4e-4` für $4 \cdot 10^{-4}$.
     :::
     """)
 
@@ -372,9 +376,9 @@ k.zahl("Wie viele verschiedene Werte kann man mit $8$ Bit darstellen?", 2 ** 8,
 
 k.luecke("Schreibe in wissenschaftlicher Schreibweise.",
          "0{,}0004 = 4 \\cdot 10^{\\luecke}", [[-4]],
-         "Das Komma wandert $4$ Stellen nach rechts, um von $0{,}0004$ zu $4$ zu kommen. Die Zahl ist klein: Exponent $-4$.",
-         tipps=["Wie oft musst du das Komma schieben, bis $4$ dasteht?", "$4$ Stellen. Ist die Zahl groß oder klein?",
-                "Kleine Zahl: negativer Exponent."],
+         "Von $4$ aus wandert das Komma $4$ Stellen nach links bis $0{,}0004$. Nach links heißt: Exponent $-4$.",
+         tipps=["Starte bei $4$: Wie weit muss das Komma wandern, bis $0{,}0004$ dasteht?",
+                "$4$ Stellen. Nach links oder nach rechts?", "Nach links: negativer Exponent."],
          rechenweg=r"""
          :::rechnung
          4 \cdot 10^{-4} = \frac{4}{10000} || negativer Exponent: Kehrwert
@@ -419,9 +423,18 @@ def potenz_auswerten(rng):
         zeilen.append((f"= {tex(w)}", f"${pot(a, m)} = {tex(F(a) ** m)}$"))
         tipps = ["Ein negativer Exponent bildet den Kehrwert.", f"${pot(a, n)} = \\frac{{1}}{{{pot(a, m)}}}$.",
                  f"${pot(a, m)} = {tex(F(a) ** m)}$."]
-        fehler += [(-(F(a) ** m), "Ein negativer Exponent macht die Zahl nicht negativ. Er bildet den Kehrwert."),
-                   (a * n, f"Du hast ${tk(a)} \\cdot ({n})$ gerechnet. Negativer Exponent heißt: Kehrwert der Potenz."),
-                   (-w, "Das Minus im Exponenten ist kein Vorzeichen des Ergebnisses.")]
+        fehler += [(F(a) ** m, f"Du hast den Kehrwert vergessen: ${pot(a, n)} = \\frac{{1}}{{{pot(a, m)}}}$."),
+                   (a * n, f"Du hast ${tk(a)} \\cdot ({n})$ gerechnet. Negativer Exponent heißt: Kehrwert der Potenz.")]
+        if a > 0:
+            fehler += [(-(F(a) ** m), "Ein negativer Exponent macht die Zahl nicht negativ. Er bildet den Kehrwert."),
+                       (-w, "Das Minus im Exponenten ist kein Vorzeichen des Ergebnisses. Das Ergebnis ist positiv.")]
+        else:
+            if m == 1:
+                vz = f"Achte auf das Vorzeichen: Im Nenner steht ${tk(a)}$, also ist das Ergebnis negativ."
+            else:
+                vz = (f"Achte auf das Vorzeichen: Im Nenner stehen ${m}$ Faktoren ${tk(a)}$, "
+                      + ("eine gerade Anzahl Minus, also plus." if m % 2 == 0 else "eine ungerade Anzahl Minus, also minus."))
+            fehler.append((-w, vz))
     fehler = [(f, t) for f, t in fehler if f is not None]
     return {
         "frage": f"Berechne ${pot(a, n)}$.",
@@ -475,7 +488,7 @@ def potenzgesetze_exponent(rng):
     weg = _zeilen(*zeilen)
     return {
         "typ": "luecke",
-        "frage": "Welcher Exponent gehört in die Lücke?",
+        "frage": "Welcher Exponent gehört in die Lücke?" + (f" Dabei ist ${basis} \\neq 0$." if basis in ("a", "x") else ""),
         "formel": formel, "antworten": [[w]],
         "tipps": [tipp, "Schreib im Zweifel die Faktoren aus.", "Rechne nur mit den Exponenten, die Basis bleibt."],
         "rechenweg": weg,
@@ -490,18 +503,25 @@ def wissenschaftlich(rng):
     zahl = mant * F(10) ** e
     mt = mathlib.dezimal(mant, 6)
     zt = mathlib.dezimal(zahl, 12)
-    richtung = "links" if e > 0 else "rechts"
+    if zahl >= 10000:                                   # Tausendergruppen: 120\,000\,000
+        ziffern = str(int(zahl))
+        gruppen = []
+        while ziffern:
+            gruppen.insert(0, ziffern[-3:])
+            ziffern = ziffern[:-3]
+        zt = "\\,".join(gruppen)
+    richtung = "rechts" if e > 0 else "links"
     fehler = [([-e], "Das Vorzeichen stimmt nicht. Große Zahlen haben positive, kleine Zahlen negative Exponenten."),
               ([e - 1 if e > 0 else e + 1], "Zähle die Stellen noch einmal genau, um die das Komma wandert.")]
     return {
         "typ": "luecke",
         "frage": "Schreibe in wissenschaftlicher Schreibweise.",
         "formel": f"{zt} = {mt} \\cdot 10^{{\\luecke}}", "antworten": [[e]],
-        "tipps": [f"Um wie viele Stellen wandert das Komma von ${zt}$ bis ${mt}$?",
+        "tipps": [f"Starte bei ${mt}$: Um wie viele Stellen muss das Komma wandern, bis ${zt}$ dasteht?",
                   f"Es wandert ${abs(e)}$ Stellen nach {richtung}.",
-                  "Große Zahl: positiver Exponent. Zahl kleiner als $1$: negativer Exponent."],
-        "rechenweg": _zeilen((f"{mt} \\cdot 10^{{{e}}} = {zt}", f"Komma ${abs(e)}$ Stellen nach {'rechts' if e > 0 else 'links'} schieben")),
-        "erklaerung": "Der Exponent zählt, wie weit das Komma wandert.",
+                  "Nach rechts (große Zahl): positiver Exponent. Nach links (Zahl kleiner als $1$): negativer Exponent."],
+        "rechenweg": _zeilen((f"{mt} \\cdot 10^{{{e}}} = {zt}", f"von ${mt}$ aus: Komma ${abs(e)}$ Stellen nach {richtung}")),
+        "erklaerung": "Der Exponent zählt, wie weit das Komma von der Zahl vor dem Malpunkt aus wandert: plus nach rechts, minus nach links.",
         "typische_fehler": fehler,
     }
 
@@ -524,8 +544,9 @@ k.luecke("Vereinfache so weit wie möglich (Uni-Niveau, $x, y \\neq 0$).",
          = x^2 y || ausrechnen
          :::
          """,
-         typische_fehler=[([2, -3], "In der Klammer wird **jeder** Exponent mit $2$ malgenommen: $y^{-2 \\cdot 2} = y^{-4}$."),
-                          ([-1, 1], "$x^{3}$ hoch $2$ ist $x^6$, nicht $x^5$: Exponenten malnehmen.")])
+         typische_fehler=[([2, 3], "Die Klammer hoch $2$ gilt auch für $y^{-2}$: $(y^{-2})^2 = y^{-4}$."),
+                          ([-1, 1], "Die Klammer hoch $2$ gilt auch für $x^3$: $(x^3)^2 = x^6$."),
+                          ([1, 5], "Potenz einer Potenz: Exponenten malnehmen, nicht addieren. $(x^3)^2 = x^6$, $(y^{-2})^2 = y^{-4}$.")])
 
 # Übungsblatt-Stil: alles auf Basis 2
 _zaehler = 5 + 2 * 3          # 2^5 · 4^3 = 2^5 · 2^6
@@ -535,7 +556,7 @@ assert _wert == F(2 ** 5 * 4 ** 3) / (F(8 ** 2) * F(1, 2))
 k.rechenweg_aufgabe(r"""
     ## Übungsblatt-Stil: Potenzen zur gleichen Basis
 
-    Berechnen Sie ohne Taschenrechner und geben Sie alle Zwischenschritte an:
+    Berechne ohne Taschenrechner und gib alle Zwischenschritte an:
     $$\frac{2^{5} \cdot 4^{3}}{8^{2} \cdot 2^{-1}}$$
     """,
     [{"typ": "luecke", "frage": "Schreibe $4^3$ als Zweierpotenz.", "formel": "4^{3} = 2^{\\luecke}", "antworten": [[6]],

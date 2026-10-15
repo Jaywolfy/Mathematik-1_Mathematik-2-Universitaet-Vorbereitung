@@ -18,7 +18,7 @@ k = neues_kapitel(
     icon="📈")
 
 k.lernziele([
-    "Ich kann die Schreibweise $f: \\mathbb{R} \\to \\mathbb{R},\\ x \\mapsto 2x + 1$ lesen und Funktionswerte ausrechnen",
+    "Ich kann die Schreibweise $f\\colon \\mathbb{R} \\to \\mathbb{R},\\ x \\mapsto 2x + 1$ lesen und Funktionswerte ausrechnen",
     "Ich kann eine Wertetabelle anlegen und den Graphen einer Funktion zeichnen",
     "Ich kann Steigung und $y$-Achsenabschnitt einer Geraden bestimmen, auch aus zwei Punkten",
     "Ich kann aus $f(x) = a(x - d)^2 + e$ den Scheitelpunkt ablesen und sagen, wie die Parabel verschoben ist",
@@ -44,7 +44,7 @@ k.erklaerung("Was ist eine Funktion?", r"""
     Eine [[Funktion]] ordnet jeder erlaubten Zahl $x$ **genau eine** Zahl $f(x)$ zu.
     An der TU schreibt man das so:
 
-    $$f: \mathbb{R} \to \mathbb{R},\quad x \mapsto 2x + 1$$
+    $$f\colon \mathbb{R} \to \mathbb{R},\quad x \mapsto 2x + 1$$
 
     Gelesen: „$f$ geht von $\mathbb{R}$ nach $\mathbb{R}$, $x$ wird auf $2x + 1$
     abgebildet.“ Kurz: $f(x) = 2x + 1$. Die Zahl $f(x)$ heißt [[Funktionswert]]
@@ -66,8 +66,9 @@ k.erklaerung("Was ist eine Funktion?", r"""
     ## Wertetabelle und Graph
 
     Setzt du mehrere Zahlen ein, entsteht eine [[Wertetabelle]]. Jedes Paar wird ein
-    Punkt $(x \mid f(x))$ im Koordinatensystem. Alle diese Punkte zusammen bilden den
-    [[Graphen|Graph]] von $f$.
+    Punkt $(x \mid f(x))$ im Koordinatensystem. Der [[Graph]] von $f$ besteht aus
+    **allen** Punkten $(x \mid f(x))$ mit $x \in D$, nicht nur aus denen der Tabelle.
+    Die Tabelle liefert nur einige davon.
 
     :::rechnung Wertetabelle für $f(x) = 2x + 1$
     2 \cdot (-1) + 1 = -1 || $f(-1) = -1$, Punkt $(-1 \mid -1)$
@@ -143,8 +144,11 @@ k.erklaerung("Welche Zahlen sind erlaubt?", r"""
 
     Nicht jede Zahl darf in jede Funktion. Bei $f(x) = \frac{1}{x - 2}$ wäre für
     $x = 2$ der Nenner $0$, und durch $0$ teilt man nicht. Die [[Definitionsmenge]]
-    $D$ enthält alle erlaubten Zahlen. In $f: D \to W$ steht $D$ links, rechts die
-    Menge $W$, in der die Ergebnisse liegen.
+    $D$ enthält alle erlaubten Zahlen. In $f\colon D \to W$ steht $D$ links, rechts die
+    [[Zielmenge]] $W$, in der die Ergebnisse liegen dürfen. Nicht jedes Element von $W$
+    muss getroffen werden: $f\colon \mathbb{R} \to \mathbb{R},\ x \mapsto x^2$ erreicht $-1$ nie.
+    In der Schule sucht man die größtmögliche Definitionsmenge, an der Uni gehört $D$
+    zur Angabe der Funktion.
 
     :::rechnung Wann wird der Nenner null?
     x - 2 = 0 || verbotene Stelle suchen
@@ -372,12 +376,13 @@ k.erklaerung("Parabeln verschieben und strecken", r"""
     Bei $f(x) = a(x - d)^2 + e$ ist $S(d \mid e)$ der Scheitelpunkt. Das ist die
     [[Scheitelpunktform]]. Der Faktor $a$ streckt:
 
-    - $a > 1$: schmaler, $0 < a < 1$: breiter,
-    - $a < 0$: an der $x$-Achse gespiegelt, nach unten offen.
+    - $|a| > 1$: schmaler, $0 < |a| < 1$: breiter,
+    - $a < 0$: nach unten offen (die Form wird umgeklappt).
 
     :::rechnung $f(x) = 2(x - 1)^2 - 8$ an der Stelle $x = 3$
     2 \cdot (3 - 1)^2 - 8 || Scheitelpunkt $S(1 \mid -8)$; $x = 3$ einsetzen
-    = 2 \cdot 4 - 8 || erst die Klammer, dann quadrieren
+    = 2 \cdot 2^2 - 8 || erst die Klammer
+    = 2 \cdot 4 - 8 || dann quadrieren
     = 0 || also ist $3$ eine Nullstelle: $f(3) = 0$
     :::
 
@@ -498,8 +503,9 @@ def gerade_durch_punkte(rng):
     y1, y2 = m * x1 + b, m * x2 + b
     loesung = _gerade_text(m, b)
     kette = f"\\frac{{{tex(y2)} - {tk(y1)}}}{{{x2} - {tk(x1)}}}"
-    if (y2 - y1).denominator == 1 and x2 - x1 != 1 and (y2 - y1) % (x2 - x1) != 0 or (m.denominator == 1 and x2 - x1 != 1):
-        kette += f" = \\frac{{{tex(y2 - y1)}}}{{{x2 - x1}}}"
+    zwischen = f"\\frac{{{tex(y2 - y1)}}}{{{x2 - x1}}}"
+    if (y2 - y1).denominator == 1 and x2 - x1 != 1 and zwischen != tex(m):
+        kette += f" = {zwischen}"
     kette += f" = {tex(m)}"
     zeilen = [(kette, "Steigung: $y$-Unterschied durch $x$-Unterschied"),
               (f"{tex(y1)} = {tex(m)} \\cdot {tk(x1)} + b", f"Punkt $({x1} \\mid {tex(y1)})$ einsetzen"),
@@ -577,7 +583,8 @@ def scheitel_lesen(rng):
     vorne = "" if a == 1 else "-" if a == -1 else str(a)
     term_tex = f"{vorne}(x {vz(F(-d))})^2 {vz(F(e))}"
     loesung = d if welche == "x" else e
-    fehler = [(-d, "Vorzeichen: Der Scheitelpunkt liegt dort, wo die Klammer null wird."),
+    fehler = [(-d, "Vorzeichen: Der Scheitelpunkt liegt dort, wo die Klammer null wird.") if welche == "x"
+              else (-e, f"Vorzeichen: Die Zahl hinten ist ${e}$. Sie ist direkt die $y$-Koordinate, ohne Vorzeichenwechsel."),
               (e if welche == "x" else d, "Du hast $x$- und $y$-Koordinate vertauscht."),
               (a, "Der Faktor vor der Klammer streckt nur, er verschiebt nicht.")]
     return {
@@ -600,7 +607,7 @@ k.rechenweg_aufgabe(r"""
     ## Übungsblatt-Stil: Eine Parabel untersuchen
 
     Gegeben ist die Funktion
-    $$f: \mathbb{R} \to \mathbb{R},\quad x \mapsto 2(x - 1)^2 - 8.$$
+    $$f\colon \mathbb{R} \to \mathbb{R},\quad x \mapsto 2(x - 1)^2 - 8.$$
     Bestimmen Sie den Scheitelpunkt, den Schnittpunkt mit der $y$-Achse und alle [[Nullstellen|Nullstelle]].
     Geben Sie alle Zwischenschritte an.
     """,
@@ -651,7 +658,7 @@ k.rechenweg_aufgabe(r"""
 k.zusammenfassung(r"""
     ## Funktionen und Graphen
 
-    - Eine Funktion $f: D \to W,\ x \mapsto f(x)$ ordnet jedem $x \in D$ **genau einen** Wert $f(x)$ zu.
+    - Eine Funktion $f\colon D \to W,\ x \mapsto f(x)$ ordnet jedem $x \in D$ **genau einen** Wert $f(x)$ zu.
     - $D$ ist die Definitionsmenge: alle erlaubten $x$. Bei $\frac{1}{x - 2}$ ist $D = \mathbb{R} \setminus \{2\}$.
     - Graph: alle Punkte $(x \mid f(x))$. Erst nach rechts, dann nach oben.
 
@@ -664,5 +671,5 @@ k.zusammenfassung(r"""
 
     !! $(x - 2)^2$ rückt nach **rechts**, $(x + 2)^2$ nach **links**.
 
-    - $a > 1$ schmaler, $0 < a < 1$ breiter, $a < 0$ nach unten offen.
+    - $|a| > 1$ schmaler, $0 < |a| < 1$ breiter, $a < 0$ nach unten offen.
 """)

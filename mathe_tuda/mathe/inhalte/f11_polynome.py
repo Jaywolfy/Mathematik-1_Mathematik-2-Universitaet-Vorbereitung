@@ -338,14 +338,14 @@ k.menge("Welche ganzen Zahlen kommen als Nullstellen von $x^3 + x^2 - 4x - 4$ in
         "Kandidaten sind alle Teiler des Absolutglieds $-4$: $\\pm 1, \\pm 2, \\pm 4$. "
         "(Wirklich Nullstellen sind davon $-2$, $-1$ und $2$.)",
         tipps=["Schau auf das Absolutglied, die Zahl ohne $x$.", "Das Absolutglied ist $-4$. Welche Zahlen teilen $4$?",
-               "Positive und negative Teiler: $\\pm 1, \\pm 2, \\pm 4$."],
+               "Positive und negative Teiler: $\\pm 1, \\pm 2, \\pm 4$. Du darfst {±1; ±2; ±4} eingeben."],
         rechenweg=r"""
         :::rechnung
         4 = 1 \cdot 4 = 2 \cdot 2 || Teiler von $4$: $1$, $2$, $4$
         (-1) \cdot (-4) = 4 || auch die negativen Teiler zählen
         :::
 
-        Kandidaten: $\{-4; -2; -1; 1; 2; 4\}$.
+        Kandidaten: $\{-4, -2, -1, 1, 2, 4\}$. Eingeben kannst du das auch kurz als {±1; ±2; ±4}.
         """,
         typische_fehler=[("{1; 2; 4}", "Die negativen Teiler fehlen. Auch $-1$, $-2$ und $-4$ teilen $-4$."),
                          ("{-2; -1; 2}", "Das sind die echten Nullstellen. Gefragt waren alle **Kandidaten**, also alle Teiler von $-4$.")])
@@ -454,8 +454,9 @@ k.luecke("Vervollständige das Ergebnis der Polynomdivision.",
                 "Abziehen: $2x^2 - (-2x^2) = 4x^2$. Also ist der nächste Term $4x$.",
                 "Rest nach dem zweiten Schritt: $3x - 6$. Dann $3x : x = 3$."],
          rechenweg=_division_markup(P.aus_text("x^3 + 2x^2 - 5x - 6"), P.aus_text("x - 2")),
-         typische_fehler=[([0, -5], "Beim Abziehen: $2x^2 - (-2x^2) = 4x^2$. Minus minus wird plus."),
-                          ([-4, 3], "Du hast durch $(x + 2)$ statt $(x - 2)$ geteilt: Das Vorzeichen im Teiler zählt.")])
+         typische_fehler=[([0, -5], "Zwei mögliche Ursachen: Beim Abziehen gilt $2x^2 - (-2x^2) = 4x^2$ "
+                                    "(Minus minus wird plus). Oder du hast durch $(x + 2)$ statt durch $(x - 2)$ geteilt: "
+                                    "Das Vorzeichen im Teiler zählt.")])
 
 # ── 4: Linearfaktoren ─────────────────────────────────────────────────────
 k.erklaerung("Linearfaktoren und Vielfachheit", r"""
@@ -518,7 +519,7 @@ k.gleichung("x^3 - 2x^2 - 5x + 6 = 0",
             x^2 - x - 6 = (x - 3)(x + 2) || Vieta: $3 \cdot (-2) = -6$, $3 + (-2) = 1$
             :::
 
-            Also $\mathbb{L} = \{-2; 1; 3\}$.
+            Also $\mathbb{L} = \{-2, 1, 3\}$.
             """,
             typische_fehler=[("{-1; -3; 2}", "Die Vorzeichen sind vertauscht. Prüfe durch Einsetzen: Bei $x = -1$ kommt $8$ heraus, nicht $0$."),
                              ("{3; -2}", "Die geratene Nullstelle $1$ gehört auch zur Lösungsmenge.")])
@@ -526,7 +527,7 @@ k.gleichung("x^3 - 2x^2 - 5x + 6 = 0",
 k.term("Zerlege $x^3 - 3x^2 - 4x + 12$ vollständig in Linearfaktoren. (Tipp: $2$ ist eine Nullstelle.)",
        "(x - 2)(x - 3)(x + 2)",
        "$(x^3 - 3x^2 - 4x + 12) : (x - 2) = x^2 - x - 6 = (x - 3)(x + 2)$.",
-       variablen="x", form="faktorisiert",
+       variablen="x", form="linearfaktoren",
        tipps=["Teile durch $(x - 2)$.", "Du erhältst $x^2 - x - 6$.",
               "Vieta: zwei Zahlen mit Produkt $-6$ und Summe $1$."],
        rechenweg=_division_markup(P.aus_text("x^3 - 3x^2 - 4x + 12"), P.aus_text("x - 2")) + r"""
@@ -557,8 +558,8 @@ k.erklaerung("Das Horner-Schema", _seite(r"""
     Division: $p(x) = (2x^2 + x + 2)(x - 2) + 9$.
 
     :::alt Als Programm erklärt
-    Im Code ist Horner eine einzige Schleife: Starte mit `w = 0` und rechne für jeden
-    Koeffizienten `a` von oben nach unten `w = w * x + a`. Das braucht nur so viele
+    Im Code ist Horner eine einzige Schleife: Starte mit dem ersten Koeffizienten als `w`
+    und rechne für jeden weiteren Koeffizienten `a` von oben nach unten `w = w * x + a`. Das braucht nur so viele
     Multiplikationen, wie der Grad groß ist. Wer jede Potenz einzeln ausrechnet,
     braucht viel mehr. Darum werten Computer Polynome so aus.
     :::
@@ -638,7 +639,7 @@ def nullstellen_finden(rng):
         "tipps": [f"Kandidaten sind die Teiler von ${tex(a0)}$, positiv und negativ.",
                   f"Probiere ${geraten}$.",
                   f"Teile durch ${_faktor(geraten)}$ und löse die quadratische Gleichung, die übrig bleibt."],
-        "rechenweg": _rechnung(zeilen) + "\n\n" + f"Also $\\mathbb{{L}} = \\{{{'; '.join(str(x) for x in alle)}\\}}$.",
+        "rechenweg": _rechnung(zeilen) + "\n\n" + f"Also $\\mathbb{{L}} = \\{{{', '.join(str(x) for x in alle)}\\}}$.",
         "erklaerung": "Nullstelle raten (Teiler des Absolutglieds), Polynomdivision, Rest mit pq-Formel oder Vieta lösen.",
         "typische_fehler": _ohne_gleiche_menge(loesung, fehler),
     }
@@ -709,7 +710,7 @@ k.rechenweg_aufgabe(r"""
       "rechenweg": _division_markup(_ub, P.aus_text("x - 2")),
       "typische_fehler": [("x^2 - 5x + 6", "Beim Abziehen: $-3x^2 - (-2x^2) = -x^2$, nicht $-5x^2$.")]},
      {"typ": "term", "frage": "(c) Gib $p(x)$ vollständig als Produkt von Linearfaktoren an.",
-      "loesung": "(x - 2)(x - 3)(x + 2)", "variablen": "x", "form": "faktorisiert",
+      "loesung": "(x - 2)(x - 3)(x + 2)", "variablen": "x", "form": "linearfaktoren",
       "tipps": ["Zerlege $x^2 - x - 6$ mit Vieta.", "Produkt $-6$, Summe $1$: $3$ und $-2$."],
       "rechenweg": "$p(x) = (x - 2)(x^2 - x - 6) = (x - 2)(x - 3)(x + 2)$",
       "typische_fehler": [("(x - 2)(x + 3)(x - 2)", "Vorzeichen: Die Nullstellen von $x^2 - x - 6$ sind $3$ und $-2$, "

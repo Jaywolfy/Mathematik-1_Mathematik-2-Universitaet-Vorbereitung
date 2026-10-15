@@ -201,8 +201,12 @@ k.gleichung("2x + 1 = 2x + 5", loesung="keine",
             erklaerung="Nach $-2x$ bleibt $1 = 5$. Das ist falsch, egal was $x$ ist: keine Lösung.",
             tipps=["Bring die $x$-Terme auf eine Seite. Was passiert?", "Nach $-2x$ ist kein $x$ mehr da.",
                    "$1 = 5$ ist falsch. Was heißt das für die Lösungsmenge?"],
-            rechenweg="Nach $-2x$ auf beiden Seiten bleibt $1 = 5$ übrig. Diese Aussage ist für kein $x$ wahr, "
-                      "also $\\mathbb{L} = \\emptyset$.",
+            rechenweg=r"""
+            :::rechnung
+            2x + 1 = 2x + 5 \quad | -2x || $x$-Terme nach links
+            # 1 = 5 || falsche Aussage, für kein $x$ wahr: $\mathbb{L} = \emptyset$
+            :::
+            """,
             typische_fehler=[("{0}", "$x = 0$ ist keine Lösung: Probe $1 = 5$ stimmt nicht. Wenn $x$ verschwindet "
                                      "und etwas Falsches übrig bleibt, gibt es gar keine Lösung."),
                              ("R", "Übrig bleibt $1 = 5$. Das ist falsch, also passt keine Zahl.")])
@@ -493,11 +497,11 @@ def lineare_gleichung(rng):
     zeilen.append((f"{_lin(m, b)} = {tex(d)} \\quad | {'-' if b > 0 else '+'}{abs(b)}", "Zahlen nach rechts"))
     zeilen.append((f"{m}x = {tex(d - b)} \\quad | :{mathlib.tex_klammer(m)}", "durch die Zahl vor $x$ teilen"))
     zeilen.append((f"x = {x0}", f"Probe: links und rechts kommt ${a * x0 + b}$ heraus"))
-    fehler = [(F(d + b, m), "Vorzeichenfehler beim Herüberholen der Zahl: Aus $+b$ wird auf der anderen Seite $-b$."),
-              (F(d - b) * m, "Du hast malgenommen statt geteilt. Das $\\cdot$ vor $x$ wird mit $:$ rückgängig gemacht."),
-              (F(d - b, -m), "Das Vorzeichen der Zahl vor $x$ gehört beim Teilen dazu.")]
+    fehler = [(F(d + b, m), f"Vorzeichenfehler beim Herüberholen der Zahl: Aus ${_vz(b)}$ links wird rechts ${_vz(-b)}$."),
+              (F(d - b) * m, f"Du hast mit ${m}$ malgenommen statt geteilt. Aus ${m}x = {tex(d - b)}$ folgt $x = {tex(d - b)} : {mathlib.tex_klammer(m)}$."),
+              (F(d - b, -m), f"Das Vorzeichen gehört beim Teilen dazu: Du teilst durch ${m}$, nicht durch ${-m}$.")]
     if c != 0 and a + c != 0:
-        fehler.append((F(d - b, a + c), "Die $x$-Terme wurden addiert statt abgezogen. Was rechts verschwindet, wird links abgezogen."))
+        fehler.append((F(d - b, a + c), f"Die $x$-Terme wurden addiert statt abgezogen: ${a}x$ und ${c}x$ ergeben nach dem Herüberholen ${m}x$, nicht ${a + c}x$."))
     return {
         "frage": f"Löse ${links} = {rechts}$. Gib die Lösungsmenge an.",
         "loesung": _menge(F(x0)),
@@ -535,9 +539,10 @@ def bruchgleichung(rng):
         zeilen.append((f"{a} = {b}x {_vz(-b * p)} \\quad | {'-' if -b * p > 0 else '+'}{abs(b * p)}", "Klammer auflösen, Zahl nach links"))
         zeilen.append((f"{a + b * p} = {b}x \\quad | :{mathlib.tex_klammer(b)}", "durch die Zahl vor $x$ teilen"))
     zeilen.append((f"x = {x0}", f"${x0} \\neq {p}$, also liegt die Lösung in $D$"))
-    fehler = [(F(a, b) - p if p != 0 else None, "Beim Auflösen von $b(x - p)$ ist ein Vorzeichen gekippt. Mach die Probe."),
-              (F(a, b) if p != 0 else None, "Du hast nur durch $b$ geteilt und den Nenner-Teil vergessen: Es gilt $x - p = \\frac{a}{b}$, also noch $p$ dazu."),
-              (F(b, a) + p if a != 0 else None, "Kehrwert erwischt: Aus $a = b \\cdot (\\ldots)$ folgt $(\\ldots) = \\frac{a}{b}$."),
+    fehler = [(F(a, b) - p if p != 0 else None, f"Beim Auflösen von ${b}({nenner})$ ist ein Vorzeichen gekippt. Mach die Probe."),
+              (F(a, b) if p != 0 else None, f"Du hast nur durch ${b}$ geteilt: Das ergibt ${nenner} = {tex(F(a, b))}$. "
+               f"Daraus folgt erst $x = {tex(F(a, b))} {_vz(p)}$."),
+              (F(b, a) + p if a != 0 else None, f"Kehrwert erwischt: Aus ${a} = {b} \\cdot {klam}$ folgt ${klam} = {tex(F(a, b))}$, nicht ${tex(F(b, a))}$."),
               (F(a, rechts) + p if c != 0 and rechts != 0 else None, "Die Zahl auf der linken Seite muss zuerst nach rechts, bevor du mit dem Nenner malnimmst."),
               (F(p), f"${p}$ ist genau die Zahl, die den Nenner $0$ macht. Sie liegt nicht in $D$ und ist nie eine Lösung."),
               (F(-x0), "Fast: Der Betrag stimmt, aber das Vorzeichen nicht. Mach die Probe.")]
@@ -632,7 +637,7 @@ k.loesungsmenge("Löse $\\frac{x}{x - 3} = \\frac{3}{x - 3} + 2$. Gib die Lösun
                 $x = 3$ ist eine Scheinlösung, also $\mathbb{L} = \emptyset$.
                 """,
                 typische_fehler=[("{3}", "Probe: Für $x = 3$ steht $\\frac{3}{0}$ da. $3$ liegt nicht in $D$, es ist eine Scheinlösung."),
-                                 ("{1}", "Die $2$ wurde nicht mit $(x - 3)$ malgenommen. Jeder Summand bekommt den Faktor ab.")])
+                                 ("{5}", "Die $2$ wurde nicht mit $(x - 3)$ malgenommen. Jeder Summand bekommt den Faktor ab.")])
 
 # Übungsblatt-Stil: Bruchgleichung mit zwei Nennern
 _L = F(2, 3)

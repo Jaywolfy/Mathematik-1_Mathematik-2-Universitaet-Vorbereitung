@@ -50,7 +50,8 @@ k.erklaerung("Die Zeichen der Mathematik", r"""
     | $x \notin A$ | $x$ ist nicht Element von $A$ |
     | $A \subseteq B$ | $A$ ist [[Teilmenge]] von $B$ |
 
-    Mengen beschreibt man oft durch eine Eigenschaft. Der Doppelpunkt (oder $\mid$) heißt „für die gilt“:
+    Mengen beschreibt man oft durch eine Eigenschaft. Der senkrechte Strich $\mid$ (so meist im
+    TU-Vorkurs, gelesen „sodass“) oder ein Doppelpunkt heißt „für die gilt“:
 
     $$A := \{x \in \mathbb{Z} : -1 \le x \le 2\} = \{-1, 0, 1, 2\}$$
 
@@ -149,8 +150,8 @@ k.mc("Welche Aussage ist für reelle Zahlen $x$ wahr?",
      "Aus $x = 3$ folgt $x^2 = 9$. Umgekehrt nicht: $x = -3$ hat auch $x^2 = 9$. Darum ist auch $\\Leftrightarrow$ falsch.",
      tipps=["Prüfe jede Richtung mit $x = -3$.", "$(-3)^2 = 9$, aber $-3 \\neq 3$."],
      fehler={"$x^2 = 9 \\Rightarrow x = 3$": "Gegenbeispiel $x = -3$: $(-3)^2 = 9$, aber $x \\neq 3$.",
-             "$x^2 = 9 \\Leftrightarrow x = 3$": "$\\Leftrightarrow$ verlangt beide Richtungen. Die Richtung „$\\Rightarrow$ x = 3“ "
-                                                "scheitert an $x = -3$."})
+             "$x^2 = 9 \\Leftrightarrow x = 3$": "$\\Leftrightarrow$ verlangt beide Richtungen. Die Richtung "
+                                                "$x^2 = 9 \\Rightarrow x = 3$ scheitert an $x = -3$."})
 
 k.zuordnen("Ordne jedem Zeichen seine Lesart zu.",
            [("$:=$", "ist definiert als"), ("$\\in$", "ist Element von"), ("$\\subseteq$", "ist Teilmenge von"),
@@ -203,8 +204,10 @@ k.erklaerung("Griechische Buchstaben und Indizes", r"""
     :::
 
     :::alt Mit einer Liste erklärt
-    In Python ist `a[3]` der Eintrag an Stelle $3$ der Liste `a`. Die Mathematik
+    In Python ist `a[3]` der Eintrag mit dem Index $3$ der Liste `a`. Die Mathematik
     schreibt dafür $a_3$. Der Index ist die Hausnummer, nicht der Inhalt des Hauses.
+    Vorsicht: Python zählt ab $0$, also ist `a[3]` dort der vierte Eintrag. In der
+    Mathematik beginnt man oft mit $a_1$.
     :::
     """)
 
@@ -230,7 +233,7 @@ k.zahl("Es sei $x = 3$ und außerdem $x_1 = 4$, $x_2 = 7$. Berechne $x_2 - x^2$.
        :::
        """,
        typische_fehler=[(0, "Du hast $x_2$ auch als $x^2 = 9$ gelesen. Der tiefe Index ist nur eine Nummer: $x_2 = 7$."),
-                        (3, "Du hast $x^2$ als $x_2$ gelesen und $7 - 4$ gerechnet. Oben heißt hoch: $x^2 = 9$."),
+                        (3, "Du hast $x^2$ mit $x_1 = 4$ verwechselt und $7 - 4$ gerechnet. Oben heißt hoch: $x^2 = 3^2 = 9$."),
                         (-42, "Du hast $x^2$ mit dem Wert von $x_2$ gerechnet. $x^2$ bezieht sich auf $x = 3$.")])
 
 # ── 3: Definition, Satz, Beweis ────────────────────────────────────────────
@@ -239,14 +242,16 @@ k.erklaerung("Definition, Satz, Beweis", r"""
 
     - Eine [[Definition]] gibt etwas einen Namen. Dabei schreibt man oft $:\Leftrightarrow$.
     - Ein [[Satz]] ist eine bewiesene Aussage: **Voraussetzung** $\Rightarrow$ **Behauptung**.
-    - Ein [[Beweis]] zeigt Schritt für Schritt, warum der Satz stimmt. Er endet mit $\square$ (oder „q.e.d.“).
+    - Ein [[Beweis]] zeigt Schritt für Schritt, warum der Satz stimmt. Er beginnt mit „z. z.:“ (zu zeigen) und
+      der Behauptung, startet dann bei der Voraussetzung und endet mit $\square$, „q.e.d.“ oder „w.z.z.w.“.
 
     **Definition.** $n \in \mathbb{Z}$ heißt gerade $:\Leftrightarrow \exists k \in \mathbb{Z} : n = 2k$.
 
     **Satz.** Sind $m, n \in \mathbb{Z}$ gerade, so ist $m + n$ gerade.
 
     :::rechnung Beweis
-    m = 2k \text{ und } n = 2l || Voraussetzung: es gibt $k, l \in \mathbb{Z}$
+    m = 2k \text{ und } n = 2l || Voraussetzung: es gibt $k, l \in \mathbb{Z}$; z. z.: $m + n$ ist gerade
+    m + n = 2k + 2l,\quad k, l \in \mathbb{Z} || einsetzen
     2k + 2l = 2(k + l) || $2$ ausklammern
     :::
 
@@ -314,7 +319,7 @@ def folge_glied(rng):
     if art == "linear":
         p = rng.choice([z for z in range(-4, 6) if z not in (0, 1)])
         q = rng.choice([z for z in range(-5, 6) if z != 0])
-        term = f"{p}n {vz(F(q))}"
+        term = ("-n" if p == -1 else f"{p}n") + f" {vz(F(q))}"
         w = p * i + q
         zeilen = [(f"{p} \\cdot {i} {vz(F(q))} = {w}", f"für $n$ die ${i}$ einsetzen")]
         fehler = [(p * (i + 1) + q, f"Das ist ${buchstabe}_{{{i + 1}}}$. Der Index sagt: $n = {i}$."),
@@ -452,7 +457,8 @@ k.ordnen(r"""
 
     Bringe die Beweisschritte in die richtige Reihenfolge. Zwei Zeilen gehören nicht in den Beweis.
     """,
-    ["Sei $n \\in \\mathbb{Z}$ ungerade.",
+    ["z. z.: Ist $n \\in \\mathbb{Z}$ ungerade, so ist $n^2$ ungerade.",
+     "Sei $n \\in \\mathbb{Z}$ ungerade.",
      "Dann gibt es ein $k \\in \\mathbb{Z}$ mit $n = 2k + 1$.",
      "Es folgt $n^2 = (2k + 1)^2 = 4k^2 + 4k + 1$.",
      "Also ist $n^2 = 2(2k^2 + 2k) + 1$.",
@@ -460,7 +466,8 @@ k.ordnen(r"""
     "Der Beweis beginnt mit der Voraussetzung, schreibt sie mit der Definition um, rechnet und endet mit der Behauptung.",
     ablenker=["Sei $n^2$ ungerade.", "Dann gibt es ein $k \\in \\mathbb{Z}$ mit $n = 2k$."],
     uebungsblatt=True,
-    tipps=["Ein Beweis startet mit der Voraussetzung, nicht mit der Behauptung.",
+    tipps=["Zuerst steht, was zu zeigen ist (z. z.). Die Argumentation startet dann bei der Voraussetzung. "
+           "Die Behauptung darfst du nicht annehmen, sie ist das Ziel.",
            "Ungerade heißt: $n = 2k + 1$. Danach wird $n^2$ ausgerechnet.",
            "Ganz am Ende steht die Behauptung und $\\square$."],
     rechenweg=r"""
@@ -487,7 +494,8 @@ k.zusammenfassung(r"""
 
     - $\forall$-Aussage: Ein Gegenbeispiel macht sie falsch. $\exists$-Aussage: Ein Beispiel macht sie wahr.
     - Index $x_2$ = zweite Zahl; Exponent $x^2 = x \cdot x$.
-    - Satz = Voraussetzung $\Rightarrow$ Behauptung. Der Beweis beginnt mit der Voraussetzung.
+    - Satz = Voraussetzung $\Rightarrow$ Behauptung. Beweis: „z. z.: …“, dann von der Voraussetzung aus argumentieren
+      (nie die Behauptung annehmen), Ende mit $\square$, „q.e.d.“ oder „w.z.z.w.“.
 
     !! Vorkurs: $\mathbb{N} = \{1, 2, \ldots\}$, $\mathbb{N}_0 = \{0, 1, \ldots\}$. Skript Mathe I/II: $\mathbb{N} = \{0, 1, \ldots\}$, $\mathbb{N}^* = \{1, 2, \ldots\}$. Immer nachschauen!
 """)
