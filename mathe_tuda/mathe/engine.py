@@ -705,8 +705,16 @@ class Mengefrage(Frage):
 
     def __init__(self, frage, loesung, erklaerung="", **kw):
         super().__init__(frage, erklaerung, **kw)
-        self.soll = pruefer.menge_parsen(loesung) if isinstance(loesung, str) else \
-            [("zahl", F(x)) if isinstance(x, (int, Fraction)) else pruefer._element_wert(str(x), True) for x in loesung]
+        if isinstance(loesung, str):
+            self.soll = pruefer.menge_parsen(loesung)
+        else:   # Liste: `e` ist Symbol, wenn auch andere Symbole vorkommen (wie bei Text)
+            def lesen(e_sym):
+                return [("zahl", F(x)) if isinstance(x, (int, Fraction)) else pruefer._element_wert(str(x), True, e_sym)
+                        for x in loesung]
+            erg = lesen(True)
+            self.soll = erg if pruefer.e_ist_symbol(erg) and pruefer._symbole(erg) - {"e"} else lesen(False)
+        # `e` als Buchstabe: gilt auch für die Eingabe der Lernenden, wenn es in der Musterlösung so vorkommt
+        self.e_symbol = True if pruefer.e_ist_symbol(self.soll) else None
 
     def loesung_anzeigen(self):
         return f"${pruefer.menge_latex(self.soll)}$"
@@ -716,7 +724,7 @@ class Mengefrage(Frage):
         if not text:
             return Ergebnis(False, "Bitte gib eine Menge ein, z. B. {1; 2; 3}.", lesefehler=True)
         try:
-            ist = pruefer.menge_parsen(text)
+            ist = pruefer.menge_parsen(text, self.e_symbol)
         except (pruefer.TermFehler, pruefer.Undefiniert) as e:
             return self._lesefehler(e)
         a, b = pruefer.menge_schluessel(ist), pruefer.menge_schluessel(self.soll)
@@ -727,7 +735,7 @@ class Mengefrage(Frage):
             return self._ergebnis(True, hinweis=hinweis)
 
         def vergleich(w):
-            return pruefer.menge_schluessel(pruefer.menge_parsen(_als_text(w))) == a
+            return pruefer.menge_schluessel(pruefer.menge_parsen(_als_text(w), self.e_symbol)) == a
         auto = None
         if a < b:
             auto = f"Alle deine Elemente gehören dazu, aber es fehlen noch {len(b - a)}."

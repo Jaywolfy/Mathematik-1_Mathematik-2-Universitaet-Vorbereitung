@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Mathe 1, Kapitel 5: Relationen und ihre Eigenschaften (Skript Disser WS 26/27, Abschn. 1.6,
 Def. 1.35 bis Bsp. 1.41)."""
+import json
 from itertools import combinations, product
 
 from ..engine import neues_kapitel
@@ -95,9 +96,12 @@ _S = {(a, b) for a in _P123 for b in _P123 if a & b}
 _S_ANZ = len(_S)
 _S_DISJ = sum(1 for a in _P123 for b in _P123 if a and b and not a & b)
 assert _S_ANZ == 49 - _S_DISJ
-_S_TABELLE = "\n".join(
-    f"| ${_mtex(a)}$ | " + (", ".join(f"${_mtex(b)}$" for b in _P123 if (a, b) in _S) or "keine") + " |"
-    for a in _P123)
+_S_BILD = ":::visual graph_gerichtet\n" + json.dumps({
+    "elemente": [sorted(a) for a in _P123],
+    "paare": [[sorted(a), sorted(b)] for a in _P123 for b in _P123 if (a, b) in _S],
+    "layout": "kreis", "titel": "Die Relation $S$ aus Beispiel 1.37 (Abbildung 1.2)",
+    "unterschrift": "Ein Pfeil von $A$ nach $B$ heißt $A S B$. Von $\\emptyset$ geht kein Pfeil aus und keiner kommt an."},
+    ensure_ascii=False) + "\n:::"
 # Beispiel 1.41: Eigenschaften von S
 assert [hat(_P123, _S, e) for e in EIGENSCHAFTEN] == [False, True, False, False]
 _S_PARTNER_1 = [b for b in _P123 if (frozenset({1}), b) in _S]
@@ -253,11 +257,9 @@ Sei $M = \mathcal{P}(\{1, 2, 3\})$ die [[Potenzmenge]] (alle $8$ Teilmengen) und
 
 $$S := \{(A, B) \in M \times M \mid A \cap B \neq \emptyset\}.$$
 
-$A S B$ heißt also: $A$ und $B$ haben mindestens ein gemeinsames Element. Die Tabelle
-listet zu jedem $A$ alle Partner $B$ (das Skript zeichnet dazu Abbildung 1.2):
+$A S B$ heißt also: $A$ und $B$ haben mindestens ein gemeinsames Element. Das Bild ist
+Abbildung 1.2 aus dem Skript:
 
-| $A$ | alle $B$ mit $A S B$ |
-|---|---|
 §TABELLE§
 
 :::rechnung Einzelne Paare prüfen
@@ -272,7 +274,7 @@ Jede Teilmenge ist eine Gruppe von Leuten aus $\{1, 2, 3\}$. Zwei Gruppen stehen
 Relation, wenn mindestens eine Person in beiden ist. Die leere Gruppe hat niemanden,
 also teilt sie mit keiner Gruppe eine Person, auch nicht mit sich selbst.
 :::
-""".replace("§TABELLE§", _S_TABELLE).replace("§DISJ§", str(_S_DISJ)).replace("§ANZ§", str(_S_ANZ)))
+""".replace("§TABELLE§", _S_BILD).replace("§DISJ§", str(_S_DISJ)).replace("§ANZ§", str(_S_ANZ)))
 
 k.menge("Bestimme in Beispiel 1.37 alle $B \\in \\mathcal{P}(\\{1, 2, 3\\})$ mit $\\{1\\} S B$. "
         "Eingabe als Menge von Mengen, zum Beispiel `{{1}; {2; 3}}`.",

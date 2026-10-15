@@ -10,6 +10,8 @@ const MODUL = {
   // vis_funktionen.js, vis_linalg.js
   einheitskreis: "vis_funktionen", exp_log: "vis_funktionen", tangente: "vis_funktionen", riemann: "vis_funktionen",
   vektoren2d: "vis_linalg", matrix_mult: "vis_linalg", gauss: "vis_linalg", komplexe_ebene: "vis_linalg",
+  // vis_ordnung.js
+  graph_gerichtet: "vis_ordnung", hasse: "vis_ordnung", aequivalenz_klassen: "vis_ordnung",
 };
 export const VISUAL_TYPEN = Object.keys(MODUL);
 
@@ -24,6 +26,8 @@ const TITEL = {
   einheitskreis: "⭕ Einheitskreis", exp_log: "📈 Exponential & Logarithmus", tangente: "📐 Sekante & Tangente",
   riemann: "▥ Riemann-Summe", vektoren2d: "↗️ Vektoren", matrix_mult: "✖️ Matrixmultiplikation",
   gauss: "🧮 Gauß-Verfahren", komplexe_ebene: "🌀 Komplexe Zahlenebene",
+  // vis_ordnung.js
+  graph_gerichtet: "🔁 Relation als Graph", hasse: "🧱 Hasse-Diagramm", aequivalenz_klassen: "🎨 Äquivalenzklassen",
 };
 
 const geladen = new Map();

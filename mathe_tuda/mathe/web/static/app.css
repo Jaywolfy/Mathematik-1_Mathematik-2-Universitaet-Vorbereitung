@@ -1513,3 +1513,7 @@ figure.visual { margin-left: 0; margin-right: 0; }   /* Browser-Standard von <fi
   .mm-zelle, .gs-matrix td { min-width: 34px; padding: 2px 4px; font-size: 14.5px; }
   .vf-werte { font-size: 14px; }
 }
+.plot .betragskreis { fill: none; stroke-width: 1.6; stroke-dasharray: 6 5; opacity: .75; }
+.plot .vl-pfeil.konj line { stroke-dasharray: 5 4; opacity: .75; }
+.plot .vl-pfeil.konj path { opacity: .75; }
+.plot .punkt.konj { opacity: .75; }

@@ -1167,15 +1167,17 @@ def _ohne_praefix(s):
     return re.sub(r"^\s*[A-ZLM](_\w+)?\s*=\s*(?=\{)", "", str(s).strip())
 
 
-def _element_wert(text, komma_dezimal):
+def _element_wert(text, komma_dezimal, e_symbol=False):
     text = text.strip()
     if not text:
         raise TermFehler("Ein Element ist leer (zwei Trennzeichen hintereinander?).")
     if text.startswith("{") and text.endswith("}"):
-        return ("menge", menge_parsen(text))
+        return ("menge", menge_parsen(text, e_symbol=e_symbol))
     if text.startswith("(") and text.endswith(")") and ("," in text[1:-1] or ";" in text[1:-1]):
         teile, kd = liste_zerlegen(text[1:-1])
-        return ("tupel", tuple(_element_wert(t, kd) for t in teile))
+        return ("tupel", tuple(_element_wert(t, kd, e_symbol) for t in teile))
+    if text == "E" or (text == "e" and e_symbol):
+        return ("symbol", text)   # ein einzelnes E ist nie die Euler-Zahl; e nur, wenn der Aufrufer es als Symbol verlangt
     try:
         t = parse(text, komma_dezimal=komma_dezimal)
     except TermFehler:
@@ -1201,8 +1203,32 @@ def _element_schluessel(e):
     return (art, w)
 
 
-def menge_parsen(text):
-    """Menge wie '{1; 2; 3}' oder '{a, b}' -> Liste von Elementen (art, wert)."""
+def _symbole(elemente):
+    """Alle Symbolnamen (rekursiv durch Mengen und Tupel)."""
+    erg = set()
+    for art, w in elemente:
+        if art == "symbol":
+            erg.add(w)
+        elif art in ("menge", "tupel"):
+            erg |= _symbole(w)
+    return erg
+
+
+def e_ist_symbol(elemente):
+    """Kommt in dieser (mit e_symbol=True gelesenen) Menge ein Symbol e vor?"""
+    return "e" in _symbole(elemente)
+
+
+def menge_parsen(text, e_symbol=None):
+    """Menge wie '{1; 2; 3}' oder '{a, b}' -> Liste von Elementen (art, wert).
+
+    Elementname `e`: True = Buchstabe (Symbol), False = Euler-Zahl, None = automatisch: Buchstabe,
+    wenn neben ihm ein anderes Symbol vorkommt ({a, b, e}), sonst Euler-Zahl ({e, 1})."""
+    if e_symbol is None:
+        erg = menge_parsen(text, True)
+        if e_ist_symbol(erg) and _symbole(erg) - {"e"}:
+            return erg
+        return menge_parsen(text, False)
     s = _ohne_praefix(text)
     if _ist_leer(s):
         return []
@@ -1214,7 +1240,7 @@ def menge_parsen(text):
     if not s.strip():
         return []
     teile, kd = liste_zerlegen(s)
-    return [_element_wert(t, kd) for t in teile]
+    return [_element_wert(t, kd, e_symbol) for t in teile]
 
 
 def menge_schluessel(elemente):

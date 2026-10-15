@@ -1,0 +1,70 @@
+/* Relationen und Ordnungen (vis_ordnung.js): Farben nur über die Theme-Variablen aus app.css. */
+.og-buehne { margin: 0 auto; width: 100%; }
+.og-svg { width: 100%; height: auto; display: block; user-select: none; }
+
+/* Knoten */
+.og-kreis { fill: var(--surface); stroke: var(--text-2); stroke-width: 2.2; }
+.og-text { font-family: "KaTeX_Main", var(--font); fill: var(--text); pointer-events: none; }
+.og-knoten.markiert .og-kreis { fill: color-mix(in srgb, var(--plot-2) 28%, var(--surface)); stroke: var(--plot-2); stroke-width: 3; }
+
+/* Pfeile */
+.og-pfeil { fill: none; stroke: var(--plot-1); stroke-width: 2.2; stroke-linecap: round; }
+.og-pfeil.markiert { stroke: var(--plot-2); stroke-width: 3.2; }
+.og-spitze { fill: var(--plot-1); }
+.og-spitze.markiert { fill: var(--plot-2); }
+.og-spitze.grau { fill: var(--text-3); }
+.og-aequiv .og-pfeil { stroke: var(--text-2); stroke-width: 1.8; }
+.og-aequiv .og-spitze { fill: var(--text-2); }
+
+/* Hasse: Schwarz gegen Ausgegraut, Supremum/Infimum farbig */
+.og-linie { stroke: var(--text); stroke-width: 2.2; stroke-linecap: round; }
+.og-linie.grau { stroke: var(--border-strong); stroke-width: 1.8; }
+.og-hasse .og-knoten.schwarz .og-kreis { stroke: var(--text); stroke-width: 2.4; }
+.og-hasse .og-knoten.grau .og-kreis { fill: var(--surface-2); stroke: var(--border-strong); stroke-width: 1.8; }
+.og-hasse .og-knoten.grau .og-text { fill: var(--text-3); }
+.og-hasse .og-knoten.obere .og-kreis { stroke: var(--plot-2); stroke-dasharray: 5 4; stroke-width: 2.6; }
+.og-hasse .og-knoten.untere .og-kreis { stroke: var(--plot-3); stroke-dasharray: 5 4; stroke-width: 2.6; }
+.og-hasse .og-knoten.sup .og-kreis { fill: color-mix(in srgb, var(--plot-2) 30%, var(--surface)); stroke: var(--plot-2); stroke-width: 3.4; stroke-dasharray: none; }
+.og-hasse .og-knoten.inf .og-kreis { fill: color-mix(in srgb, var(--plot-3) 30%, var(--surface)); stroke: var(--plot-3); stroke-width: 3.4; stroke-dasharray: none; }
+.og-hasse .og-knoten.sup .og-text, .og-hasse .og-knoten.inf .og-text { font-weight: 700; fill: var(--text); }
+.og-tag { font-family: var(--font); font-size: 13px; font-weight: 800; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+.og-tag.sup { fill: var(--plot-2); }
+.og-tag.inf { fill: var(--plot-3); }
+.og-legende { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: center; margin-top: 10px; font-size: 14px; color: var(--text-2); }
+.og-chip { display: inline-flex; align-items: center; gap: 7px; }
+.og-farbe { width: 16px; height: 16px; border-radius: 50%; border: 2.4px solid var(--text); background: var(--surface); display: inline-block; box-sizing: border-box; }
+.og-farbe.grau { border-color: var(--border-strong); background: var(--surface-2); }
+.og-farbe.sup { border-color: var(--plot-2); background: color-mix(in srgb, var(--plot-2) 30%, var(--surface)); }
+.og-farbe.inf { border-color: var(--plot-3); background: color-mix(in srgb, var(--plot-3) 30%, var(--surface)); }
+.og-farbe.obere { border: 2.4px dashed var(--plot-2); }
+.og-farbe.untere { border: 2.4px dashed var(--plot-3); }
+.og-info { margin-top: 8px; text-align: center; font-size: 15px; display: grid; gap: 2px; }
+.og-info p { overflow-x: auto; max-width: 100%; }
+
+/* Äquivalenzklassen: Farbbereiche */
+.og-region { stroke-width: 2.4; }
+.og-region.alt { stroke-dasharray: 7 5; }
+.og-region.k1 { fill: color-mix(in srgb, var(--plot-1) 14%, transparent); stroke: var(--plot-1); }
+.og-region.k2 { fill: color-mix(in srgb, var(--plot-2) 14%, transparent); stroke: var(--plot-2); }
+.og-region.k3 { fill: color-mix(in srgb, var(--plot-3) 14%, transparent); stroke: var(--plot-3); }
+.og-region.k4 { fill: color-mix(in srgb, var(--plot-4) 14%, transparent); stroke: var(--plot-4); }
+.og-klassenname { font-family: "KaTeX_Main", var(--font); font-size: 16px; font-weight: 700; }
+.og-klassenname.k1 { fill: var(--plot-1); } .og-klassenname.k2 { fill: var(--plot-2); }
+.og-klassenname.k3 { fill: var(--plot-3); } .og-klassenname.k4 { fill: var(--plot-4); }
+.og-aequiv .og-knoten.k1 .og-kreis { stroke: var(--plot-1); } .og-aequiv .og-knoten.k2 .og-kreis { stroke: var(--plot-2); }
+.og-aequiv .og-knoten.k3 .og-kreis { stroke: var(--plot-3); } .og-aequiv .og-knoten.k4 .og-kreis { stroke: var(--plot-4); }
+.og-aequiv .og-knoten.vertreter.k1 .og-kreis { fill: color-mix(in srgb, var(--plot-1) 35%, var(--surface)); }
+.og-aequiv .og-knoten.vertreter.k2 .og-kreis { fill: color-mix(in srgb, var(--plot-2) 35%, var(--surface)); }
+.og-aequiv .og-knoten.vertreter.k3 .og-kreis { fill: color-mix(in srgb, var(--plot-3) 35%, var(--surface)); }
+.og-aequiv .og-knoten.vertreter.k4 .og-kreis { fill: color-mix(in srgb, var(--plot-4) 35%, var(--surface)); }
+.og-aequiv .og-knoten.vertreter .og-text { font-weight: 700; }
+.og-klassenliste { display: grid; gap: 4px; justify-content: center; margin-top: 10px; }
+.og-zeile { display: flex; align-items: center; gap: 10px; overflow-x: auto; max-width: 100%; }
+.og-punkt { width: 14px; height: 14px; border-radius: 50%; flex: none; border: 2.4px solid var(--plot-1); background: color-mix(in srgb, var(--plot-1) 20%, transparent); }
+.og-zeile.k2 .og-punkt { border-color: var(--plot-2); background: color-mix(in srgb, var(--plot-2) 20%, transparent); }
+.og-zeile.k3 .og-punkt { border-color: var(--plot-3); background: color-mix(in srgb, var(--plot-3) 20%, transparent); }
+.og-zeile.k4 .og-punkt { border-color: var(--plot-4); background: color-mix(in srgb, var(--plot-4) 20%, transparent); }
+
+@media (max-width: 600px) {
+  .og-legende { font-size: 13px; }
+}

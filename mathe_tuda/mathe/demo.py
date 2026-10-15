@@ -62,17 +62,46 @@ DEMO.update({
 })
 
 
+# Relationen und Ordnungen (vis_ordnung.js); eine Liste = mehrere Beispiele desselben Typs
+_POTENZ = [[], [1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]
+DEMO.update({
+    "graph_gerichtet": [
+        {"elemente": [1, 2, 3, 4], "paare": [[1, 1], [2, 2], [3, 3], [4, 4], [1, 2], [2, 1], [2, 3], [3, 4]],
+         "markiert": [[2, 3]], "layout": "kreis",
+         "unterschrift": "Schleifen an 1 bis 4 (reflexiv), $1 \\leftrightarrow 2$ als gegenläufiges Paar. Der Pfeil $2 \\to 3$ ist markiert."},
+        {"elemente": [[], [1], [1, 2]], "paare": [[[], []], [[], [1]], [[], [1, 2]], [[1], [1]], [[1], [1, 2]], [[1, 2], [1, 2]]],
+         "layout": {"∅": [0, 0], "{1}": [1, 0], "{1, 2}": [2, 0]},
+         "unterschrift": "Mengen als Knoten: die Relation $\\subseteq$ auf $\\{\\emptyset, \\{1\\}, \\{1, 2\\}\\}$."}],
+    "hasse": [
+        {"elemente": _POTENZ, "paare": [[a, b] for a in _POTENZ for b in _POTENZ if set(a) <= set(b)],
+         "teilmenge": [[1], [2]], "sup": True, "inf": True, "schranken": True,
+         "unterschrift": "Potenzmenge von $\\{1, 2, 3\\}$ mit $\\subseteq$. Schwarz: $T = \\{\\{1\\}, \\{2\\}\\}$, orange: Supremum, grün: Infimum."},
+        {"elemente": [1, 2, 3, 4, 6, 12], "paare": [[a, b] for a in (1, 2, 3, 4, 6, 12) for b in (1, 2, 3, 4, 6, 12) if b % a == 0],
+         "unterschrift": "Teilbarkeit auf den Teilern von $12$: $a \\preceq b$ genau dann, wenn $a \\mid b$."}],
+    "aequivalenz_klassen": [
+        {"klassen": [[0, 3, 6], [1, 4, 7], [2, 5, 8]], "repraesentanten": [0, 1, 2],
+         "unterschrift": "Rest beim Teilen durch $3$: Jede Zahl liegt in genau einer Klasse."},
+        {"klassen": [[1, 2], [3], [4, 5, 6]], "graph": True,
+         "unterschrift": "Dieselbe Idee als Graph: Reflexiv (Schleifen), symmetrisch (Doppelpfeile), transitiv."}],
+})
+DEMO["komplexe_ebene"] = [DEMO["komplexe_ebene"],
+                          {"punkte": [{"z": [3, 4], "label": "z_1"}, {"z": [-2, 1], "label": "z_2"}],
+                           "konjugiert": True, "betragskreis": True,
+                           "unterschrift": "Gestrichelt: die Konjugierten (Spiegelung an der reellen Achse) und die Kreise mit dem Betrag als Radius."}]
+
+
 def demo_daten():
     erg = []
     for art in visuals.VISUAL_TYPEN:
         if art not in DEMO or art not in visuals.VISUAL_FERTIG:
             continue
-        d = copy.deepcopy(DEMO[art])
-        fehler = "; ".join(visuals.pruefen(art, d)) or None
-        if not fehler:
-            try:
-                visuals.ergaenzen(art, d)
-            except Exception as e:  # noqa: BLE001
-                fehler = f"{type(e).__name__}: {e}"
-        erg.append({"art": art, "daten": d, "fehler": fehler})
+        for beispiel in (DEMO[art] if isinstance(DEMO[art], list) else [DEMO[art]]):
+            d = copy.deepcopy(beispiel)
+            fehler = "; ".join(visuals.pruefen(art, d)) or None
+            if not fehler:
+                try:
+                    visuals.ergaenzen(art, d)
+                except Exception as e:  # noqa: BLE001
+                    fehler = f"{type(e).__name__}: {e}"
+            erg.append({"art": art, "daten": d, "fehler": fehler})
     return erg

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Mathe 1, Kapitel 6: Ordnungen, Supremum und Infimum (Skript Disser WS 26/27, Abschn. 1.6,
 Def. 1.42 bis Satz 1.58)."""
+import json
 import math
 from itertools import combinations
 
@@ -89,6 +90,20 @@ def _sortiert(f):
 
 # Beispiele 1.51 und 1.57 nachrechnen
 _P012 = potenzmenge({0, 1, 2})
+
+
+def _hasse_bild(teil, titel, unterschrift):
+    """Hasse-Diagramm von (P({0, 1, 2}), ⊆) mit hervorgehobener Teilmenge (Abbildung 1.3)."""
+    el = [sorted(a) for a in sorted(_P012, key=lambda a: (len(a), sorted(a)))]
+    return ":::visual hasse\n" + json.dumps({
+        "elemente": el, "paare": [[a, b] for a in el for b in el if set(a) <= set(b)],
+        "teilmenge": [sorted(a) for a in teil], "titel": titel, "unterschrift": unterschrift}, ensure_ascii=False) + "\n:::"
+
+
+_BILD_A = _hasse_bild([{0}, {1}, {0, 1}], "$A$ in $(\\mathcal{P}(\\{0, 1, 2\\}), \\subseteq)$ (Abbildung 1.3)",
+                      "Schwarz: $A$. Unter $\\{0, 1\\}$ liegen $\\{0\\}$ und $\\{1\\}$, die beiden sind nicht vergleichbar.")
+_BILD_B = _hasse_bild([set(), {0}, {1}, {1, 2}], "$B$ in $(\\mathcal{P}(\\{0, 1, 2\\}), \\subseteq)$ (Abbildung 1.3)",
+                      "Schwarz: $B$. Von $\\emptyset$ führt ein Weg nach oben zu jedem Element von $B$, aber kein Element von $B$ liegt über allen.")
 assert ist_ordnung(_P012, teilmenge) and not ist_total(_P012, teilmenge)
 _A = [frozenset({0}), frozenset({1}), frozenset({0, 1})]
 _B = [frozenset(), frozenset({0}), frozenset({1}), frozenset({1, 2})]
@@ -229,7 +244,13 @@ immer unten steht, die Hälfte seiner Zahl steht noch darunter.
 ## Beispiel 1.51: In $(\mathcal{P}(\{0, 1, 2\}), \subseteq)$
 
 $(\mathcal{P}(\{0, 1, 2\}), \subseteq)$ hat das Maximum $\{0, 1, 2\}$ und das Minimum $\emptyset$.
-Nach Beobachtung 1.45 sind auch Teilmengen davon partiell geordnet:
+Nach Beobachtung 1.45 sind auch Teilmengen davon partiell geordnet. Das Hasse-Diagramm zeigt
+die Ordnung: Eine Linie nach oben heißt „kleiner oder gleich“. Hervorgehoben (schwarz) sind
+die beiden Teilmengen $A$ und $B$ aus Abbildung 1.3:
+
+§A§
+
+§B§
 
 :::rechnung Beispiel 1.51 (Abbildung 1.3 im Skript)
 A = \{\{0\}, \{1\}, \{0, 1\}\} || betrachte $(A, \subseteq)$
@@ -250,7 +271,7 @@ Ein Gebirge mit zwei Gipfeln, die nicht vergleichbar sind (jeder auf seiner eige
 Auf keinem Gipfel ist es weiter nach oben möglich, aber keiner überblickt den anderen. Ein
 Maximum wäre ein Gipfel, von dem aus alles darunter liegt. Den gibt es hier nicht.
 :::
-""")
+""".replace("§A§", _BILD_A).replace("§B§", _BILD_B))
 
 k.mc("Welche Aussage über $(\\{\\{0\\}, \\{1\\}, \\{0, 1\\}\\}, \\subseteq)$ stimmt (Beispiel 1.51)?",
      ["Maximum $\\{0, 1\\}$, kein Minimum", "Maximum $\\{0, 1\\}$, Minimum $\\emptyset$",

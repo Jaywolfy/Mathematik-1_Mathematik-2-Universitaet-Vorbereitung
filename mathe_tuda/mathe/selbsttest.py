@@ -119,6 +119,88 @@ def typ_batterie(bericht):
             bericht.fehler_melden("Typ-Batterie", f"{q.typ}: Antwort {antwort!r} ergibt {ist}, erwartet {soll}")
 
 
+def visual_batterie(bericht):
+    """Schematest der Relations-/Ordnungs-Visuals, Rangfolge der Logik, Element e in Mengen, "?? "-Zeilen."""
+    import copy
+    from . import demo, visuals
+
+    def lauf(art, daten):
+        d = copy.deepcopy(daten)
+        probleme = visuals.pruefen(art, d)
+        if probleme:
+            return "; ".join(probleme), None
+        try:
+            visuals.ergaenzen(art, d)
+        except ValueError as e:
+            return str(e), None
+        return None, d
+
+    gut = {"graph_gerichtet": {"elemente": [1, 2, 3], "paare": [[1, 1], [1, 2], [2, 1], [2, 3]], "layout": "zeilen",
+                               "markiert": [[1, 2], 3]},
+           "hasse": {"elemente": [1, 2, 3, 6], "paare": [[1, 2], [1, 3], [2, 6], [3, 6], [1, 6], [1, 1]],
+                     "teilmenge": [2, 3], "sup": True, "inf": True, "schranken": True},
+           "aequivalenz_klassen": {"klassen": [[0, 3], [1, 4], [2]], "graph": True, "repraesentanten": [4]},
+           "komplexe_ebene": {"punkte": [[3, 4], {"z": ["1/2", "-sqrt(3)/2"], "label": "w"}], "konjugiert": True,
+                              "betragskreis": True}}
+    schlecht = {"graph_gerichtet": [{"elemente": [1, 2], "paare": [[1, 3]]}, {"elemente": [1, 1], "paare": []},
+                                    {"elemente": [1, 2], "paare": [[1, 2], [1, 2]]},
+                                    {"elemente": [1], "paare": [], "layout": {"2": [0, 0]}},
+                                    {"elemente": [1], "paare": [], "markiert": [5]}],
+                "hasse": [{"elemente": [1, 2], "paare": [[1, 2], [2, 1]]}, {"elemente": [1, 2], "paare": [[1, 2]], "sup": True},
+                          {"elemente": [1, 2], "paare": [], "teilmenge": [3]}],
+                "aequivalenz_klassen": [{"klassen": [[1, 2], [2, 3]]}, {"klassen": [[1], []]},
+                                        {"klassen": [[1], [2]], "elemente": [1, 2, 3]},
+                                        {"klassen": [[1, 2, 3, 4, 5]], "graph": True}],
+                "komplexe_ebene": [{}, {"punkte": [[1, 2]], "w": [1, 1]}, {"punkte": [[1]]}]}
+    for art, daten in gut.items():
+        fehler, erg = lauf(art, daten)
+        if fehler:
+            bericht.fehler_melden(f"Visual-Schema {art}", f"gültiges Beispiel abgelehnt: {fehler}")
+    fehler, erg = lauf("hasse", gut["hasse"])
+    if erg and (erg["_sup"] != 3 or erg["_inf"] != 0 or [1, 6] in erg["_kanten"] or len(erg["_kanten"]) != 4):
+        bericht.fehler_melden("Visual-Schema hasse", "Supremum/Infimum oder transitive Reduktion falsch berechnet")
+    for art, liste in schlecht.items():
+        for daten in liste:
+            fehler, _ = lauf(art, daten)
+            if not fehler:
+                bericht.fehler_melden(f"Visual-Schema {art}", f"ungültige Eingabe nicht abgelehnt: {daten!r}")
+    for art, beispiel in demo.DEMO.items():
+        for b in (beispiel if isinstance(beispiel, list) else [beispiel]):
+            fehler, _ = lauf(art, b)
+            if fehler and art in visuals.VISUAL_FERTIG:
+                bericht.fehler_melden(f"Demo-Visual {art}", fehler)
+    # Rangfolge: ¬ vor ∧ vor ⊕ vor ∨ vor ⇒ vor ⇔
+    rang = [("A ∨ B ∧ C", "A ∨ (B ∧ C)"), ("A ∧ B ∨ C", "(A ∧ B) ∨ C"), ("A ⊕ B ∨ C", "(A ⊕ B) ∨ C"),
+            ("A ∨ B ⊕ C", "A ∨ (B ⊕ C)"), ("A ⊕ B ∧ C", "A ⊕ (B ∧ C)"), ("¬A ∧ B", "(¬A) ∧ B"),
+            ("A ∨ B ⇒ C", "(A ∨ B) ⇒ C"), ("A ⇒ B ⇔ C", "(A ⇒ B) ⇔ C"), ("A ⇔ B ⇒ C", "A ⇔ (B ⇒ C)"),
+            ("A ⇒ B ⇒ C", "A ⇒ (B ⇒ C)"), ("¬A ∨ B ⇒ C ∧ D", "((¬A) ∨ B) ⇒ (C ∧ D)")]
+    for a, b in rang:
+        if visuals.logik_parse(a) != visuals.logik_parse(b):
+            bericht.fehler_melden("logik_parse", f"Rangfolge: {a!r} wird nicht wie {b!r} gelesen")
+    # Element e in Mengen: Buchstabe, wenn die Musterlösung es als Symbol enthält; sonst Euler-Zahl
+    T = dict(tipps=["a", "b"], rechenweg="r", erklaerung="e")
+    qs = engine.Mengefrage("Buchstabenmenge", "{a, b, e}", **T)
+    qe = engine.Mengefrage("Euler", "{e, 1}", **T)
+    for q, antwort, soll in [(qs, "{e, a, b}", True), (qs, "{a, b}", False), (qs, "{a, b, c}", False),
+                             (qe, "{1; e}", True), (qe, "{1, a}", False)]:
+        if q.pruefen(antwort).ok != soll:
+            bericht.fehler_melden("Prüfer Menge", f"{q.frage}: Antwort {antwort!r} ergibt ok={not soll}, erwartet {soll}")
+    if pruefer.menge_schluessel(pruefer.menge_parsen("{∅, {1}}")) != pruefer.menge_schluessel(pruefer.menge_parsen("{\\emptyset, {1}}")):
+        bericht.fehler_melden("Prüfer Menge", "∅ und \\emptyset als Element sind nicht gleich")
+    if pruefer.menge_latex(pruefer.menge_parsen("{∅, {1}}")) != "\\{\\emptyset; \\{1\\}\\}":
+        bericht.fehler_melden("Prüfer Menge", "∅ als Element wird nicht als \\emptyset angezeigt")
+    # "?? "-Zeilen und \text{…} werden nicht nachgerechnet und nicht beanstandet
+    fehler, _, geprueft = rechnung_pruefen([{"tex": "1 + 1 = 3", "grund": "", "falsch": False, "ungeprueft": True},
+                                            {"tex": "\\text{beliebig } 2 = 5", "grund": "", "falsch": False},
+                                            {"tex": "2 + 2 = 4", "grund": "", "falsch": False}])
+    if fehler or geprueft != 1:
+        bericht.fehler_melden("Rechnung", f"'?? ' oder \\text{{}} wird nicht ausgenommen: {fehler}, geprüft {geprueft}")
+    seite = markup.parse(":::rechnung T\n?? 1 + 1 = 3 || Absicht\n2 + 2 = 4 || ok\n:::")[0]
+    schr = next(b for b in markup.alle_bloecke([seite]) if b["typ"] == "rechnung")["schritte"]
+    if not (schr[0].get("ungeprueft") and schr[0]["tex"] == "1 + 1 = 3" and not schr[1].get("ungeprueft")):
+        bericht.fehler_melden("Markup", "'?? '-Zeile in :::rechnung wird nicht erkannt")
+
+
 # ──────────────────────────────────────────────────────────────────────────
 #  :::rechnung nachrechnen
 # ──────────────────────────────────────────────────────────────────────────
@@ -160,7 +242,7 @@ def rechnung_pruefen(schritte):
     fehler, ungeprueft, geprueft = [], 0, 0
     zeilen = []                       # (index, [asts], [rels]) oder None
     for i, s in enumerate(schritte):
-        if s.get("falsch"):
+        if s.get("falsch") or s.get("ungeprueft"):   # "!" bzw. "?? ": wird nicht nachgerechnet, ohne Warnung
             zeilen.append(None)
             continue
         if s.get("widerspruch"):
@@ -188,7 +270,7 @@ def rechnung_pruefen(schritte):
                 ungeprueft += 1
                 zeilen.append(None)
             continue
-        if _NICHT_GEPRUEFT.search(tex):
+        if re.match(r"\s*\\text\{", tex) or _NICHT_GEPRUEFT.search(tex):   # \text{…}: nur Text, ohne Warnung
             ungeprueft += 1
             zeilen.append(None)
             continue
@@ -671,6 +753,7 @@ def main(farben=True, kapitel=None, leise=False):
 
     batterie(bericht)
     typ_batterie(bericht)
+    visual_batterie(bericht)
     escape_pruefen(bericht)
     ids = {}
     for kap in engine.KAPITEL:

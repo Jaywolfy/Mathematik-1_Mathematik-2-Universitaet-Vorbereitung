@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Mathe 1, Kapitel 7: Äquivalenzrelationen (Skript Disser WS 26/27, Abschn. 1.6, Def. 1.59 bis Bsp. 1.65)."""
+import json
 from itertools import product
 
 from ..engine import neues_kapitel
@@ -74,6 +75,14 @@ assert (len(_R1), len(_R2), len(_R3), len(_R4)) == (5, 13, 17, 9)
 _KL = {n: {a: klasse(_M, r, a) for a in _M} for n, r in enumerate((_R1, _R2, _R3, _R4), 1)}
 assert _KL[2][1] == frozenset({-1, 1, 3}) and _KL[3][2] == frozenset({1, 2, 3, 4})
 _TAB = "\n".join(f"| $\\sim_{n}$ | " + " | ".join(f"${mtex(_KL[n][a])}$" for a in _M) + " |" for n in (1, 2, 3, 4))
+def _klassen_bild(n):
+    """Abbildung 1.4: Relation ~n auf M als Graph, Elemente nach Klassen gruppiert und eingefärbt."""
+    kl = sorted({tuple(sorted(_KL[n][a])) for a in _M}, key=lambda k: k[0])
+    return ":::visual aequivalenz_klassen\n" + json.dumps({
+        "klassen": [list(k) for k in kl], "graph": True, "titel": f"$\\sim_{n}$ auf $M$"}, ensure_ascii=False) + "\n:::"
+
+
+_BILDER = "\n\n".join(_klassen_bild(n) for n in (1, 2, 3, 4))
 _ANZ = {n: len(faktormenge(_M, r)) for n, r in enumerate((_R1, _R2, _R3, _R4), 1)}
 assert _ANZ == {1: 5, 2: 2, 3: 2, 4: 3}
 
@@ -133,6 +142,11 @@ Auf $M = \{-1, 1, 2, 3, 4\}$ (Abbildung 1.4 im Skript):
 - $\sim_3$: $x$ und $y$ haben dasselbe Vorzeichen,
 - $\sim_4$: dieselbe Parität **und** dasselbe Vorzeichen.
 
+Die Bilder zeigen die vier Relationen als Graph (Abbildung 1.4). Die Farbe verrät, welche
+Elemente zusammengehören; an den Pfeilen siehst du Schleifen (reflexiv) und Doppelpfeile (symmetrisch).
+
+§BILDER§
+
 :::rechnung Wie viele Paare haben die Relationen?
 5 || $\sim_1$: nur die Schleifen $(x, x)$
 5 + 8 = 13 || $\sim_2$: 5 Schleifen und $(-1,1),(1,-1),(-1,3),(3,-1),(1,3),(3,1),(2,4),(4,2)$
@@ -150,7 +164,7 @@ Einzelporträts. $\sim_2$ fotografiert „gerade“ und „ungerade“ zusammen.
 Positiven in eine Reihe und lässt $-1$ allein. $\sim_4$ nimmt beide Kriterien und macht
 drei Gruppen.
 :::
-""")
+""".replace("§BILDER§", _BILDER))
 
 _M5 = [1, 2, 3, 4, 5]
 _ABS1 = rel(_M5, lambda x, y: abs(x - y) <= 1)

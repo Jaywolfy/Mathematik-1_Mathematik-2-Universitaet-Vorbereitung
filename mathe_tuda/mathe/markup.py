@@ -348,7 +348,8 @@ def _direktive(kopf, inhalt, probleme):
                 continue
             falsch = z.lstrip().startswith("!")
             widerspruch = z.lstrip().startswith("#")
-            z = z.lstrip()[1:] if falsch or widerspruch else z
+            frei = z.lstrip().startswith("??")      # "?? ": vom Nachrechnen ausgenommen (ohne Warnung)
+            z = z.lstrip()[1:] if falsch or widerspruch else (z.lstrip()[2:] if frei else z)
             tex, _, grund = z.partition("||")
             if not tex.strip():
                 probleme.append(f"':::rechnung': Zeile ohne Formel: {z!r}")
@@ -356,6 +357,8 @@ def _direktive(kopf, inhalt, probleme):
             schritt = {"tex": tex.strip(), "grund": grund.strip(), "falsch": falsch}
             if widerspruch:
                 schritt["widerspruch"] = True
+            if frei:
+                schritt["ungeprueft"] = True
             schritte.append(schritt)
         if not schritte:
             probleme.append("':::rechnung' enthält keine Schritte.")

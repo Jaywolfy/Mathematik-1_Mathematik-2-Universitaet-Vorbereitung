@@ -285,7 +285,63 @@ function polarZeile(name, info, exakt) {
 
 const OP_TEX = { plus: "z + w", minus: "z - w", mal: "z \\cdot w", geteilt: "\\frac{z}{w}", konjugiert: "\\bar{z}" };
 
+/* Zusätzliche Zahlen (punkte), Konjugierte und Betragskreise; z (falls vorhanden) zählt mit. */
+function extraBereich(d, z) {
+  const pk = [];
+  for (const p of [...(z ? [{ re: z.re, im: z.im }] : []), ...(d._punkte || [])]) {
+    pk.push([p.re, p.im], [p.re, -p.im]);
+    if (d.betragskreis) { const r = Math.hypot(p.re, p.im); pk.push([r, r], [-r, -r]); }
+  }
+  return pk;
+}
+function extraZeichnen(k, d, z) {
+  const P = d._punkte || [];
+  const alle = [...(z ? [{ re: z.re, im: z.im, label: "z", farbe: 1, haupt: true }] : []), ...P];
+  const farbe = (p) => FARBE(p.farbe);
+  if (d.betragskreis) {
+    const gesehen = new Set();
+    for (const p of alle) {
+      const r = Math.hypot(p.re, p.im), schluessel = r.toFixed(6);
+      if (r < 1e-9 || gesehen.has(schluessel)) continue;
+      gesehen.add(schluessel);
+      const c = k.kreis(0, 0, r, "betragskreis");
+      c.style.stroke = farbe(p);
+    }
+  }
+  if (d.konjugiert) {
+    for (const p of alle) {
+      if (Math.abs(p.im) < 1e-12) continue;
+      k.linie(p.re, p.im, p.re, -p.im, "hilfslinie");
+      if (d.pfeile === false && !p.haupt) k.punkt(p.re, -p.im, { klasse: "punkt konj", r: 5 }).style.fill = farbe(p);
+      else pfeil(k, 0, 0, p.re, -p.im, farbe(p), "vl-pfeil konj");
+      k.etikett(p.re, -p.im, texHtml(`\\overline{${p.label}}`), (p.im > 0 ? "unten" : "ueber") + " klein");
+    }
+  }
+  for (const p of P) {
+    if (d.pfeile === false) k.punkt(p.re, p.im, { r: 6 }).style.fill = farbe(p);
+    else pfeil(k, 0, 0, p.re, p.im, farbe(p));
+    k.etikett(p.re, p.im, texHtml(p.label), "ueber klein");
+  }
+}
+function extraZeilen(d) {
+  return (d._punkte || []).map(p => {
+    const bt = `|${p.label}| ${p.betrag_exakt ? "=" : "\\approx"} ${p.betrag_tex}`;
+    return `${p.label} = ${p.tex},\\quad ${bt}` + (d.konjugiert ? `,\\quad \\overline{${p.label}} = ${p.konj_tex}` : "");
+  });
+}
+
+/** Nur Punkte: Zahlen als Pfeile oder Punkte in der Gaußschen Zahlenebene. */
+function komplexePunkte(box, d) {
+  const auto = bereich(extraBereich(d, null), 1);
+  const k = koordinaten({ x: (d.x || auto.x).map(Number), y: (d.y || auto.y).map(Number), gleicheAchsen: true,
+    xName: "Re", yName: "Im", label: d._alt }, (k) => extraZeichnen(k, d, null));
+  const werte = h("div", { class: "vf-werte", "aria-live": "polite" }, extraZeilen(d).map(wertZeile));
+  werte.append(h("div", { class: "vf-hinweis", text: "Betrag = Länge des Pfeils." + (d.konjugiert ? " Konjugieren = Spiegeln an der reellen Achse." : "") }));
+  box.append(h("div", { class: "vis-scroll" }, k.el), werte);
+}
+
 function komplexeEbene(box, d) {
+  if (!d._z) { komplexePunkte(box, d); return; }
   const op = d.op || "keine";
   const z = { re: d._z.re, im: d._z.im }, w = d._w ? { re: d._w.re, im: d._w.im } : null;
   const start = JSON.stringify([z, w]);
@@ -302,6 +358,7 @@ function komplexeEbene(box, d) {
   if (w) pk.push([w.re, w.im]);
   const e0 = ergebnis();
   if (e0) pk.push([e0.re, e0.im]);
+  pk.push(...extraBereich(d, null), ...(d.konjugiert || d.betragskreis ? extraBereich({ betragskreis: d.betragskreis }, z) : []));
   const auto = bereich(pk, 1);
   const werte = h("div", { class: "vf-werte", "aria-live": "polite" });
   const griffe = [];
@@ -328,6 +385,7 @@ function komplexeEbene(box, d) {
     if (w) { pfeil(k, 0, 0, w.re, w.im, "var(--plot-3)"); k.etikett(w.re, w.im, texHtml("w"), "ueber klein"); }
     pfeil(k, 0, 0, z.re, z.im, "var(--plot-1)");
     k.etikett(z.re, z.im, texHtml("z"), "ueber klein");
+    if (d._punkte || d.konjugiert || d.betragskreis) extraZeichnen(k, d, z);
     griffe.forEach(g => g.lage());
   });
   function anzeigen() {
@@ -340,6 +398,7 @@ function komplexeEbene(box, d) {
       if (exE) zeilen.push(`${OP_TEX[op]} ${exE.exakt ? "=" : "\\approx"} ${exE.tex}`, ...(exE.arg_tex !== null ? [`${OP_TEX[op]} ${exE.polar_exakt ? "=" : "\\approx"} ${exE.polar_tex}`] : []));
       else zeilen.push(`${OP_TEX[op]} ${nenner(e.re, e.im) ? "=" : "\\approx"} ${komplexTex(e.re, e.im)}`);
     }
+    zeilen.push(...extraZeilen(d));
     werte.replaceChildren(...zeilen.map(wertZeile));
     const regel = { mal: "Multiplizieren = Drehstreckung: Beträge multiplizieren, Winkel addieren.",
       geteilt: "Dividieren: Beträge teilen, Winkel subtrahieren.", plus: "Addieren wie Vektoren: Pfeile aneinanderhängen (Parallelogramm).",

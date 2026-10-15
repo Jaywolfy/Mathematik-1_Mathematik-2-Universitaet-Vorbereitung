@@ -88,8 +88,17 @@ SCHEMA = {
     "flaeche_integral": ({"term": "term", "von": "zahl", "bis": "zahl"},
                          {"term2": "term", "x": "liste", "y": "liste", "unterschrift": "text", "titel": "text"}),
     "landau": ({"funktionen": "liste"}, {"n_bis": "zahl", "log_achse": "bool", "unterschrift": "text", "titel": "text"}),
-    "komplexe_ebene": ({"z": "liste"}, {"w": "liste", "op": "text", "interaktiv": "bool", "x": "liste",
-                                        "y": "liste", "unterschrift": "text", "titel": "text"}),
+    "komplexe_ebene": ({}, {"z": "liste", "w": "liste", "op": "text", "interaktiv": "bool", "x": "liste",
+                            "y": "liste", "punkte": "liste", "konjugiert": "bool", "betragskreis": "bool",
+                            "pfeile": "bool", "unterschrift": "text", "titel": "text"}),
+    "graph_gerichtet": ({"elemente": "liste", "paare": "liste"},
+                        {"layout": "beliebig", "markiert": "liste", "unterschrift": "text", "titel": "text"}),
+    "hasse": ({"elemente": "liste", "paare": "liste"},
+              {"teilmenge": "liste", "sup": "bool", "inf": "bool", "schranken": "bool", "unterschrift": "text",
+               "titel": "text"}),
+    "aequivalenz_klassen": ({"klassen": "liste"},
+                            {"elemente": "liste", "repraesentanten": "liste", "namen": "liste", "graph": "bool",
+                             "unterschrift": "text", "titel": "text"}),
     "graph": ({"knoten": "liste", "kanten": "liste"}, {"gerichtet": "bool", "gewichte": "liste",
                                                        "markiert": "liste", "unterschrift": "text", "titel": "text"}),
     "baum": ({"wurzel": "objekt"}, {"unterschrift": "text", "titel": "text"}),
@@ -102,6 +111,7 @@ VISUAL_FERTIG |= {"einheitskreis", "exp_log", "tangente", "riemann", "vektoren2d
                   "komplexe_ebene"}  # vis_funktionen.js, vis_linalg.js
 VISUAL_FERTIG |= {"venn", "wahrheitstabelle", "relation_graph", "pascal", "euklid", "modulo_uhr",
                   "induktion_domino", "folge"}  # vis_diskret.js
+VISUAL_FERTIG |= {"graph_gerichtet", "hasse", "aequivalenz_klassen"}  # vis_ordnung.js
 
 
 def _ist_zahl(v):
@@ -1372,7 +1382,7 @@ def _komplex_zahl(feld, paar):
 _KOMPLEX_OPS = ("keine", "konjugiert", "plus", "minus", "mal", "geteilt")
 
 
-def _komplexe_ebene(d):
+def _komplexe_ebene_z(d):
     zr, zi = _komplex_zahl("z", d["z"])
     d["_z"] = _komplex_info(zr, zi)
     op = d.setdefault("op", "mal" if "w" in d else "keine")
@@ -1403,7 +1413,377 @@ def _komplexe_ebene(d):
     d["_ergebnis"] = _komplex_info(er, ei)
 
 
+def _komplexe_ebene(d):
+    if "z" not in d and "punkte" not in d:
+        raise ValueError("komplexe_ebene braucht 'z' ([Re, Im]) oder 'punkte' (Liste von Zahlen)")
+    if "z" not in d and ("w" in d or "op" in d):
+        raise ValueError("'w' und 'op' gehören zu 'z'")
+    if "z" in d:
+        _komplexe_ebene_z(d)
+    _komplexe_punkte(d)
+
+
+def _komplexe_punkte(d):
+    """Zusätzliche Zahlen als Pfeile/Punkte: punkte[{z: [Re, Im], label?, farbe?}] oder [Re, Im]."""
+    if "punkte" not in d:
+        if d.get("konjugiert") or d.get("betragskreis"):
+            if "z" not in d:
+                raise ValueError("'konjugiert'/'betragskreis' brauchen 'z' oder 'punkte'")
+        return
+    roh = d["punkte"]
+    if not 1 <= len(roh) <= 8:
+        raise ValueError("'punkte': 1 bis 8 Zahlen")
+    erg = []
+    for i, p in enumerate(roh, 1):
+        if isinstance(p, list):
+            p = {"z": p}
+        if not isinstance(p, dict) or "z" not in p or set(p) - {"z", "label", "farbe"}:
+            raise ValueError(f"Punkt {i}: als [Re, Im] oder {{\"z\": [Re, Im], \"label\": …, \"farbe\": 1-4}} angeben")
+        re_, im_ = _komplex_zahl(f"punkte[{i}].z", p["z"])
+        farbe = p.get("farbe", (i - 1) % 4 + 1)
+        if farbe not in (1, 2, 3, 4) or isinstance(farbe, bool):
+            raise ValueError(f"Punkt {i}: farbe muss 1 bis 4 sein")
+        label = p.get("label")
+        if label is None:
+            label = ("z" if len(roh) == 1 else f"z_{{{i}}}") if "z" not in d else f"u_{{{i}}}"
+        if not isinstance(label, str):
+            raise ValueError(f"Punkt {i}: label ist Text (LaTeX)")
+        info = _komplex_info(re_, im_)
+        konj = _komplex_info(re_, -im_)
+        info.update(label=label, farbe=farbe, konj_tex=konj["tex"])
+        erg.append(info)
+    d["_punkte"] = erg
+    teile = [f"{p['label']} = {p['tex']}" for p in erg]
+    d["_alt"] = "Gaußsche Zahlenebene mit " + "; ".join(t.replace("\\", "") for t in teile)
+
+
 _ERGAENZER.update({
     "einheitskreis": _einheitskreis, "exp_log": _exp_log, "tangente": _tangente, "riemann": _riemann,
     "vektoren2d": _vektoren2d, "komplexe_ebene": _komplexe_ebene,
 })
+
+
+# ──────────────────────────────────────────────────────────────────────────
+#  Relationen und Ordnungen: graph_gerichtet, hasse, aequivalenz_klassen
+#  Frontend: vis_ordnung.js. Python liefert Knotentexte, Positionen (Einheiten, y nach unten),
+#  Kanten als Indexpaare und alle Eigenschaften exakt.
+# ──────────────────────────────────────────────────────────────────────────
+
+def _teile_oben(s):
+    """Zerlegt 'a, {b, c}, d' an Kommas auf oberster Ebene."""
+    teile, tiefe, akt = [], 0, ""
+    for c in s:
+        if c in "({[":
+            tiefe += 1
+        elif c in ")}]":
+            tiefe -= 1
+        if c == "," and tiefe == 0:
+            teile.append(akt)
+            akt = ""
+        else:
+            akt += c
+    teile.append(akt)
+    return [t.strip() for t in teile]
+
+
+def _knoten_text(e):
+    """Element (Zahl, Text, Liste = Menge) -> normierter Anzeigetext; Mengen als '{1, 2}', leere Menge als '∅'."""
+    if isinstance(e, list):
+        return "{" + ", ".join(_knoten_text(x) for x in e) + "}" if e else "∅"
+    s = _el_text(e).replace("\\emptyset", "∅").replace("\\varnothing", "∅")
+    if s.startswith("{") and s.endswith("}"):
+        inner = s[1:-1].strip()
+        return "{" + ", ".join(_knoten_text(t) for t in _teile_oben(inner)) + "}" if inner else "∅"
+    return s
+
+
+def _knoten_tex(text):
+    if text == "∅":
+        return "\\emptyset"
+    if text.startswith("{") and text.endswith("}"):
+        return "\\{" + ", ".join(_knoten_tex(t) for t in _teile_oben(text[1:-1])) + "\\}"
+    return _el_tex(text)
+
+
+def _elemente_lesen(d, feld="elemente", maximal=16):
+    liste = d[feld]
+    if not 1 <= len(liste) <= maximal:
+        raise ValueError(f"'{feld}': 1 bis {maximal} Elemente")
+    texte = [_knoten_text(e) for e in liste]
+    if len(set(texte)) != len(texte):
+        doppelt = next(t for t in texte if texte.count(t) > 1)
+        raise ValueError(f"'{feld}' enthält {doppelt!r} doppelt")
+    return texte
+
+
+def _paare_lesen(roh, texte, feld="paare"):
+    idx = {t: i for i, t in enumerate(texte)}
+    paare = []
+    for p in roh:
+        if not (isinstance(p, list) and len(p) == 2):
+            raise ValueError(f"{feld}: {p!r} ist kein Paar [a, b]")
+        a, b = _knoten_text(p[0]), _knoten_text(p[1])
+        for x in (a, b):
+            if x not in idx:
+                raise ValueError(f"{feld}: {x!r} (in {p!r}) steht nicht in 'elemente'")
+        if (idx[a], idx[b]) in paare:
+            raise ValueError(f"{feld}: Paar {p!r} doppelt")
+        paare.append((idx[a], idx[b]))
+    return paare
+
+
+def _kreis_layout(n):
+    if n == 1:
+        return [(0.0, 0.0)]
+    if n == 2:
+        return [(-1.0, 0.0), (1.0, 0.0)]
+    r = max(1.0, 1 / (2 * math.sin(math.pi / n)))
+    return [(r * math.cos(-math.pi / 2 + 2 * math.pi * i / n), r * math.sin(-math.pi / 2 + 2 * math.pi * i / n))
+            for i in range(n)]
+
+
+def _graph_layout(texte, layout):
+    n = len(texte)
+    if layout is None or layout == "kreis":
+        return _kreis_layout(n)
+    if layout == "zeilen":
+        spalten = max(1, math.ceil(math.sqrt(n)))
+        return [(float(i % spalten), float(i // spalten)) for i in range(n)]
+    if isinstance(layout, dict):
+        pos = {}
+        for k, v in layout.items():
+            t = _knoten_text(k)
+            if t not in texte:
+                raise ValueError(f"layout: {k!r} steht nicht in 'elemente'")
+            if isinstance(v, dict):
+                v = [v.get("x"), v.get("y")]
+            if not (isinstance(v, list) and len(v) == 2 and all(_ist_zahl(c) for c in v)):
+                raise ValueError(f"layout: Position von {k!r} als [x, y] angeben")
+            pos[t] = (float(zahl(v[0])), -float(zahl(v[1])))      # y nach oben angegeben, intern nach unten
+        fehlt = [t for t in texte if t not in pos]
+        if fehlt:
+            raise ValueError(f"layout: Position fehlt für {', '.join(fehlt)}")
+        return [pos[t] for t in texte]
+    raise ValueError('layout: "kreis", "zeilen" oder {Element: [x, y], …}')
+
+
+def _knoten_dicts(texte, pos, **extra):
+    return [{"text": t, "tex": _knoten_tex(t), "x": round(x, 4), "y": round(y, 4), **extra}
+            for t, (x, y) in zip(texte, pos)]
+
+
+def _graph_gerichtet(d):
+    texte = _elemente_lesen(d)
+    paare = _paare_lesen(d["paare"], texte)
+    pos = _graph_layout(texte, d.get("layout"))
+    idx = {t: i for i, t in enumerate(texte)}
+    mk_knoten, mk_kanten = [], []
+    for m in d.get("markiert", []):
+        if isinstance(m, list) and len(m) == 2 and _knoten_text(m[0]) in idx and _knoten_text(m[1]) in idx \
+                and (idx[_knoten_text(m[0])], idx[_knoten_text(m[1])]) in paare:
+            mk_kanten.append([idx[_knoten_text(m[0])], idx[_knoten_text(m[1])]])
+        elif _knoten_text(m) in idx:
+            mk_knoten.append(idx[_knoten_text(m)])
+        else:
+            raise ValueError(f"markiert: {m!r} ist weder ein Element noch ein Pfeil der Relation")
+    d["_knoten"] = _knoten_dicts(texte, pos)
+    d["_kanten"] = [list(p) for p in paare]
+    d["_markiert_knoten"], d["_markiert_kanten"] = mk_knoten, mk_kanten
+    schleifen = [texte[a] for a, b in paare if a == b]
+    teile = [f"{texte[a]} nach {texte[b]}" if a != b else f"Schleife an {texte[a]}" for a, b in paare]
+    d["_alt"] = (f"Gerichteter Graph mit {len(texte)} Knoten ({', '.join(texte)}) und {len(paare)} Pfeilen"
+                 + (": " + "; ".join(teile) if teile else ", ohne Pfeile")
+                 + (f". Schleifen an: {', '.join(schleifen)}" if schleifen else ""))
+
+
+# ---- Hasse-Diagramm
+
+def _hasse_analyse(texte, paare):
+    """Ordnung (reflexiv-transitiver Abschluss), Überdeckungen (transitive Reduktion), Höhen."""
+    n = len(texte)
+    le = [[i == j for j in range(n)] for i in range(n)]
+    for a, b in paare:
+        le[a][b] = True
+    for k in range(n):
+        for i in range(n):
+            if le[i][k]:
+                for j in range(n):
+                    if le[k][j]:
+                        le[i][j] = True
+    for i in range(n):
+        for j in range(i + 1, n):
+            if le[i][j] and le[j][i]:
+                raise ValueError(f"Keine Halbordnung: {texte[i]} und {texte[j]} stehen in beide Richtungen "
+                                 "in Relation (Antisymmetrie verletzt)")
+    ueber = [(i, j) for i in range(n) for j in range(n)
+             if i != j and le[i][j] and not any(k != i and k != j and le[i][k] and le[k][j] for k in range(n))]
+    hoehe = [0] * n
+    for _ in range(n):
+        for i, j in ueber:
+            hoehe[j] = max(hoehe[j], hoehe[i] + 1)
+    return le, ueber, hoehe
+
+
+def _hasse_ebenen(n, ueber, hoehe):
+    """Reihenfolge je Schicht (Schwerpunktverfahren gegen Kreuzungen)."""
+    top = max(hoehe)
+    ebenen = [[i for i in range(n) if hoehe[i] == h] for h in range(top + 1)]
+    unten = {j: [i for i, jj in ueber if jj == j] for j in range(n)}
+    oben = {i: [j for ii, j in ueber if ii == i] for i in range(n)}
+
+    def platz():
+        return {i: p for e in ebenen for p, i in enumerate(e)}
+
+    for _ in range(6):
+        for h in range(1, top + 1):
+            p = platz()
+            ebenen[h].sort(key=lambda i: (sum(p[u] for u in unten[i]) / len(unten[i])) if unten[i] else p[i])
+        for h in range(top - 1, -1, -1):
+            p = platz()
+            ebenen[h].sort(key=lambda i: (sum(p[u] for u in oben[i]) / len(oben[i])) if oben[i] else p[i])
+    return ebenen
+
+
+def _hasse(d):
+    texte = _elemente_lesen(d, maximal=20)
+    n = len(texte)
+    paare = _paare_lesen(d["paare"], texte)
+    le, ueber, hoehe = _hasse_analyse(texte, paare)
+    ebenen = _hasse_ebenen(n, ueber, hoehe)
+    top = len(ebenen) - 1
+    pos = [None] * n
+    for h, e in enumerate(ebenen):
+        for p, i in enumerate(e):
+            pos[i] = (p - (len(e) - 1) / 2, float(h))      # y nach unten: Schicht 0 (klein) ganz unten
+    for i in range(n):
+        pos[i] = (pos[i][0], float(top) - pos[i][1])
+    idx = {t: i for i, t in enumerate(texte)}
+    T = None
+    if "teilmenge" in d:
+        T = []
+        for e in d["teilmenge"]:
+            t = _knoten_text(e)
+            if t not in idx:
+                raise ValueError(f"teilmenge: {e!r} steht nicht in 'elemente'")
+            if idx[t] not in T:
+                T.append(idx[t])
+    if (d.get("sup") or d.get("inf") or d.get("schranken")) and T is None:
+        raise ValueError("'sup', 'inf' und 'schranken' brauchen 'teilmenge'")
+    d["_knoten"] = _knoten_dicts(texte, pos)
+    for i, k in enumerate(d["_knoten"]):
+        k["ebene"] = hoehe[i]
+    d["_kanten"] = [list(p) for p in ueber]          # [klein, groß]
+    d["_ebenen"] = [list(e) for e in ebenen]
+    d["_ordnung"] = [[i, j] for i in range(n) for j in range(n) if i != j and le[i][j]]
+    d["_teilmenge"] = T
+    info = []
+    if T is not None:
+        tt = "\\{" + ", ".join(_knoten_tex(texte[i]) for i in T) + "\\}" if T else "\\emptyset"
+        obere = [u for u in range(n) if all(le[t][u] for t in T)]
+        untere = [u for u in range(n) if all(le[u][t] for t in T)]
+        sup = next((u for u in obere if all(le[u][v] for v in obere)), None)
+        inf = next((u for u in untere if all(le[v][u] for v in untere)), None)
+        d["_obere"], d["_untere"], d["_sup"], d["_inf"] = obere, untere, sup, inf
+
+        def aufz(ids):
+            return "$\\{" + ", ".join(_knoten_tex(texte[i]) for i in ids) + "\\}$" if ids else "keine"
+        info.append(f"Teilmenge $T = {tt}$ (schwarz)")
+        if d.get("schranken"):
+            info.append(f"obere Schranken von $T$: {aufz(obere)}")
+            info.append(f"untere Schranken von $T$: {aufz(untere)}")
+        if d.get("sup"):
+            if sup is not None:
+                info.append(f"$\\sup T = {_knoten_tex(texte[sup])}$ (kleinste obere Schranke)")
+            else:
+                info.append("$T$ hat kein Supremum: " + ("es gibt keine obere Schranke." if not obere
+                            else f"die oberen Schranken {aufz(obere)} haben kein kleinstes Element."))
+        if d.get("inf"):
+            if inf is not None:
+                info.append(f"$\\inf T = {_knoten_tex(texte[inf])}$ (größte untere Schranke)")
+            else:
+                info.append("$T$ hat kein Infimum: " + ("es gibt keine untere Schranke." if not untere
+                            else f"die unteren Schranken {aufz(untere)} haben kein größtes Element."))
+    d["_info"] = info
+    d["_alt"] = (f"Hasse-Diagramm mit {n} Elementen in {len(ebenen)} Schichten, kleinere Elemente unten. Linien: "
+                 + (", ".join(f"{texte[i]} unter {texte[j]}" for i, j in ueber) or "keine")
+                 + (f". Hervorgehoben: {', '.join(texte[i] for i in T)}" if T else "")
+                 + (f". Supremum: {texte[d['_sup']]}" if d.get("sup") and d.get("_sup") is not None else "")
+                 + (f". Infimum: {texte[d['_inf']]}" if d.get("inf") and d.get("_inf") is not None else ""))
+
+
+# ---- Äquivalenzklassen
+
+def _aequivalenz_klassen(d):
+    roh = d["klassen"]
+    if not 1 <= len(roh) <= 8 or not all(isinstance(k, list) and k for k in roh):
+        raise ValueError("'klassen': 1 bis 8 nichtleere Listen")
+    klassen = [[_knoten_text(e) for e in k] for k in roh]
+    alle = [t for k in klassen for t in k]
+    if len(alle) > 24:
+        raise ValueError("höchstens 24 Elemente insgesamt")
+    for t in alle:
+        if alle.count(t) > 1:
+            raise ValueError(f"{t!r} steht mehrfach in 'klassen' (Klassen sind disjunkt, Elemente nur einmal)")
+    if "elemente" in d:
+        el = [_knoten_text(e) for e in d["elemente"]]
+        if set(el) != set(alle):
+            fehlt = [t for t in el if t not in alle]
+            extra = [t for t in alle if t not in el]
+            raise ValueError("'klassen' passt nicht zu 'elemente'"
+                             + (f": in keiner Klasse: {', '.join(fehlt)}" if fehlt else "")
+                             + (f"; nicht in elemente: {', '.join(extra)}" if extra else ""))
+    graph = bool(d.get("graph"))
+    if graph and any(len(k) > 4 for k in klassen):
+        raise ValueError("'graph': höchstens 4 Elemente je Klasse (sonst zu viele Pfeile)")
+    reps = []
+    wunsch = [_knoten_text(e) for e in d.get("repraesentanten", [])]
+    for t in wunsch:
+        if t not in alle:
+            raise ValueError(f"repraesentanten: {t!r} steht in keiner Klasse")
+    for k in klassen:
+        w = [t for t in wunsch if t in k]
+        if len(w) > 1:
+            raise ValueError(f"repraesentanten: zwei Vertreter in einer Klasse ({', '.join(w)})")
+        reps.append(w[0] if w else k[0])
+    namen = d.get("namen")
+    if namen is not None and (len(namen) != len(klassen) or not all(isinstance(x, str) for x in namen)):
+        raise ValueError("'namen': ein Text je Klasse")
+    # Layout: Klassen als Zellen eines Gitters, Elemente je Klasse auf einem kleinen Kreis
+    form = []
+    w = 1.45 if graph else 1.0        # mit Pfeilen mehr Platz
+    for k in klassen:
+        n = len(k)
+        if n == 1:
+            p = [(0.0, 0.0)]
+        elif n == 2:
+            p = [(-0.8 * w, 0.0), (0.8 * w, 0.0)]
+        else:
+            r = w * max(0.95, 0.55 / math.sin(math.pi / n))
+            p = [(r * math.cos(-math.pi / 2 + 2 * math.pi * i / n), r * math.sin(-math.pi / 2 + 2 * math.pi * i / n))
+                 for i in range(n)]
+        rad = max(math.hypot(x, y) for x, y in p) + (1.25 if graph else 0.85)
+        form.append((p, rad))
+    anz = len(klassen)
+    spalten = 1 if anz == 1 else (anz if anz <= 3 else (2 if anz == 4 else (3 if anz <= 6 else 4)))
+    zelle = 2 * max(r for _, r in form) + 0.5
+    knoten, kl_out, kanten = [], [], []
+    for ki, (k, (p, rad)) in enumerate(zip(klassen, form)):
+        cx, cy = (ki % spalten) * zelle, (ki // spalten) * zelle
+        basis = len(knoten)
+        for t, (x, y) in zip(k, p):
+            knoten.append({"text": t, "tex": _knoten_tex(t), "x": round(cx + x, 4), "y": round(cy + y, 4),
+                           "klasse": ki, "vertreter": t == reps[ki]})
+        name_tex = namen[ki] if namen else "[" + _knoten_tex(reps[ki]) + "]"
+        name_txt = namen[ki] if namen else "[" + reps[ki] + "]"
+        kl_out.append({"name": name_txt, "name_tex": name_tex, "x": round(cx, 4), "y": round(cy, 4),
+                       "r": round(rad, 4), "knoten": list(range(basis, basis + len(k))),
+                       "tex": name_tex + " = \\{" + ", ".join(_knoten_tex(t) for t in k) + "\\}"})
+        if graph:
+            kanten += [[a, b] for a in range(basis, basis + len(k)) for b in range(basis, basis + len(k))]
+    d["_knoten"], d["_klassen"], d["_kanten"] = knoten, kl_out, kanten
+    d["_alt"] = (f"{len(klassen)} Äquivalenzklassen mit insgesamt {len(alle)} Elementen: "
+                 + "; ".join(f"Klasse {k['name']} mit {', '.join(t)}" for k, t in zip(kl_out, klassen))
+                 + (". Die Relation ist als Graph mit Pfeilen zwischen allen Elementen einer Klasse gezeigt." if graph else ""))
+
+
+_ERGAENZER.update({"graph_gerichtet": _graph_gerichtet, "hasse": _hasse, "aequivalenz_klassen": _aequivalenz_klassen})

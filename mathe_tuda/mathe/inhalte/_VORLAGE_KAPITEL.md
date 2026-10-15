@@ -34,7 +34,7 @@ neues Kapitel schreibst. Der Vertrag steht in `mathe/ARCHITEKTUR.md` (Abschnitte
 - Seiten: höchstens ~120 Wörter, genau eine neue Idee, jede mit `:::rechnung` oder `:::visual` **und** `:::alt`.
 - `:::rechnung`: jede Zeile `LaTeX || Begründung`. Der Selbsttest rechnet jede Zeile nach: Ketten müssen
   stimmen, Gleichungsumformungen müssen von der Lösung in den letzten Zeilen (`x = 5`) erfüllt werden.
-  Absichtlich falsche Zeile: `!` am Anfang. Notizen wie `\quad | -5` am Zeilenende sind erlaubt.
+  Absichtlich falsche Zeile: `!` am Anfang. Zeile, die nicht nachgerechnet werden soll (Mengenlehre, Text, Notation), ohne Warnung: `?? ` am Anfang oder Formel in `\text{…}`. Notizen wie `\quad | -5` am Zeilenende sind erlaubt.
 - Sprache: Du-Form, kurze Sätze, kleine Zahlen, keine Floskeln, keine Gedankenstriche als Stilmittel.
 
 ## Gerüst
@@ -148,5 +148,5 @@ zufällig richtig wäre (z. B. Faktor 1, Summe 0) und Nenner, die für Anfänger
 ## Visuals
 
 Erlaubt sind nur Typen aus `visuals.VISUAL_FERTIG` (aktuell: `zahlenstrahl`, `bruch`, `rechnung` (Waage),
-`funktionsgraph`, `parabel`). Felder: `ARCHITEKTUR.md` Abschnitt 4 bzw. `visuals.SCHEMA`.
+`funktionsgraph`, `parabel` und alle weiteren, u. a. `graph_gerichtet`, `hasse`, `aequivalenz_klassen`, `komplexe_ebene`; maßgeblich ist `VISUAL_FERTIG`). Felder: `ARCHITEKTUR.md` Abschnitt 4 bzw. `visuals.SCHEMA`.
 Beispiele: `mathe/demo.py` und die Demo-Seite `#/demo/visuals`.
